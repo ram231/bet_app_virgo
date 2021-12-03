@@ -14,6 +14,7 @@ import 'login/widgets/scaffold.dart';
 import 'login/widgets/splash_screen.dart';
 
 void main() async {
+  print(api);
   WidgetsFlutterBinding.ensureInitialized();
 
   HydratedBloc.storage = await HydratedStorage.build(

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 
-const api =
-    String.fromEnvironment('API', defaultValue: 'laravel-stl-games.com');
+const api = const String.fromEnvironment('API', defaultValue: '');
 final _url = 'http://$api';
 const adminEndpoint = 'api/lotto';
 typedef string = String;
