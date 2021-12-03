@@ -1,6 +1,11 @@
+import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
+import 'package:bet_app_virgo/login/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../combinations/scaffold.dart';
+import '../generate_hits/scaffold.dart';
+import '../sold_out/scaffold.dart';
 import '../win_category/scaffold.dart';
 import 'logs_scaffold.dart';
 
@@ -11,46 +16,99 @@ class BetDashboardScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text("BET APPLICATION"),
-              accountEmail: Text("DASHBOARD v1.06"),
-            ),
-            ListTile(
-              title: Text("Top 10 Combinations"),
-              onTap: () =>
-                  Navigator.pushNamed(context, BetCombinationScaffold.path),
-            ),
-            ListTile(
-              title: Text("Low Win Summary"),
-              onTap: () =>
-                  Navigator.pushNamed(context, BetCategoryScaffold.path),
-            ),
-            ListTile(
-              title: Text("General Hits"),
-            ),
-            ListTile(
-              title: Text("Sold Out / Low Win"),
-            ),
-            ListTile(
-              title: Text("Bet Cancellation"),
-            ),
-          ],
-        ),
-      ),
-      appBar: AppBar(
-          elevation: 0,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return _BetDashboardWillPopScope(
+      child: Scaffold(
+        drawer: Drawer(
+          child: ListView(
             children: [
-              Text("THIS MONTH"),
-              Text("P 25,000", style: textTheme.caption),
+              UserAccountsDrawerHeader(
+                accountName: Text("BET APPLICATION"),
+                accountEmail: Text("DASHBOARD v1.06"),
+              ),
+              ListTile(
+                title: Text("Top 10 Combinations"),
+                onTap: () =>
+                    Navigator.pushNamed(context, BetCombinationScaffold.path),
+              ),
+              ListTile(
+                title: Text("Low Win Summary"),
+                onTap: () =>
+                    Navigator.pushNamed(context, BetCategoryScaffold.path),
+              ),
+              ListTile(
+                title: Text("General Hits"),
+                onTap: () =>
+                    Navigator.pushNamed(context, BetGenerateHitScaffold.path),
+              ),
+              ListTile(
+                title: Text("Sold Out / Low Win"),
+                onTap: () =>
+                    Navigator.pushNamed(context, BetSoldOutScaffold.path),
+              ),
+              ListTile(
+                title: Text("Bet Cancellation"),
+              ),
+              ListTile(
+                title: Text("LOGOUT"),
+                onTap: () {
+                  context.read<LoginBloc>().add(LogoutEvent());
+                  Navigator.pushReplacementNamed(
+                      context, BetLoginScaffold.path);
+                },
+              ),
             ],
-          )),
-      body: BetDashboardBody(),
+          ),
+        ),
+        appBar: AppBar(
+            elevation: 0,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("THIS MONTH"),
+                Text("P 25,000", style: textTheme.caption),
+              ],
+            )),
+        body: BetDashboardBody(),
+      ),
+    );
+  }
+}
+
+class _BetDashboardWillPopScope extends StatelessWidget {
+  const _BetDashboardWillPopScope({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return AlertDialog(
+                title: Text("Logout"),
+                content: Text("Do you want to logout?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("CANCEL"),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        context.read<LoginBloc>().add(LogoutEvent());
+                      },
+                      child: Text("LOGOUT")),
+                ],
+              );
+            });
+        return false;
+      },
+      child: child,
     );
   }
 }
