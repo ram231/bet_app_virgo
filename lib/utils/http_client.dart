@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 const api = const String.fromEnvironment('API', defaultValue: '');
-final _url = 'http://$api';
+final _url = 'https://$api';
 const adminEndpoint = 'api/lotto';
 typedef string = String;
 
@@ -37,14 +39,12 @@ class STLHttpClient {
         data: body,
         queryParameters: queryParams,
         options: Options(
-            followRedirects: false,
-            validateStatus: (status) => status != null && status < 500,
-            headers: {"Accept": "application/json"}));
+            followRedirects: false, headers: {"Accept": "application/json"}));
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
-      throw onError?.call(response.data) ??
-          response.data['error'] ??
-          response.data;
+      throw HttpException(onError?.call(response.data) ??
+          response.data['message'] ??
+          response.data);
     }
 
     return onSerialize?.call(response.data) ?? response.data as Response;

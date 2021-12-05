@@ -1,6 +1,5 @@
 import 'package:bet_app_virgo/admin/dashboard/scaffold.dart';
 import 'package:bet_app_virgo/cashier/cashier.dart';
-import 'package:bet_app_virgo/utils/loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,16 +34,6 @@ class _BetLoginBodyState extends State<BetLoginBody> {
   @override
   Widget build(BuildContext context) {
     return LoginAuthenticator(
-      onLoading: () async {
-        if (!_dialog) {
-          _dialog = await showDialog<bool>(
-                  context: context,
-                  builder: (context) {
-                    return LoadingDialog();
-                  }) ??
-              false;
-        }
-      },
       successListener: (state) {
         if (state.user.type == 'A') {
           Navigator.pushReplacementNamed(context, BetDashboardScaffold.path);
@@ -54,16 +43,11 @@ class _BetLoginBodyState extends State<BetLoginBody> {
         }
       },
       onError: (state) async {
-        Navigator.pop(context, false);
-        _dialog = await showDialog<bool>(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text("Error"),
-                    content: Text("${state.error}"),
-                  );
-                }) ??
-            false;
+        if (_dialog) {
+          return;
+        }
+        await ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Incorrect Password")));
       },
       child: Form(
         key: _formKey,
@@ -122,30 +106,37 @@ class _BetLoginBodyState extends State<BetLoginBody> {
               ),
             ),
             Spacer(),
-            SizedBox(
-              width: MediaQuery.of(context).size.width - 100,
-              height: 32,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.yellow[700],
-                ),
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    context.read<LoginBloc>().add(
-                          SignInEvent(
-                            username: _userController.text,
-                            password: _passController.text,
+            BlocBuilder<LoginBloc, LoginState>(
+              builder: (context, state) {
+                if (state is LoginLoading) {
+                  return Center(child: CircularProgressIndicator.adaptive());
+                }
+                return SizedBox(
+                  width: MediaQuery.of(context).size.width - 100,
+                  height: 32,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.yellow[700],
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        context.read<LoginBloc>().add(
+                              SignInEvent(
+                                username: _userController.text,
+                                password: _passController.text,
+                              ),
+                            );
+                      }
+                    },
+                    child: Text(
+                      "LOGIN",
+                      style: Theme.of(context).textTheme.button?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                  }
-                },
-                child: Text(
-                  "LOGIN",
-                  style: Theme.of(context).textTheme.button?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

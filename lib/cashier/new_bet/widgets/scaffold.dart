@@ -113,7 +113,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DrawTypeCubit, DrawTypeState>(
+    return BlocConsumer<DrawTypeCubit, DrawTypeState>(
       listener: (context, state) {
         if (state is DrawTypesLoaded) {
           context
@@ -121,7 +121,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
               .add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType));
         }
       },
-      child: Column(
+      builder: (context, state) => Column(
         children: [
           _GroundZeroLabel(),
           _DateCreatedLabel(),
@@ -159,27 +159,29 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
             padding: const EdgeInsets.all(8),
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                final userState = context.read<LoginBloc>().state;
-                if (userState is LoginSuccess) {
-                  final _state = context.read<NewBetBloc>().state;
-                  if (_state is NewBetLoaded) {
-                    final winAmount =
-                        double.parse(_state.drawTypeBet?.winningAmount ?? "0");
-                    context.read<NewBetBloc>().add(
-                          AddNewBetEvent(
-                            dto: AppendBetDTO(
-                              betAmount: _state.betAmount!,
-                              betNumber: _state.betNumber!,
-                              drawTypeBet: _state.drawTypeBet,
-                              winAmount: winAmount,
-                              cashier: userState.user,
-                            ),
-                          ),
-                        );
-                  }
-                }
-              },
+              onPressed: state is DrawTypesLoaded
+                  ? () {
+                      final userState = context.read<LoginBloc>().state;
+                      if (userState is LoginSuccess) {
+                        final _state = context.read<NewBetBloc>().state;
+                        if (_state is NewBetLoaded) {
+                          final winAmount = double.parse(
+                              _state.drawTypeBet?.winningAmount ?? "0");
+                          context.read<NewBetBloc>().add(
+                                AddNewBetEvent(
+                                  dto: AppendBetDTO(
+                                    betAmount: _state.betAmount!,
+                                    betNumber: _state.betNumber!,
+                                    drawTypeBet: _state.drawTypeBet,
+                                    winAmount: winAmount,
+                                    cashier: userState.user,
+                                  ),
+                                ),
+                              );
+                        }
+                      }
+                    }
+                  : null,
               child: Text("APPEND"),
             ),
           ),

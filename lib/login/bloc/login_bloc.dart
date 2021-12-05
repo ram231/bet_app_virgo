@@ -32,6 +32,7 @@ class LoginBloc extends HydratedBloc<LoginEvent, LoginState> {
       emit(LoginSuccess(user: UserAccount.fromMap(result["user"])));
     } catch (e) {
       emit(LoginFailed(error: e.toString()));
+      addError("$e");
     }
   }
 

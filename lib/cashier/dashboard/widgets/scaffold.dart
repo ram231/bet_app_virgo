@@ -28,52 +28,57 @@ class _CashierDashboardScaffoldState extends State<CashierDashboardScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        title: Text("Main Menu"),
-        actions: [
-          Icon(Icons.notifications_active),
-        ],
-      ),
-      body: PageView(
-        onPageChanged: _changeTab,
-        controller: _controller,
-        physics: const BouncingScrollPhysics(),
-        children: [
-          _CashierBody(),
-          Container(child: Text("Claim")),
-          _CashierSettingsBody(),
-        ],
-      ),
-      floatingActionButton: _index == 0
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.pushNamed(context, CashierNewBetScaffold.path);
-              },
-              label: Text("New Bet"),
-              icon: Icon(Icons.add),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: _changeTab,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money_rounded),
-            label: "Claim",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
-        ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          elevation: 0,
+          title: Text("Main Menu"),
+          actions: [
+            Icon(Icons.notifications_active),
+          ],
+        ),
+        body: PageView(
+          onPageChanged: _changeTab,
+          controller: _controller,
+          physics: const BouncingScrollPhysics(),
+          children: [
+            _CashierBody(),
+            Container(child: Text("Claim")),
+            _CashierSettingsBody(),
+          ],
+        ),
+        floatingActionButton: _index == 0
+            ? FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.pushNamed(context, CashierNewBetScaffold.path);
+                },
+                label: Text("New Bet"),
+                icon: Icon(Icons.add),
+              )
+            : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _index,
+          onTap: _changeTab,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.attach_money_rounded),
+              label: "Claim",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: "Settings",
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -26,11 +26,14 @@ class _LoginAuthenticatorState extends State<LoginAuthenticator> {
       listener: (context, state) {
         if (state is LoginLoading) {
           widget.onLoading?.call();
+          return;
         }
         if (state is LoginSuccess) {
           widget.successListener(state);
+          return;
         } else if (state is LoginFailed) {
           widget.onError?.call(state);
+          return;
         }
       },
       child: widget.child,
