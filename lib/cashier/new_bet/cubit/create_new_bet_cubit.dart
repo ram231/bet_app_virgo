@@ -4,6 +4,7 @@ import 'package:bet_app_virgo/models/draw.dart';
 import 'package:bet_app_virgo/models/user_account.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 part 'create_new_bet_state.dart';
@@ -18,17 +19,23 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
     List<AppendBetDTO> items,
     DrawBet drawBet,
   ) async {
-    emit(CreateNewBetLoading());
-    final result = await _httpClient.post('$adminEndpoint/bets', body: {
-      'cashier_id': cashier.id,
-      'branch_id': cashier.branchId,
-      'gambler_id': 1,
-      'bet_amount': items.first.betAmount,
-      'bet_number': items.map((e) => e.betNumber).toList(),
-      'draw_id': drawBet.drawType?.id,
-    }, onSerialize: (json) {
-      return BetResult.fromMap(json);
-    });
-    emit(CreateNewBetLoaded(result: result));
+    try {
+      emit(CreateNewBetLoading());
+      final body = {
+        'cashier_id': cashier.id,
+        'branch_id': cashier.branchId,
+        'bet_amount': items.first.betAmount,
+        'bet_number': items.map((e) => e.betNumber).toList(),
+        'draw_id': drawBet.id,
+      };
+      final result = await _httpClient.post('$adminEndpoint/bets', body: body,
+          onSerialize: (json) {
+        return BetResult.fromMap(json);
+      });
+      emit(CreateNewBetLoaded(result: result));
+    } on DioError catch (e) {
+      emit(CreateNewBetError(error: e.response?.data['message']));
+      addError(e);
+    }
   }
 }

@@ -44,14 +44,26 @@ class CashierNewBetScaffold extends StatelessWidget {
         appBar: AppBar(
           title: Text("New Bet"),
           elevation: 0,
-          actions: [
-            _AddNewBetIcon(),
-            IconButton(onPressed: () {}, icon: Icon(Icons.undo))
-          ],
+          actions: [_AddNewBetIcon(), _UndoBetIconButton()],
         ),
         body: _CashierNewBetBody(),
       ),
     );
+  }
+}
+
+class _UndoBetIconButton extends StatelessWidget {
+  const _UndoBetIconButton({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          context.read<NewBetBloc>().add(ResetBetEvent());
+        },
+        icon: Icon(Icons.undo));
   }
 }
 
@@ -95,11 +107,12 @@ class _CashierNewBetBody extends StatefulWidget {
 class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
   late final TextEditingController _betNumberController;
   late final TextEditingController _betAmountController;
-
+  late final FocusNode _betNumberFocusNode;
   @override
   void initState() {
     _betNumberController = TextEditingController();
     _betAmountController = TextEditingController();
+    _betNumberFocusNode = FocusNode();
     context.read<DrawTypeCubit>().fetchDrawTypes();
     super.initState();
   }
@@ -108,46 +121,45 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
   void dispose() {
     _betNumberController.dispose();
     _betAmountController.dispose();
+    _betNumberFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DrawTypeCubit, DrawTypeState>(
-      listener: (context, state) {
-        if (state is DrawTypesLoaded) {
-          context
-              .read<NewBetBloc>()
-              .add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType));
-        }
-      },
-      builder: (context, state) => Column(
+        listener: (context, state) {
+      if (state is DrawTypesLoaded) {
+        context
+            .read<NewBetBloc>()
+            .add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType));
+      }
+    }, builder: (context, state) {
+      final isClosed = state is DrawTypesLoaded;
+      return ListView(
         children: [
           _GroundZeroLabel(),
           _DateCreatedLabel(),
-          Flexible(
-            child:
-                _BetNumberTextField(betNumberController: _betNumberController),
-          ),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                controller: _betAmountController,
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  hintText: "Bet Amount",
-                ),
-                keyboardType: TextInputType.numberWithOptions(
-                    decimal: false, signed: false),
-                onChanged: (val) {
-                  if (val.isNotEmpty) {
-                    context.read<NewBetBloc>().add(InsertNewBetEvent(
-                          betAmount: double.parse(val),
-                        ));
-                  }
-                },
+          _BetNumberTextField(
+              focusNode: _betNumberFocusNode,
+              betNumberController: _betNumberController),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: _betAmountController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintText: "Bet Amount",
               ),
+              keyboardType: TextInputType.numberWithOptions(
+                  decimal: false, signed: false),
+              onChanged: (val) {
+                if (val.isNotEmpty) {
+                  context.read<NewBetBloc>().add(InsertNewBetEvent(
+                        betAmount: double.parse(val),
+                      ));
+                }
+              },
             ),
           ),
           Container(
@@ -159,7 +171,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
             padding: const EdgeInsets.all(8),
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: state is DrawTypesLoaded
+              onPressed: isClosed
                   ? () {
                       final userState = context.read<LoginBloc>().state;
                       if (userState is LoginSuccess) {
@@ -178,6 +190,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                                   ),
                                 ),
                               );
+                          _betNumberFocusNode.requestFocus();
                         }
                       }
                     }
@@ -185,10 +198,10 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
               child: Text("APPEND"),
             ),
           ),
-          Expanded(child: _BetTable())
+          SizedBox(height: 250, child: _BetTable())
         ],
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -196,9 +209,10 @@ class _BetNumberTextField extends StatelessWidget {
   const _BetNumberTextField({
     Key? key,
     required TextEditingController betNumberController,
+    required this.focusNode,
   })  : _betNumberController = betNumberController,
         super(key: key);
-
+  final FocusNode focusNode;
   final TextEditingController _betNumberController;
 
   @override
@@ -207,6 +221,7 @@ class _BetNumberTextField extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
+          focusNode: focusNode,
           controller: _betNumberController,
           textAlign: TextAlign.center,
           decoration: InputDecoration(
@@ -362,8 +377,9 @@ class __BetTypeDropdownState extends State<_BetTypeDropdown> {
           }
         },
         items: state.drawTypes
+            .where((element) => (element.winningCombination.isEmpty))
             .map((type) => DropdownMenuItem(
-                  child: Text(type.drawType?.name ?? ""),
+                  child: Text("${type.drawType?.name} - ${type.id}"),
                   value: type,
                 ))
             .toList(),

@@ -22,7 +22,10 @@ class DrawTypeCubit extends Cubit<DrawTypeState> {
       debugPrint("$result");
       final list =
           (result as List).map((json) => DrawBet.fromMap(json)).toList();
-      emit(DrawTypesLoaded(drawTypes: list, selectedDrawType: list.first));
+      emit(DrawTypesLoaded(
+          drawTypes: list,
+          selectedDrawType: list
+              .firstWhere((element) => element.winningCombination.isEmpty)));
     } catch (e) {
       debugPrint("$e");
     }

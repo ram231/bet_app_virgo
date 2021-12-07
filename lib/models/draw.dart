@@ -11,8 +11,8 @@ class DrawBet extends Equatable {
   final String? drawEnd;
   final String winningAmount;
   final String readableWinningAmount;
-  final List<String> winningNumber;
-
+  final List<int> winningCombination;
+  final String status;
   const DrawBet({
     required this.id,
     this.drawType,
@@ -21,7 +21,8 @@ class DrawBet extends Equatable {
     this.drawEnd,
     this.winningAmount = '',
     this.readableWinningAmount = '',
-    this.winningNumber = const [],
+    this.winningCombination = const [],
+    this.status = 'C',
   });
 
   DrawBet copyWith({
@@ -32,7 +33,8 @@ class DrawBet extends Equatable {
     String? drawEnd,
     String? winningAmount,
     String? readableWinningAmount,
-    List<String>? winningNumber,
+    List<int>? winningNumber,
+    String? status,
   }) {
     return DrawBet(
       id: id ?? this.id,
@@ -43,7 +45,8 @@ class DrawBet extends Equatable {
       winningAmount: winningAmount ?? this.winningAmount,
       readableWinningAmount:
           readableWinningAmount ?? this.readableWinningAmount,
-      winningNumber: winningNumber ?? this.winningNumber,
+      winningCombination: winningNumber ?? this.winningCombination,
+      status: status ?? this.status,
     );
   }
 
@@ -56,7 +59,8 @@ class DrawBet extends Equatable {
       'draw_end': drawEnd,
       'winning_amount': winningAmount,
       'readable_winning_amount': readableWinningAmount,
-      'winning_number': winningNumber,
+      'winning_combination': winningCombination,
+      'status': status,
     };
   }
 
@@ -72,7 +76,10 @@ class DrawBet extends Equatable {
       drawEnd: map['draw_end'],
       winningAmount: map['winning_amount'] ?? '',
       readableWinningAmount: map['readable_winning_amount'] ?? '',
-      winningNumber: List<String>.from(map['winning_number'] ?? const []),
+      winningCombination: map['winning_combination'] != null
+          ? List<int>.from(map['winning_combination'] ?? const [])
+          : [],
+      status: map['status'] ?? 'C',
     );
   }
 
@@ -94,7 +101,7 @@ class DrawBet extends Equatable {
       drawEnd,
       winningAmount,
       readableWinningAmount,
-      winningNumber,
+      winningCombination,
     ];
   }
 }

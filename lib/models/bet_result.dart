@@ -10,10 +10,10 @@ class BetResult extends Equatable {
   final BetBranch? branch;
   final UserAccount? gambler;
   final UserAccount? cashier;
-  final num? betAmount;
+  final String? betAmount;
   final String? readableBetAmount;
   final List<int> betNumber;
-  final bool? isWinner;
+  final int? isWinner;
   BetResult({
     required this.id,
     this.draw,
@@ -32,10 +32,10 @@ class BetResult extends Equatable {
     BetBranch? branch,
     UserAccount? gambler,
     UserAccount? cashier,
-    num? betAmount,
+    String? betAmount,
     String? readableBetAmount,
     List<int>? betNumber,
-    bool? isWinner,
+    int? isWinner,
   }) {
     return BetResult(
       id: id ?? this.id,

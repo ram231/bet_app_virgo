@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
-const api = const String.fromEnvironment('API', defaultValue: '');
-final _url = 'https://$api';
+const api = const String.fromEnvironment('API',
+    defaultValue: 'http://192.168.1.189:8000');
+final _url = '$api';
 const adminEndpoint = 'api/lotto';
 typedef string = String;
 

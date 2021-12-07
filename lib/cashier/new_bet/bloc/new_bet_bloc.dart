@@ -12,6 +12,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetState> {
   NewBetBloc() : super(NewBetLoaded()) {
     on<AddNewBetEvent>(_onAppend);
     on<InsertNewBetEvent>(_onInsert);
+    on<ResetBetEvent>(_onReset);
   }
   void _onInsert(InsertNewBetEvent event, Emitter emit) {
     final _state = state;
@@ -31,6 +32,15 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetState> {
     final _state = state;
     if (_state is NewBetLoaded) {
       emit(_state.copyWith(items: [..._state.items, event.dto]));
+    }
+  }
+
+  void _onReset(ResetBetEvent event, Emitter emit) {
+    final _state = state;
+    if (_state is NewBetLoaded) {
+      emit(_state.copyWith(
+        items: [],
+      ));
     }
   }
 }

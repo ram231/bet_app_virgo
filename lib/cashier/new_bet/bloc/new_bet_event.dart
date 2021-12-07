@@ -52,3 +52,5 @@ class InsertNewBetEvent extends NewBetEvent {
 }
 
 class SaveBetEvent extends NewBetEvent {}
+
+class ResetBetEvent extends NewBetEvent {}

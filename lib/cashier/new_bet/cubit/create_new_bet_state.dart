@@ -20,3 +20,14 @@ class CreateNewBetLoaded extends CreateNewBetState {
   @override
   List<Object> get props => [result];
 }
+
+class CreateNewBetError extends CreateNewBetState {
+  final String error;
+  CreateNewBetError({
+    required this.error,
+  });
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [error];
+}
