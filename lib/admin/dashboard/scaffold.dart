@@ -1,9 +1,10 @@
-import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
-import 'package:bet_app_virgo/login/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../login/bloc/login_bloc.dart';
+import '../../login/widgets/scaffold.dart';
 import '../combinations/scaffold.dart';
+import '../draws/widgets/scaffold.dart';
 import '../generate_hits/scaffold.dart';
 import '../sold_out/scaffold.dart';
 import '../win_category/scaffold.dart';
@@ -45,6 +46,10 @@ class BetDashboardScaffold extends StatelessWidget {
                 onTap: () =>
                     Navigator.pushNamed(context, BetSoldOutScaffold.path),
               ),
+              ListTile(
+                  title: Text("Draws"),
+                  onTap: () =>
+                      Navigator.pushNamed(context, AdminDrawScaffold.path)),
               ListTile(
                 title: Text("Bet Cancellation"),
               ),

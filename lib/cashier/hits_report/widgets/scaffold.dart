@@ -31,10 +31,28 @@ class CashierHitScaffold extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text("Hits Report"),
+          actions: [_RefreshHits()],
         ),
         body: _HitsBody(),
       ),
     );
+  }
+}
+
+class _RefreshHits extends StatelessWidget {
+  const _RefreshHits({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          context.read<HitsReportBloc>().add(FetchHitReportsEvent(
+                dateTime: DateTime.now(),
+              ));
+        },
+        icon: Icon(Icons.refresh));
   }
 }
 
@@ -58,27 +76,35 @@ class _HitsBodyState extends State<_HitsBody> {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final today = DateFormat.yMd().format(now);
-    return Column(
-      children: [
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Text("Draw date: $today"),
-                Spacer(),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Text("CHANGE DATE"),
-                ),
-              ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<HitsReportBloc>().add(FetchHitReportsEvent(
+              dateTime: DateTime.now(),
+            ));
+      },
+      child: Column(
+        children: [
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Text("Draw date: $today"),
+                  Spacer(),
+                  ElevatedButton(
+                    onPressed: () {},
+                    child: Text("CHANGE DATE"),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: _HitsTable(),
-        ),
-      ],
+          Flexible(
+            flex: 2,
+            child: _HitsTable(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -96,19 +122,22 @@ class _HitsTable extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                rows: state.draws.map((draw) => DataRow(cells: [
-                  DataCell(Text("${draw.drawType?.name}")),
-                  DataCell(Text("# ${draw.drawType?.id}")),
-                  DataCell(Text("${draw.id}")),
-                  DataCell(Text("${draw.id}")),
-                  DataCell(Text("${draw.readableWinningAmount}"))
-                ])).toList(),
+                rows: state.draws
+                    .map((bet) => DataRow(cells: [
+                          DataCell(Text("${bet.draw?.id}")),
+                          DataCell(Text(
+                              "# ${bet.draw?.winningCombination.join(" ")}")),
+                          DataCell(Text("${bet.totalBetAmount}")),
+                          DataCell(Text("${bet.id}")),
+                          DataCell(Text("${bet.readablePrize}")),
+                        ]))
+                    .toList(),
                 columns: [
                   DataColumn(label: Text("Draw")),
-                  DataColumn(label: Text("Bet key")),
-                  DataColumn(label: Text("Bet amount")),
+                  DataColumn(label: Text("Bet Number")),
+                  DataColumn(label: Text("Bet Amount")),
                   DataColumn(label: Text("Doc No.")),
-                  DataColumn(label: Text("Win Amt")),
+                  DataColumn(label: Text("Prize")),
                 ],
               ),
             ),

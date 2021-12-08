@@ -10,7 +10,7 @@ abstract class HitsReportState extends Equatable {
 class HitsReportInitial extends HitsReportState {}
 
 class HitsReportLoaded extends HitsReportState {
-  final List<DrawBet> draws;
+  final List<WinningHitsResult> draws;
   final DateTime drawDate;
   const HitsReportLoaded({
     this.draws = const [],

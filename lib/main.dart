@@ -1,5 +1,7 @@
+import 'package:bet_app_virgo/admin/draws/create_draw/widgets/scaffold.dart';
 import 'package:bet_app_virgo/cashier/dashboard/widgets/scaffold.dart';
 import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
+import 'package:bet_app_virgo/models/draw.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +11,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'admin/admin.dart';
+import 'admin/draws/widgets/scaffold.dart';
 import 'cashier/cashier.dart';
 import 'login/widgets/scaffold.dart';
 import 'login/widgets/splash_screen.dart';
@@ -102,6 +105,17 @@ class MyApp extends StatelessWidget {
           case CashierPrinterScaffold.path:
             return CupertinoPageRoute(
                 builder: (context) => CashierPrinterScaffold());
+          case CreateDrawScaffold.path:
+            final args = settings.arguments as DrawBet;
+            return PageRouteBuilder(
+              pageBuilder: (context, _, __) => CreateDrawProvider(
+                draw: args,
+                child: CreateDrawScaffold(),
+              ),
+            );
+          case AdminDrawScaffold.path:
+            return PageRouteBuilder(
+                pageBuilder: (context, _, __) => AdminDrawScaffold());
           default:
             return CupertinoPageRoute(builder: (context) => BetLoginScaffold());
         }

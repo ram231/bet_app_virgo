@@ -209,46 +209,48 @@ class _CashierSettingsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text("History"),
-          leading: Icon(Icons.history),
-          onTap: () {
-            Navigator.pushNamed(context, CashierBetHistoryScaffold.path);
-          },
-        ),
-        ListTile(
-          title: Text("Hits"),
-          leading: Icon(Icons.flip_to_back_sharp),
-          onTap: () {
-            Navigator.pushNamed(context, CashierHitScaffold.path);
-          },
-        ),
-        ListTile(
-          title: Text("Cancel Doc"),
-          leading: Icon(Icons.cancel),
-          onTap: () {
-            Navigator.pushNamed(context, CashierBetCancelScaffold.path);
-          },
-        ),
-        ListTile(
-          title: Text("Setup Printer"),
-          leading: Icon(Icons.print),
-          onTap: () {
-            Navigator.pushNamed(context, CashierPrinterScaffold.path);
-          },
-        ),
-        ListTile(
-          title: Text("Logout"),
-          leading: Icon(Icons.logout),
-          onTap: () {
-            context.read<LoginBloc>().add(LogoutEvent());
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          ListTile(
+            title: Text("History"),
+            leading: Icon(Icons.history),
+            onTap: () {
+              Navigator.pushNamed(context, CashierBetHistoryScaffold.path);
+            },
+          ),
+          ListTile(
+            title: Text("Hits"),
+            leading: Icon(Icons.flip_to_back_sharp),
+            onTap: () {
+              Navigator.pushNamed(context, CashierHitScaffold.path);
+            },
+          ),
+          ListTile(
+            title: Text("Cancel Doc"),
+            leading: Icon(Icons.cancel),
+            onTap: () {
+              Navigator.pushNamed(context, CashierBetCancelScaffold.path);
+            },
+          ),
+          ListTile(
+            title: Text("Setup Printer"),
+            leading: Icon(Icons.print),
+            onTap: () {
+              Navigator.pushNamed(context, CashierPrinterScaffold.path);
+            },
+          ),
+          ListTile(
+            title: Text("Logout"),
+            leading: Icon(Icons.logout),
+            onTap: () {
+              context.read<LoginBloc>().add(LogoutEvent());
 
-            Navigator.pushReplacementNamed(context, BetLoginScaffold.path);
-          },
-        ),
-      ],
+              Navigator.pushReplacementNamed(context, BetLoginScaffold.path);
+            },
+          ),
+        ],
+      ),
     );
   }
 }
