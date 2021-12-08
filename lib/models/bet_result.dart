@@ -12,7 +12,7 @@ class BetResult extends Equatable {
   final UserAccount? cashier;
   final String? betAmount;
   final String? readableBetAmount;
-  final List<int> betNumber;
+  final int betNumber;
   final int? isWinner;
   BetResult({
     required this.id,
@@ -34,7 +34,7 @@ class BetResult extends Equatable {
     UserAccount? cashier,
     String? betAmount,
     String? readableBetAmount,
-    List<int>? betNumber,
+    int? betNumber,
     int? isWinner,
   }) {
     return BetResult(
@@ -77,7 +77,7 @@ class BetResult extends Equatable {
       readableBetAmount: map['readable_bet_amount'] != null
           ? map['readable_bet_amount']
           : null,
-      betNumber: List<int>.from(map['bet_number'] ?? const []),
+      betNumber: map['bet_number'],
       isWinner: map['is_winner'] != null ? map['is_winner'] : null,
     );
   }
@@ -113,7 +113,7 @@ class BetDrawResult extends Equatable {
   final String? drawStart;
   final String? drawEnd;
   final String? winningAmount;
-  final List<String> winningNumber;
+  final int? winningNumber;
   BetDrawResult({
     this.id = 1,
     this.drawTypeId,
@@ -121,7 +121,7 @@ class BetDrawResult extends Equatable {
     this.drawStart,
     this.drawEnd,
     this.winningAmount,
-    this.winningNumber = const [],
+    this.winningNumber,
   });
 
   BetDrawResult copyWith({
@@ -131,7 +131,7 @@ class BetDrawResult extends Equatable {
     String? drawStart,
     String? drawEnd,
     String? winningAmount,
-    List<String>? winningNumber,
+    int? winningNumber,
   }) {
     return BetDrawResult(
       id: id ?? this.id,
@@ -165,7 +165,7 @@ class BetDrawResult extends Equatable {
       drawEnd: map['draw_end'] != null ? map['draw_end'] : null,
       winningAmount:
           map['winning_amount'] != null ? map['winning_amount'] : null,
-      winningNumber: List<String>.from(map['winning_number'] ?? const []),
+      winningNumber: map['winning_number'],
     );
   }
 

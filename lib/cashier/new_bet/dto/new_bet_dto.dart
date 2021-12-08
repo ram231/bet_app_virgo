@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 class NewBetDTO extends Equatable {
-  final List<int> betNumber;
+  final int? betNumber;
   final double betAmount;
   final int gambleId;
   final int cashierId;
   final int branchId;
   NewBetDTO({
-    this.betNumber = const [],
+    this.betNumber,
     this.betAmount = 0,
     required this.gambleId,
     required this.cashierId,
@@ -17,7 +17,7 @@ class NewBetDTO extends Equatable {
   });
 
   NewBetDTO copyWith({
-    List<int>? betNumber,
+    int? betNumber,
     double? betAmount,
     int? gambleId,
     int? cashierId,
@@ -44,7 +44,7 @@ class NewBetDTO extends Equatable {
 
   factory NewBetDTO.fromMap(Map<String, dynamic> map) {
     return NewBetDTO(
-      betNumber: List<int>.from(map['betNumber'] ?? const []),
+      betNumber: map['betNumber'],
       betAmount: map['bet_amount'] ?? 0.0,
       gambleId: map['gamble_id'] ?? 0,
       cashierId: map['cashier_id'] ?? 0,
@@ -61,7 +61,7 @@ class NewBetDTO extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props {
+  List<Object?> get props {
     return [
       betNumber,
       betAmount,

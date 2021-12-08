@@ -11,7 +11,7 @@ class DrawBet extends Equatable {
   final String? drawEnd;
   final String winningAmount;
   final String readableWinningAmount;
-  final List<int> winningCombination;
+  final int? winningCombination;
   final String status;
   const DrawBet({
     required this.id,
@@ -21,7 +21,7 @@ class DrawBet extends Equatable {
     this.drawEnd,
     this.winningAmount = '',
     this.readableWinningAmount = '',
-    this.winningCombination = const [],
+    this.winningCombination,
     this.status = 'C',
   });
 
@@ -33,7 +33,7 @@ class DrawBet extends Equatable {
     String? drawEnd,
     String? winningAmount,
     String? readableWinningAmount,
-    List<int>? winningNumber,
+    int? winningNumber,
     String? status,
   }) {
     return DrawBet(
@@ -76,9 +76,7 @@ class DrawBet extends Equatable {
       drawEnd: map['draw_end'],
       winningAmount: map['winning_amount'] ?? '',
       readableWinningAmount: map['readable_winning_amount'] ?? '',
-      winningCombination: map['winning_combination'] != null
-          ? List<int>.from(map['winning_combination'] ?? const [])
-          : [],
+      winningCombination: map['winning_combination'],
       status: map['status'] ?? 'C',
     );
   }

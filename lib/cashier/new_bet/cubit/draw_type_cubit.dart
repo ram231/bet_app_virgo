@@ -25,7 +25,7 @@ class DrawTypeCubit extends Cubit<DrawTypeState> {
       emit(DrawTypesLoaded(
           drawTypes: list,
           selectedDrawType: list
-              .firstWhere((element) => element.winningCombination.isEmpty)));
+              .firstWhere((element) => element.winningCombination != null)));
     } catch (e) {
       debugPrint("$e");
     }

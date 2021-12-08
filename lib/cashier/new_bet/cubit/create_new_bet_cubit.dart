@@ -25,7 +25,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
         'cashier_id': cashier.id,
         'branch_id': cashier.branchId,
         'bet_amount': items.first.betAmount,
-        'bet_number': items.map((e) => e.betNumber).toList(),
+        'bet_number': int.parse(items.map((e) => e.betNumber).join("")),
         'draw_id': drawBet.id,
       };
       final result = await _httpClient.post('$adminEndpoint/bets', body: body,
