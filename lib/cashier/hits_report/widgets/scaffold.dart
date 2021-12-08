@@ -126,7 +126,7 @@ class _HitsTable extends StatelessWidget {
                     .map((bet) => DataRow(cells: [
                           DataCell(Text("${bet.draw?.id}")),
                           DataCell(Text(
-                              "# ${bet.draw?.winningCombination.join(" ")}")),
+                              "${bet.draw?.winningCombination.join(" ")}")),
                           DataCell(Text("${bet.totalBetAmount}")),
                           DataCell(Text("${bet.id}")),
                           DataCell(Text("${bet.readablePrize}")),
