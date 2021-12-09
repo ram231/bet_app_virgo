@@ -6,6 +6,7 @@ import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 part 'create_new_bet_state.dart';
 
@@ -23,7 +24,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
       emit(CreateNewBetLoading());
       final body = {
         'cashier_id': cashier.id,
-        'branch_id': cashier.branchId,
+        'branch_id': drawBet.employee?.branchId ?? cashier.branchId,
         'bet_amount': items.first.betAmount,
         'bet_number': int.parse(items.map((e) => e.betNumber).join("")),
         'draw_id': drawBet.id,
@@ -33,9 +34,12 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
         return BetResult.fromMap(json);
       });
       emit(CreateNewBetLoaded(result: result));
-    } on DioError catch (e) {
-      emit(CreateNewBetError(error: e.response?.data['message']));
+    } catch (e) {
+      if (e is DioError) {
+        emit(CreateNewBetError(error: e.response?.data['message']));
+      }
       addError(e);
+      debugPrint("$e");
     }
   }
 }

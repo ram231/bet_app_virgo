@@ -62,8 +62,7 @@ class BetResultTable extends StatelessWidget {
               DataRow(cells: [
                 DataCell(Text("${result.betNumber}")),
                 DataCell(Text("${result.readableBetAmount}")),
-                DataCell(Text(
-                    "${result.isWinner == true ? result.draw?.winningAmount : 0}")),
+                DataCell(Text("${result.draw?.winningAmount}")),
                 DataCell(Text("${result.draw?.drawTypeId}")),
               ])
             ],

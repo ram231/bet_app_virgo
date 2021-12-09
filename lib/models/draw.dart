@@ -70,8 +70,8 @@ class DrawBet extends Equatable {
       drawType: map['draw_type'] != null
           ? DrawTypeBet.fromMap(map['draw_type'])
           : null,
-      // employee:
-      //     map['employee'] != null ? UserAccount.fromMap(map['employee']) : null,
+      employee:
+          map['employee'] != null ? UserAccount.fromMap(map['employee']) : null,
       drawStart: map['draw_start'],
       drawEnd: map['draw_end'],
       winningAmount: map['winning_amount'] ?? '',

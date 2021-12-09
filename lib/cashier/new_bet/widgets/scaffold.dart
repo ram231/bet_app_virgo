@@ -377,7 +377,7 @@ class __BetTypeDropdownState extends State<_BetTypeDropdown> {
           }
         },
         items: state.drawTypes
-            .where((element) => (element.winningCombination != null))
+            .where((element) => (element.winningCombination == null))
             .map((type) => DropdownMenuItem(
                   child: Text("${type.drawType?.name} - ${type.id}"),
                   value: type,

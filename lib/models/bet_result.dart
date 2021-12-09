@@ -10,10 +10,9 @@ class BetResult extends Equatable {
   final BetBranch? branch;
   final UserAccount? gambler;
   final UserAccount? cashier;
-  final String? betAmount;
+  final num? betAmount;
   final String? readableBetAmount;
   final int betNumber;
-  final int? isWinner;
   BetResult({
     required this.id,
     this.draw,
@@ -23,7 +22,6 @@ class BetResult extends Equatable {
     required this.betAmount,
     required this.readableBetAmount,
     required this.betNumber,
-    required this.isWinner,
   });
 
   BetResult copyWith({
@@ -32,10 +30,10 @@ class BetResult extends Equatable {
     BetBranch? branch,
     UserAccount? gambler,
     UserAccount? cashier,
-    String? betAmount,
+    int? betAmount,
     String? readableBetAmount,
     int? betNumber,
-    int? isWinner,
+    bool? isWinner,
   }) {
     return BetResult(
       id: id ?? this.id,
@@ -46,7 +44,6 @@ class BetResult extends Equatable {
       betAmount: betAmount ?? this.betAmount,
       readableBetAmount: readableBetAmount ?? this.readableBetAmount,
       betNumber: betNumber ?? this.betNumber,
-      isWinner: isWinner ?? this.isWinner,
     );
   }
 
@@ -60,7 +57,6 @@ class BetResult extends Equatable {
       'betAmount': betAmount,
       'readableBetAmount': readableBetAmount,
       'betNumber': betNumber,
-      'isWinner': isWinner,
     };
   }
 
@@ -73,12 +69,15 @@ class BetResult extends Equatable {
           map['gambler'] != null ? UserAccount.fromMap(map['gambler']) : null,
       cashier:
           map['cashier'] != null ? UserAccount.fromMap(map['cashier']) : null,
-      betAmount: map['bet_amount'] != null ? map['bet_amount'] : null,
+      betAmount: map['bet_amount'] != null
+          ? map['bet_amount'] is String
+              ? double.parse(map['bet_amount'])
+              : map['bet_amount']
+          : null,
       readableBetAmount: map['readable_bet_amount'] != null
           ? map['readable_bet_amount']
           : null,
       betNumber: map['bet_number'],
-      isWinner: map['is_winner'] != null ? map['is_winner'] : null,
     );
   }
 
@@ -101,7 +100,6 @@ class BetResult extends Equatable {
       betAmount,
       readableBetAmount,
       betNumber,
-      isWinner,
     ];
   }
 }
