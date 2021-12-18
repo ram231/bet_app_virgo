@@ -3,6 +3,7 @@ import 'package:bet_app_virgo/cashier/new_bet/dto/append_bet_dto.dart';
 import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -108,6 +109,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
   late final TextEditingController _betNumberController;
   late final TextEditingController _betAmountController;
   late final FocusNode _betNumberFocusNode;
+  final GlobalKey<FormState> formKey = GlobalKey();
   @override
   void initState() {
     _betNumberController = TextEditingController();
@@ -136,70 +138,91 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
       }
     }, builder: (context, state) {
       final isClosed = state is DrawTypesLoaded;
-      return ListView(
-        children: [
-          _GroundZeroLabel(),
-          _DateCreatedLabel(),
-          _BetNumberTextField(
-              focusNode: _betNumberFocusNode,
-              betNumberController: _betNumberController),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              controller: _betAmountController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                hintText: "Bet Amount",
+      return Form(
+        key: formKey,
+        child: ListView(
+          children: [
+            _GroundZeroLabel(),
+            _DateCreatedLabel(),
+            _BetNumberTextField(
+                focusNode: _betNumberFocusNode,
+                betNumberController: _betNumberController),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: _betAmountController,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: "Bet Amount",
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                    RegExp(r"^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$"),
+                  ),
+                  FilteringTextInputFormatter.deny(
+                    RegExp(r"[+-]"),
+                  )
+                ],
+                validator: (val) {
+                  if (val != null && val.isNotEmpty) {
+                    return null;
+                  }
+                  return "Required";
+                },
+                keyboardType: TextInputType.numberWithOptions(
+                    decimal: false, signed: false),
+                onChanged: (val) {
+                  if (val.isNotEmpty) {
+                    context.read<NewBetBloc>().add(InsertNewBetEvent(
+                          betAmount: double.parse(val),
+                        ));
+                  }
+                },
               ),
-              keyboardType: TextInputType.numberWithOptions(
-                  decimal: false, signed: false),
-              onChanged: (val) {
-                if (val.isNotEmpty) {
-                  context.read<NewBetBloc>().add(InsertNewBetEvent(
-                        betAmount: double.parse(val),
-                      ));
-                }
-              },
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            width: double.infinity,
-            child: _BetTypeDropdown(),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isClosed
-                  ? () {
-                      final userState = context.read<LoginBloc>().state;
-                      if (userState is LoginSuccess) {
-                        final _state = context.read<NewBetBloc>().state;
-                        if (_state is NewBetLoaded) {
-                          final winAmount = double.parse(
-                              _state.drawTypeBet?.winningAmount ?? "0");
-                          context.read<NewBetBloc>().add(
-                                AddNewBetEvent(
-                                  dto: AppendBetDTO(
-                                    betAmount: _state.betAmount!,
-                                    betNumber: _state.betNumber!,
-                                    drawTypeBet: _state.drawTypeBet,
-                                    winAmount: winAmount,
-                                    cashier: userState.user,
-                                  ),
-                                ),
-                              );
-                          _betNumberFocusNode.requestFocus();
+            Container(
+              padding: const EdgeInsets.all(8),
+              width: double.infinity,
+              child: _BetTypeDropdown(),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isClosed
+                    ? () {
+                        final validate =
+                            formKey.currentState?.validate() ?? false;
+                        if (validate) {
+                          final userState = context.read<LoginBloc>().state;
+                          if (userState is LoginSuccess) {
+                            final _state = context.read<NewBetBloc>().state;
+                            if (_state is NewBetLoaded) {
+                              final winAmount = double.parse(
+                                  _state.drawTypeBet?.winningAmount ?? "0");
+                              context.read<NewBetBloc>().add(
+                                    AddNewBetEvent(
+                                      dto: AppendBetDTO(
+                                        betAmount: _state.betAmount!,
+                                        betNumber: _state.betNumber!,
+                                        drawTypeBet: _state.drawTypeBet,
+                                        winAmount: winAmount,
+                                        cashier: userState.user,
+                                      ),
+                                    ),
+                                  );
+                              _betNumberFocusNode.requestFocus();
+                            }
+                          }
                         }
                       }
-                    }
-                  : null,
-              child: Text("APPEND"),
+                    : null,
+                child: Text("APPEND"),
+              ),
             ),
-          ),
-          SizedBox(height: 250, child: _BetTable())
-        ],
+            SizedBox(height: 250, child: _BetTable())
+          ],
+        ),
       );
     });
   }
@@ -226,19 +249,26 @@ class _BetNumberTextField extends StatelessWidget {
           textAlign: TextAlign.center,
           decoration: InputDecoration(
             hintText: "Bet Number",
-            errorMaxLines: state.selectedDrawType?.drawType?.digits.toInt(),
           ),
-          maxLength: state.selectedDrawType?.drawType?.digits.toInt(),
           keyboardType:
               TextInputType.numberWithOptions(decimal: false, signed: false),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r"[0-9]*$"))
+          ],
+          validator: (val) {
+            if (val != null && val.isNotEmpty) {
+              return null;
+            }
+            return "Required";
+          },
           onChanged: (val) {
             if (val.isNotEmpty) {
-              /// TODO: Listen to draw type and change it dynamically
-              /// via bloc builder
+              final betNumber = int.parse(val);
               context.read<NewBetBloc>().add(InsertNewBetEvent(
-                    betNumber: int.parse(val),
+                    betNumber: betNumber,
                   ));
             }
+            context.read<DrawTypeCubit>().changeDrawTypeByLength(val);
           },
         ),
       );
@@ -371,11 +401,7 @@ class __BetTypeDropdownState extends State<_BetTypeDropdown> {
     return DrawTypeBuilder(builder: (state) {
       return DropdownButtonFormField<DrawBet>(
         value: state.selectedDrawType,
-        onChanged: (val) {
-          if (val != null) {
-            context.read<DrawTypeCubit>().changeDrawType(val);
-          }
-        },
+        onChanged: null,
         items: state.drawTypes
             .where((element) => (element.winningCombination == null))
             .map((type) => DropdownMenuItem(

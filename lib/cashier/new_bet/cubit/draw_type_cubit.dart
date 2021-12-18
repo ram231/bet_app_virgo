@@ -22,10 +22,7 @@ class DrawTypeCubit extends Cubit<DrawTypeState> {
       debugPrint("$result");
       final list =
           (result as List).map((json) => DrawBet.fromMap(json)).toList();
-      emit(DrawTypesLoaded(
-          drawTypes: list,
-          selectedDrawType: list
-              .firstWhere((element) => element.winningCombination == null)));
+      emit(DrawTypesLoaded(drawTypes: list));
     } catch (e) {
       debugPrint("$e");
     }
@@ -35,6 +32,26 @@ class DrawTypeCubit extends Cubit<DrawTypeState> {
     final _state = state;
     if (_state is DrawTypesLoaded) {
       emit(_state.copyWith(selectedDrawType: drawType));
+    }
+  }
+
+  void changeDrawTypeByLength(String betNumber) {
+    if (betNumber.isEmpty) return;
+    final _state = state;
+    if (_state is DrawTypesLoaded) {
+      final selectedDrawType = _state.drawTypes
+          .where(
+            (e) =>
+                (e.drawType?.digits.toInt() ?? 0) >= betNumber.length &&
+                e.winningCombination == null,
+          )
+          .toList();
+      final drawTypes = _state.drawTypes.toSet().toList();
+      emit(_state.copyWith(
+        selectedDrawType:
+            selectedDrawType.isNotEmpty ? selectedDrawType.first : null,
+        drawTypes: drawTypes,
+      ));
     }
   }
 }
