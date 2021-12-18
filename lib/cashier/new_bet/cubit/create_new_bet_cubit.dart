@@ -22,17 +22,22 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
   ) async {
     try {
       emit(CreateNewBetLoading());
-      final body = {
-        'cashier_id': cashier.id,
-        'branch_id': drawBet.employee?.branchId ?? cashier.branchId,
-        'bet_amount': items.first.betAmount,
-        'bet_number': int.parse(items.map((e) => e.betNumber).join("")),
-        'draw_id': drawBet.id,
-      };
-      final result = await _httpClient.post('$adminEndpoint/bets', body: body,
-          onSerialize: (json) {
-        return BetResult.fromMap(json);
-      });
+      final request = items.map((e) {
+        final data = {
+          'cashier_id': cashier.id,
+          'branch_id': drawBet.employee?.branchId ?? cashier.branchId,
+          'bet_amount': items.first.betAmount,
+          'bet_number': e.betNumber,
+          'draw_id': drawBet.id,
+        };
+        return _httpClient.post(
+          '$adminEndpoint/bets',
+          body: data,
+          onSerialize: (json) => BetResult.fromMap(json),
+        );
+      }).toList();
+      final result = await Future.wait(request);
+
       emit(CreateNewBetLoaded(result: result));
     } catch (e) {
       if (e is DioError) {

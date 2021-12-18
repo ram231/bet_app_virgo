@@ -12,7 +12,7 @@ class CreateNewBetInitial extends CreateNewBetState {}
 class CreateNewBetLoading extends CreateNewBetState {}
 
 class CreateNewBetLoaded extends CreateNewBetState {
-  final BetResult result;
+  final List<BetResult> result;
   CreateNewBetLoaded({
     required this.result,
   });
@@ -28,6 +28,5 @@ class CreateNewBetError extends CreateNewBetState {
   });
 
   @override
-  // TODO: implement props
   List<Object> get props => [error];
 }

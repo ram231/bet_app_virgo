@@ -58,14 +58,14 @@ class BetResultTable extends StatelessWidget {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            rows: [
-              DataRow(cells: [
-                DataCell(Text("${result.betNumber}")),
-                DataCell(Text("${result.readableBetAmount}")),
-                DataCell(Text("${result.draw?.winningAmount}")),
-                DataCell(Text("${result.draw?.drawTypeId}")),
-              ])
-            ],
+            rows: result
+                .map((e) => DataRow(cells: [
+                      DataCell(Text("${e.betNumber}")),
+                      DataCell(Text("${e.readableBetAmount}")),
+                      DataCell(Text("${e.draw?.winningAmount}")),
+                      DataCell(Text("${e.draw?.drawTypeId}")),
+                    ]))
+                .toList(),
             columns: [
               DataColumn(label: Text("Bet Comb")),
               DataColumn(label: Text("Bet Amt")),

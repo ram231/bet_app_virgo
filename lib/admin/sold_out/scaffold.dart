@@ -57,6 +57,7 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
                 .map((e) => DropdownMenuItem<String>(child: Text(e), value: e))
                 .toList(),
             value: _selectedItem,
+            onChanged: (String? value) {},
           ),
         ),
         Flexible(
@@ -65,6 +66,7 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
                 .map((e) => DropdownMenuItem<String>(child: Text(e), value: e))
                 .toList(),
             value: selectedTime,
+            onChanged: (value) {},
           ),
         ),
         Flexible(
