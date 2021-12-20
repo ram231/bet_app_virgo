@@ -15,8 +15,8 @@ class DrawTypeCubit extends Cubit<DrawTypeState> {
   void fetchDrawTypes() async {
     try {
       emit(DrawTypeLoading());
-      final result =
-          await _httpClient.get('$adminEndpoint/draws', onSerialize: (json) {
+      final result = await _httpClient.get('$adminEndpoint/draws/availables',
+          onSerialize: (json) {
         return json['data'];
       });
       debugPrint("$result");
