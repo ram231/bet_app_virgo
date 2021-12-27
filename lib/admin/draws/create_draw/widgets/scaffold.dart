@@ -1,9 +1,9 @@
-import 'package:bet_app_virgo/admin/draws/create_draw/data/draw_data.dart';
-import 'package:bet_app_virgo/models/draw.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+
+import '../../../../models/draw.dart';
+import '../data/draw_data.dart';
 
 class CreateDrawProvider extends StatelessWidget {
   const CreateDrawProvider({required this.child, required this.draw, Key? key})

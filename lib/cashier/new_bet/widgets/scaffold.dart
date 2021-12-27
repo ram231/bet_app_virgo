@@ -395,13 +395,16 @@ class _BetTypeDropdown extends StatefulWidget {
 }
 
 class __BetTypeDropdownState extends State<_BetTypeDropdown> {
-  String _val = "CURRENT DAY OFF";
   @override
   Widget build(BuildContext context) {
     return DrawTypeBuilder(builder: (state) {
       return DropdownButtonFormField<DrawBet>(
         value: state.selectedDrawType,
-        onChanged: null,
+        onChanged: (val) {
+          if (val != null) {
+            context.read<DrawTypeCubit>().changeDrawType(val);
+          }
+        },
         items: state.drawTypes
             .where((element) => (element.winningCombination == null))
             .map((type) => DropdownMenuItem(

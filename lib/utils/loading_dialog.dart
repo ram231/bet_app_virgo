@@ -15,7 +15,9 @@ class _HeroLoadingDialogState extends State<LoadingDialog> {
   @override
   void initState() {
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      widget.onLoading?.call();
+      if (mounted) {
+        widget.onLoading?.call();
+      }
     });
     super.initState();
   }
@@ -28,7 +30,7 @@ class _HeroLoadingDialogState extends State<LoadingDialog> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator.adaptive(),
         ),
       ),
     );

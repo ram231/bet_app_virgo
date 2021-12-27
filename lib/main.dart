@@ -1,8 +1,3 @@
-import 'package:bet_app_virgo/admin/draws/create_draw/widgets/scaffold.dart';
-import 'package:bet_app_virgo/cashier/dashboard/widgets/scaffold.dart';
-import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
-import 'package:bet_app_virgo/models/draw.dart';
-import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +6,15 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'admin/admin.dart';
+import 'admin/draws/create_draw/widgets/scaffold.dart';
 import 'admin/draws/widgets/scaffold.dart';
+import 'bluetooth/cubit/bluetooth_cubit.dart';
 import 'cashier/cashier.dart';
+import 'login/bloc/login_bloc.dart';
 import 'login/widgets/scaffold.dart';
 import 'login/widgets/splash_screen.dart';
+import 'models/draw.dart';
+import 'utils/http_client.dart';
 
 void main() async {
   print(api);
@@ -33,8 +33,12 @@ class HttpProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => STLHttpClient(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => STLHttpClient(),
+        ),
+      ],
       child: child,
     );
   }
@@ -47,6 +51,7 @@ class BetProviders extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (c) => BluetoothCubit()),
         BlocProvider(create: (context) => LoginBloc()),
       ],
       child: MyApp(),

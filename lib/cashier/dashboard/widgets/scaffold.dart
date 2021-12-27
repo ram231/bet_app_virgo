@@ -1,3 +1,4 @@
+import 'package:bet_app_virgo/cashier/claim/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 
@@ -45,9 +46,9 @@ class _CashierDashboardScaffoldState extends State<CashierDashboardScaffold> {
           onPageChanged: _changeTab,
           controller: _controller,
           physics: const BouncingScrollPhysics(),
-          children: [
+          children: const [
             _CashierBody(),
-            Container(child: Text("Claim")),
+            ClaimQRScaffold(),
             _CashierSettingsBody(),
           ],
         ),
