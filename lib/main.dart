@@ -20,12 +20,15 @@ void main() async {
   print(api);
   WidgetsFlutterBinding.ensureInitialized();
 
-  HydratedBloc.storage = await HydratedStorage.build(
+  final storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
         ? HydratedStorage.webStorageDirectory
         : await getApplicationDocumentsDirectory(),
   );
-  runApp(HttpProvider(child: const BetProviders()));
+  HydratedBlocOverrides.runZoned(
+    () => runApp(HttpProvider(child: const BetProviders())),
+    storage: storage,
+  );
 }
 
 class HttpProvider extends StatelessWidget {
