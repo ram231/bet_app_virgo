@@ -1,11 +1,11 @@
 import 'package:bet_app_virgo/bluetooth/cubit/bluetooth_cubit.dart';
-import 'package:bet_app_virgo/models/bluetooth_device.dart';
-import 'package:bet_app_virgo/utils/nil.dart';
+import 'package:bet_app_virgo/cashier/printer/cubit/blue_thermal_cubit.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart' as printer;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:intl/intl.dart';
+
+import 'builder.dart';
 
 const loading = CircularProgressIndicator.adaptive();
 
@@ -39,254 +39,103 @@ class _PrinterBodyState extends State<_PrinterBody> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
+        SizedBox(
           width: double.infinity,
-          child: const StreamBluetoothState(),
-        ),
-        _TestPrintButton(),
-        BluetoothScanBuilder(builder: (scanning) {
-          if (scanning) {
-            return Container(
-              padding: const EdgeInsets.all(8),
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await FlutterBlue.instance.stopScan();
-                  await printer.BlueThermalPrinter.instance.disconnect();
-                },
-                child: Text("STOP"),
-              ),
-            );
-          }
-          return Container(
-            padding: const EdgeInsets.all(8),
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                FlutterBlue.instance
-                    .startScan(timeout: const Duration(seconds: 4));
-              },
-              child: Text("DISCOVER NEW DEVICES"),
-            ),
-          );
-        }),
-        Flexible(
-          child: BluetoothScanResultBuilder(
-            builder: (devices) {
-              return ListView.builder(
-                itemCount: devices.length,
-                itemBuilder: (context, index) {
-                  final device = devices[index].device;
-
-                  return StreamBluetoothDeviceState(
-                      device: device,
-                      builder: (state) {
-                        return ListTile(
-                          title: Text("${device.name}"),
-                          subtitle: Text("${device.id}"),
-                          trailing: _StatusIcon(
-                            state: state,
-                            onDisconnect: () async {
-                              await printer.BlueThermalPrinter.instance
-                                  .disconnect();
-                              context.read<BluetoothCubit>().disconnectDevice();
-                            },
-                            onConnect: () async {
-                              context.read<BluetoothCubit>().disconnectDevice();
-                              context.read<BluetoothCubit>().connectDevice(
-                                    BetBluetoothDevice(
-                                      name: device.name,
-                                      address: device.id.id,
-                                    ),
-                                  );
-                              await printer.BlueThermalPrinter.instance.connect(
-                                printer.BluetoothDevice(
-                                  device.name,
-                                  device.id.id,
-                                ),
-                              );
-
-                              await ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text("Connected to ${device.name}")));
-                            },
-                          ),
-                        );
-                      });
-                },
-              );
+          child: ElevatedButton(
+            child: Text("Start scan"),
+            onPressed: () {
+              context.read<BlueThermalCubit>().scan();
             },
           ),
-        )
+        ),
+        _TestPrintButton(),
+
+        Flexible(child: BlueThermalBuilder(
+          builder: (state) {
+            if (!state.isConnected) {
+              return Text("Bluetooth disabled");
+            }
+            if (!state.isEmpty) {
+              final data = state.devices;
+              return ListView.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    final device = data[index];
+                    final button = !device.connected
+                        ? ElevatedButton(
+                            onPressed: () {
+                              context.read<BlueThermalCubit>().connect(device);
+                            },
+                            child: Text("CONNECT "),
+                          )
+                        : ElevatedButton(
+                            onPressed: () {
+                              context.read<BlueThermalCubit>().disconnect();
+                            },
+                            child: Text("DISCONNECT"),
+                          );
+
+                    return ListTile(
+                      title: Text("${device.name}"),
+                      subtitle: Text("${device.address}"),
+                      trailing: button,
+                    );
+                  });
+            }
+            return Text("No Device Found");
+          },
+        ))
+        // Flexible(
+        //   child: BluetoothScanResultBuilder(
+        //     builder: (devices) {
+        //       return ListView.builder(
+        //         itemCount: devices.length,
+        //         itemBuilder: (context, index) {
+        //           final device = devices[index].device;
+
+        //           return StreamBluetoothDeviceState(
+        //               device: device,
+        //               builder: (state) {
+        //                 return ListTile(
+        //                   title: Text("${device.name}"),
+        //                   subtitle: Text("${device.id}"),
+        //                   trailing: _StatusIcon(
+        //                     state: state,
+        //                     onDisconnect: () async {
+        //                       await printer.BlueThermalPrinter.instance
+        //                           .disconnect();
+        //                       context.read<BluetoothCubit>().disconnectDevice();
+        //                     },
+        //                     onConnect: () async {
+        //                       context.read<BluetoothCubit>().disconnectDevice();
+        //                       context.read<BluetoothCubit>().connectDevice(
+        //                             BetBluetoothDevice(
+        //                               name: device.name,
+        //                               address: device.id.id,
+        //                             ),
+        //                           );
+        //                       await printer.BlueThermalPrinter.instance.connect(
+        //                         printer.BluetoothDevice(
+        //                           device.name,
+        //                           device.id.id,
+        //                         ),
+        //                       );
+
+        //                       await ScaffoldMessenger.of(context).showSnackBar(
+        //                           SnackBar(
+        //                               content:
+        //                                   Text("Connected to ${device.name}")));
+        //                     },
+        //                   ),
+        //                 );
+        //               });
+        //         },
+        //       );
+        //     },
+        //   ),
+        // )
       ],
     );
-  }
-}
-
-class StreamBluetoothState extends StatelessWidget {
-  const StreamBluetoothState({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<BluetoothState>(
-      stream: FlutterBlue.instance.state,
-      initialData: BluetoothState.off,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return loading;
-        }
-        if (snapshot.hasData) {
-          final status = snapshot.data;
-          switch (status) {
-            case BluetoothState.on:
-              return ElevatedButton(
-                onPressed: () async {
-                  await FlutterBlue.instance.stopScan();
-                  final result = await FlutterBlue.instance.turnOff();
-                  await printer.BlueThermalPrinter.instance.disconnect();
-                  debugPrint("Turning off: $result");
-                },
-                child: Text("TURN OFF BLUETOOTH"),
-              );
-            case BluetoothState.turningOn:
-            case BluetoothState.turningOff:
-              return Center(child: loading);
-            case BluetoothState.unauthorized:
-            case BluetoothState.unavailable:
-              return Text("Bluetooth not available on this device");
-            default:
-              return ElevatedButton(
-                onPressed: () async {
-                  await FlutterBlue.instance.turnOn();
-                },
-                child: Text("TURN ON BLUETOOTH"),
-              );
-          }
-        }
-        return notNil;
-      },
-    );
-  }
-}
-
-class BluetoothScanResultBuilder extends StatelessWidget {
-  const BluetoothScanResultBuilder({
-    this.onLoading,
-    required this.builder,
-    Key? key,
-  }) : super(key: key);
-  final Widget? onLoading;
-  final Widget Function(List<ScanResult> devices) builder;
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<ScanResult>>(
-      stream: FlutterBlue.instance.scanResults,
-      initialData: [],
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: onLoading ?? loading);
-        }
-        if (snapshot.hasData) {
-          final data = snapshot.data ?? [];
-          if (data.isEmpty) {
-            return Text("No devices found");
-          }
-          return builder(data.where((e) => e.device.name.isNotEmpty).toList());
-        }
-        return notNil;
-      },
-    );
-  }
-}
-
-class BluetoothScanBuilder extends StatelessWidget {
-  const BluetoothScanBuilder({
-    required this.builder,
-    this.onLoading,
-    Key? key,
-  }) : super(key: key);
-  final Widget Function(bool state) builder;
-  final Widget? onLoading;
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: FlutterBlue.instance.isScanning,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return onLoading ?? loading;
-        }
-        if (snapshot.hasData) {
-          final data = snapshot.data ?? false;
-          return builder(data);
-        }
-
-        return notNil;
-      },
-    );
-  }
-}
-
-class StreamBluetoothDeviceState extends StatelessWidget {
-  const StreamBluetoothDeviceState({
-    required this.device,
-    required this.builder,
-    this.onLoading,
-    Key? key,
-  }) : super(key: key);
-  final BluetoothDevice device;
-  final Widget Function(BluetoothDeviceState state) builder;
-  final Widget? onLoading;
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<BluetoothDeviceState>(
-        stream: device.state,
-        initialData: BluetoothDeviceState.connecting,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: onLoading ?? loading);
-          }
-          if (snapshot.hasData) {
-            final data = snapshot.data;
-            return builder(data!);
-          }
-          return notNil;
-        });
-  }
-}
-
-class _StatusIcon extends StatelessWidget {
-  const _StatusIcon({
-    required this.state,
-    this.onConnect,
-    this.onDisconnect,
-    Key? key,
-  }) : super(key: key);
-  final VoidCallback? onConnect;
-  final VoidCallback? onDisconnect;
-  final BluetoothDeviceState state;
-  @override
-  Widget build(BuildContext context) {
-    switch (state) {
-      case BluetoothDeviceState.connected:
-        return ElevatedButton(
-            onPressed: onDisconnect,
-            child: Text("Disconnect"),
-            style: ElevatedButton.styleFrom(
-                primary: Colors.red,
-                textStyle: TextStyle(
-                  color: Colors.white,
-                )));
-      case BluetoothDeviceState.connecting:
-      case BluetoothDeviceState.disconnecting:
-        return Icon(Icons.pending, color: Colors.yellow);
-      default:
-        return ElevatedButton(
-          onPressed: onConnect,
-          child: Text("Connect"),
-        );
-    }
   }
 }
 

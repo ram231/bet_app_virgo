@@ -137,7 +137,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
             .add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType));
       }
     }, builder: (context, state) {
-      final isClosed = state is DrawTypesLoaded;
+      final isClosed = state is DrawTypesLoaded && state.drawTypes.isNotEmpty;
       return Form(
         key: formKey,
         child: ListView(
@@ -206,7 +206,8 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                                         betAmount: _state.betAmount!,
                                         betNumber: _state.betNumber!,
                                         drawTypeBet: _state.drawTypeBet,
-                                        winAmount: winAmount,
+                                        winAmount:
+                                            _state.betAmount! + winAmount,
                                         cashier: userState.user,
                                       ),
                                     ),

@@ -10,6 +10,7 @@ import 'admin/draws/create_draw/widgets/scaffold.dart';
 import 'admin/draws/widgets/scaffold.dart';
 import 'bluetooth/cubit/bluetooth_cubit.dart';
 import 'cashier/cashier.dart';
+import 'cashier/printer/cubit/blue_thermal_cubit.dart';
 import 'login/bloc/login_bloc.dart';
 import 'login/widgets/scaffold.dart';
 import 'login/widgets/splash_screen.dart';
@@ -56,6 +57,7 @@ class BetProviders extends StatelessWidget {
       providers: [
         BlocProvider(create: (c) => BluetoothCubit()),
         BlocProvider(create: (context) => LoginBloc()),
+        BlocProvider(create: (context) => BlueThermalCubit())
       ],
       child: MyApp(),
     );

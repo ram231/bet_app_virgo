@@ -138,16 +138,18 @@ class __PrintResultState extends State<_PrintResult> {
             1,
             0,
           );
-          await BlueThermalPrinter.instance.print3Column(
+          await BlueThermalPrinter.instance.print4Column(
             "Bet",
             "Amount",
+            "WinAmt",
             "Draw",
             1,
           );
           await Future.wait(betResult.result.map((e) {
-            return BlueThermalPrinter.instance.print3Column(
+            return BlueThermalPrinter.instance.print4Column(
               '${e.betNumber}',
               "${e.betAmount?.toInt()}",
+              "${e.draw?.winningAmount}",
               "${e.draw?.id ?? 'N/A'}",
               0,
             );

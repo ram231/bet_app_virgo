@@ -148,15 +148,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "8.0.0"
-  flutter_blue:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: "0.11.0"
-      resolved-ref: f6bf99be778bdbeac9a41fbb0eb36597325109ac
-      url: "https://github.com/boskokg/flutter_blue.git"
-    source: git
-    version: "0.11.0"
   flutter_multi_formatter:
     dependency: "direct main"
     description:
@@ -164,6 +155,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.1"
+  flutter_reactive_ble:
+    dependency: "direct main"
+    description:
+      name: flutter_reactive_ble
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -174,6 +172,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  functional_data:
+    dependency: transitive
+    description:
+      name: functional_data
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   hive:
     dependency: transitive
     description:
@@ -335,13 +340,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1"
-  rxdart:
+  reactive_ble_mobile:
     dependency: transitive
     description:
-      name: rxdart
+      name: reactive_ble_mobile
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.27.3"
+    version: "5.0.2"
+  reactive_ble_platform_interface:
+    dependency: transitive
+    description:
+      name: reactive_ble_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.2"
   sky_engine:
     dependency: transitive
     description: flutter
