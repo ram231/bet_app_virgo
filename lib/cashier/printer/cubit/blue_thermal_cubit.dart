@@ -2,7 +2,6 @@ import 'package:bet_app_virgo/models/bluetooth_device.dart';
 import 'package:bloc/bloc.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
 part 'blue_thermal_state.dart';
 
@@ -18,14 +17,17 @@ class BlueThermalCubit extends Cubit<BlueThermalState> {
   void scan() async {
     try {
       emit(BlueThermalLoading());
-      final flutterReactiveBle = FlutterReactiveBle();
-      await flutterReactiveBle.initialize();
 
+      final isConnected =
+          (await BlueThermalPrinter.instance.isConnected) ?? false;
+      if (isConnected) {
+        await BlueThermalPrinter.instance.disconnect();
+      }
       final result = await BlueThermalPrinter.instance.getBondedDevices();
       final devices =
           result.map((e) => BetBluetoothDevice.fromMap(e.toMap())).toList();
-      final bool isConnected = await BlueThermalPrinter.instance.isOn ?? false;
-      emit(BlueThermalLoaded(devices: devices, isConnected: isConnected));
+      final bool isOn = await BlueThermalPrinter.instance.isOn ?? false;
+      emit(BlueThermalLoaded(devices: devices, isConnected: isOn));
     } catch (e) {
       emit(BlueThermalLoaded(devices: [], error: "$e"));
     }

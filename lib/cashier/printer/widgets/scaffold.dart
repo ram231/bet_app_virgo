@@ -1,4 +1,3 @@
-import 'package:bet_app_virgo/bluetooth/cubit/bluetooth_cubit.dart';
 import 'package:bet_app_virgo/cashier/printer/cubit/blue_thermal_cubit.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart' as printer;
 import 'package:flutter/material.dart';
@@ -161,10 +160,24 @@ class _TestPrintButtonState extends State<_TestPrintButton> {
 
   Future<void> printResult() async {
     try {
-      final state = context.read<BluetoothCubit>().state;
+      final state = context.read<BlueThermalCubit>().state;
       final blueConnected =
-          await printer.BlueThermalPrinter.instance.isConnected;
-      if (state is BluetoothLoaded) {
+          await printer.BlueThermalPrinter.instance.isOn ?? false;
+      if (!blueConnected) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Printer not connected"),
+            content: Text("Printer not found"),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context), child: Text("CLOSE"))
+            ],
+          ),
+        );
+        return;
+      }
+      if (state is BlueThermalLoaded) {
         await printer.BlueThermalPrinter.instance.printCustom(
             "Receipt Date: ${DateFormat.yMd().add_jm().format(DateTime.now())}",
             1,

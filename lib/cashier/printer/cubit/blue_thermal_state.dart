@@ -23,15 +23,17 @@ class BlueThermalLoaded extends BlueThermalState {
   bool get hasError => error != null;
   bool get isEmpty => devices.isEmpty;
   @override
-  List<Object?> get props => [devices, error];
+  List<Object?> get props => [devices, error, isConnected];
 
   BlueThermalLoaded copyWith({
     List<BetBluetoothDevice>? devices,
     String? error,
+    bool? isConnected,
   }) {
     return BlueThermalLoaded(
       devices: devices ?? this.devices,
       error: error ?? this.error,
+      isConnected: isConnected ?? this.isConnected,
     );
   }
 }

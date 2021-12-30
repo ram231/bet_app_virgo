@@ -115,13 +115,17 @@ class __PrintResultState extends State<_PrintResult> {
       }
       final betResult = context.read<CreateNewBetCubit>().state;
       if (betResult is CreateNewBetLoaded) {
+        final isOn = await BlueThermalPrinter.instance.isOn ?? false;
+        if (isOn) {
+          return;
+        }
         final userState = context.read<LoginBloc>().state;
         if (userState is LoginSuccess) {
           final receipt = await context
               .read<STLHttpClient>()
               .post('$adminEndpoint/receipts',
                   body: {
-                    "cashier_id": userState.user.id,
+                    "shier_id": userState.user.id,
                     "bet_ids": betResult.result.map((e) => e.id).toList(),
                   },
                   onSerialize: (json) => BetReceipt.fromMap(json));
