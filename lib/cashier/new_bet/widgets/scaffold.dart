@@ -206,8 +206,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                                         betAmount: _state.betAmount!,
                                         betNumber: _state.betNumber!,
                                         drawTypeBet: _state.drawTypeBet,
-                                        winAmount:
-                                            _state.betAmount! + winAmount,
+                                        winAmount: winAmount,
                                         cashier: userState.user,
                                       ),
                                     ),
@@ -258,6 +257,15 @@ class _BetNumberTextField extends StatelessWidget {
           ],
           validator: (val) {
             if (val != null && val.isNotEmpty) {
+              final appendBet = context.read<NewBetBloc>().state;
+              if (appendBet is NewBetLoaded) {
+                final isDup = appendBet.items
+                    .where((element) => element.betNumber == int.parse(val))
+                    .toList();
+                if (isDup.isNotEmpty) {
+                  return "Bet Number already taken";
+                }
+              }
               return null;
             }
             return "Required";
@@ -375,7 +383,7 @@ class _BetTable extends StatelessWidget {
                 label: Text("Bet Amount"),
               ),
               DataColumn(
-                label: Text("Win Amount"),
+                label: Text("Prize"),
               ),
               DataColumn(
                 label: Text("Draw"),

@@ -29,6 +29,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
           'bet_amount': items.first.betAmount,
           'bet_number': e.betNumber,
           'draw_id': drawBet.id,
+          'prize': drawBet.winningAmount,
         };
         return _httpClient.post(
           '$adminEndpoint/bets',

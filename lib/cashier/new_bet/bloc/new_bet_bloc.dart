@@ -31,7 +31,12 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetState> {
   void _onAppend(AddNewBetEvent event, Emitter emit) {
     final _state = state;
     if (_state is NewBetLoaded) {
-      emit(_state.copyWith(items: [..._state.items, event.dto]));
+      emit(_state.copyWith(items: [
+        ..._state.items,
+        event.dto.copyWith(
+          winAmount: event.dto.betAmount * event.dto.winAmount,
+        )
+      ]));
     }
   }
 

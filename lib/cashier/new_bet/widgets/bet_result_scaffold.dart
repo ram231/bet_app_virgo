@@ -17,6 +17,10 @@ class BetResultScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("BET CREATED"),
+        elevation: 0,
+      ),
       body: _BetResultBody(),
     );
   }
@@ -79,7 +83,7 @@ class BetResultTable extends StatelessWidget {
             columns: [
               DataColumn(label: Text("Bet Comb")),
               DataColumn(label: Text("Bet Amt")),
-              DataColumn(label: Text("Win Amt")),
+              DataColumn(label: Text("Prize")),
               DataColumn(label: Text("Sched")),
             ],
           ),
