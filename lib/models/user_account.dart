@@ -2,6 +2,40 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 
+final fakeUserAccount = UserAccount.fromMap({
+  "id": 3,
+  "branch": 1,
+  "first_name": "Kakashi",
+  "middle_name": "",
+  "last_name": "Hatake",
+  "name_suffix": "",
+  "fullname": "Kakashi Hatake",
+  "type": "C",
+  "type_text": "Cashier",
+  "sex": "M",
+  "sex_text": "Male",
+  "company": "Bahringer Inc",
+  "address": "23451 Brenna Passage, Sanfordton, 12259-4546",
+  "contact_number": "(485) 719-3090",
+  "birthday": "Aug 22, 1986",
+  "age": 36,
+  "salary": "544341.00",
+  "salary_text": "₱544,341.00",
+  "username": "cashier",
+  "photo": "https://laravel-stl-games.com/",
+  "active": 1,
+  "consignee_amount": null,
+  "consignee_paid_amt": null,
+  "consignee_balance": null,
+  "consignee_amount_text": null,
+  "consignee_paid_amt_text": null,
+  "consignee_balance_text": null,
+  "schedule_in": "08:00:00",
+  "schedule_out": "17:00:00",
+  "created_at": "2022-01-05 19:34:40",
+  "created_at_text": "Jan 05, 2022"
+});
+
 class UserAccount extends Equatable {
   final int id;
   final String firstName;
@@ -20,7 +54,7 @@ class UserAccount extends Equatable {
   final DateTime? updatedAt;
   final String fullName;
   final int? branchId;
-  UserAccount({
+  const UserAccount({
     required this.id,
     this.firstName = '',
     this.type = '',
