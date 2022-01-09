@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 
 final fakeUserAccount = UserAccount.fromMap({
   "id": 3,
-  "branch": 1,
+  "branch_id": 1,
   "first_name": "Kakashi",
   "middle_name": "",
   "last_name": "Hatake",
