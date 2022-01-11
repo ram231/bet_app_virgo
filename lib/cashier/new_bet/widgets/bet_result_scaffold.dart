@@ -149,7 +149,7 @@ class __PrintResultState extends State<_PrintResult> {
           await BlueThermalPrinter.instance.print4Column(
             "Bet",
             "Amount",
-            "WinAmt",
+            "Prize",
             "Draw",
             1,
           );
@@ -157,7 +157,7 @@ class __PrintResultState extends State<_PrintResult> {
             return BlueThermalPrinter.instance.print4Column(
               '${e.betNumber}',
               "${e.betAmount?.toInt()}",
-              "${e.draw?.winningAmount}",
+              "${e.prize}",
               "${e.draw?.id ?? 'N/A'}",
               0,
             );

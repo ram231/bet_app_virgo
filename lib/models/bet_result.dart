@@ -13,6 +13,7 @@ class BetResult extends Equatable {
   final num? betAmount;
   final String? readableBetAmount;
   final int betNumber;
+  final int prize;
   BetResult({
     required this.id,
     this.draw,
@@ -22,6 +23,7 @@ class BetResult extends Equatable {
     required this.betAmount,
     required this.readableBetAmount,
     required this.betNumber,
+    this.prize = 0,
   });
 
   BetResult copyWith({
@@ -34,6 +36,7 @@ class BetResult extends Equatable {
     String? readableBetAmount,
     int? betNumber,
     bool? isWinner,
+    int? prize,
   }) {
     return BetResult(
       id: id ?? this.id,
@@ -44,6 +47,7 @@ class BetResult extends Equatable {
       betAmount: betAmount ?? this.betAmount,
       readableBetAmount: readableBetAmount ?? this.readableBetAmount,
       betNumber: betNumber ?? this.betNumber,
+      prize: prize ?? this.prize,
     );
   }
 
@@ -57,6 +61,7 @@ class BetResult extends Equatable {
       'betAmount': betAmount,
       'readableBetAmount': readableBetAmount,
       'betNumber': betNumber,
+      'prize': prize,
     };
   }
 
@@ -78,6 +83,7 @@ class BetResult extends Equatable {
           ? map['readable_bet_amount']
           : null,
       betNumber: map['bet_number'],
+      prize: map['prize'],
     );
   }
 
@@ -100,6 +106,7 @@ class BetResult extends Equatable {
       betAmount,
       readableBetAmount,
       betNumber,
+      prize,
     ];
   }
 }
