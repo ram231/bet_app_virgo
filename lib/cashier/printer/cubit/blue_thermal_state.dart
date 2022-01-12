@@ -14,8 +14,8 @@ class BlueThermalLoading extends BlueThermalState {}
 class BlueThermalLoaded extends BlueThermalState {
   final List<BetBluetoothDevice> devices;
   final String? error;
-  bool isConnected;
-  BlueThermalLoaded({
+  final bool isConnected;
+  const BlueThermalLoaded({
     required this.devices,
     this.error,
     this.isConnected = false,

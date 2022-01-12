@@ -14,6 +14,8 @@ class DrawBet extends Equatable {
   final int? winningCombination;
   final String status;
   final int prize;
+  final String? timeStart;
+  final String? timeEnd;
   const DrawBet({
     required this.id,
     this.drawType,
@@ -25,6 +27,8 @@ class DrawBet extends Equatable {
     this.winningCombination,
     this.status = 'C',
     this.prize = 0,
+    this.timeStart,
+    this.timeEnd,
   });
 
   DrawBet copyWith({
@@ -64,6 +68,8 @@ class DrawBet extends Equatable {
       'winning_combination': winningCombination,
       'status': status,
       'prize': prize,
+      'time_start': timeStart,
+      'time_end': timeEnd,
     };
   }
 
@@ -82,6 +88,8 @@ class DrawBet extends Equatable {
       winningCombination: map['winning_combination'],
       status: map['status'] ?? 'C',
       prize: map['prize'] != null ? int.parse(map['prize']) : 0,
+      timeStart: map['time_start'],
+      timeEnd: map['time_end'],
     );
   }
 
@@ -104,7 +112,10 @@ class DrawBet extends Equatable {
       winningAmount,
       readableWinningAmount,
       winningCombination,
-      prize
+      status,
+      prize,
+      timeStart,
+      timeEnd,
     ];
   }
 }
