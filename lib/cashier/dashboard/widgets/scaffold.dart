@@ -1,14 +1,14 @@
-import 'package:bet_app_virgo/cashier/claim/widgets/scaffold.dart';
-import 'package:bet_app_virgo/cashier/dashboard/cubit/grand_total_cubit.dart';
-import 'package:bet_app_virgo/cashier/dashboard/widgets/grand_total_builder.dart';
-import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../login/bloc/login_bloc.dart';
 import '../../../login/widgets/scaffold.dart';
+import '../../../utils/nil.dart';
 import '../../cashier.dart';
+import '../../claim/widgets/scaffold.dart';
+import '../cubit/grand_total_cubit.dart';
+import 'grand_total_builder.dart';
 
 class GrandTotalProvider extends StatelessWidget {
   const GrandTotalProvider({
@@ -334,8 +334,11 @@ class GrandTotalContainer extends StatelessWidget {
                 children: [
                   Text("BET", style: textTheme.button),
                   GrandTotalBuilder(builder: (state) {
-                    return Text("${state.betAmount}",
-                        style: textTheme.subtitle1);
+                    return Text(
+                      "${state.betAmount}",
+                      style: textTheme.subtitle1,
+                      overflow: TextOverflow.ellipsis,
+                    );
                   })
                 ],
               ),
@@ -344,11 +347,35 @@ class GrandTotalContainer extends StatelessWidget {
                   Text("HITS", style: textTheme.button),
                   GrandTotalBuilder(
                     builder: (state) {
-                      return Text("${state.hits}", style: textTheme.subtitle1);
+                      return Text(
+                        "${state.hits}",
+                        style: textTheme.subtitle1,
+                        overflow: TextOverflow.ellipsis,
+                      );
                     },
                   )
                 ],
-              )
+              ),
+              Column(
+                children: [
+                  Text("Tapal", style: textTheme.button),
+                  GrandTotalBuilder(
+                    builder: (state) {
+                      final tapal = state.betAmount - state.hits;
+                      final isPositive = tapal > 0;
+                      final color =
+                          isPositive ? Colors.green[600] : Colors.red[600];
+                      return Text(
+                        "${tapal}",
+                        style: textTheme.subtitle1?.copyWith(
+                          color: color,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
+                  )
+                ],
+              ),
             ],
           ),
         ],
