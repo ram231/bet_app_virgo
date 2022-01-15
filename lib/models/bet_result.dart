@@ -83,7 +83,9 @@ class BetResult extends Equatable {
           ? map['readable_bet_amount']
           : null,
       betNumber: map['bet_number'],
-      prize: map['prize'],
+      prize: map['prize'] is String
+          ? double.parse(map['prize']).toInt()
+          : map['prize'],
     );
   }
 

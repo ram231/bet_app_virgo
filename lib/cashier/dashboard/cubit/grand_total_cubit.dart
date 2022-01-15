@@ -2,6 +2,7 @@ import 'package:bet_app_virgo/utils/utils.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 
 part 'grand_total_state.dart';
 
@@ -31,11 +32,27 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
         betAmount: result['bet_amount'],
         readableBetAmount: result['readable_bet_amount'],
         hits: result['hits'],
+        fromDate: fromDate,
+        toDate: toDate,
       );
       emit(grandTotal);
     } catch (e) {
       debugPrint("$e");
       addError(e);
+    }
+  }
+
+  void refetch() {
+    final _state = state;
+    if (_state is GrandTotalLoaded) {
+      emit(GrandTotalLoading());
+      final now = DateFormat("YYYY-MM-DD").format(DateTime.now());
+      final fromDate = _state.fromDate ?? now;
+      final toDate = _state.toDate ?? now;
+      fetch(
+        fromDate: fromDate,
+        toDate: toDate,
+      );
     }
   }
 }

@@ -70,7 +70,8 @@ class BetHistoryTable extends StatelessWidget {
                   DataCell(Text("${e.id}")),
                   DataCell(Text("${e.betNumber}")),
                   DataCell(Text("${e.readableBetAmount}")),
-                  DataCell(Text("${DateFormat.LLL().format(DateTime.now())}")),
+                  DataCell(
+                      Text("${DateFormat.yMMMEd().format(DateTime.now())}")),
                 ],
               ),
             )

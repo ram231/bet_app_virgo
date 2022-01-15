@@ -113,31 +113,36 @@ class _CashierBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8.0),
-          margin: const EdgeInsets.all(8.0),
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(child: _CashierSalesDateToggle()),
-              Center(
-                child: Text(
-                  "Today P 0 - Ground Zero",
-                  style: textTheme.headline6?.copyWith(
-                    fontWeight: FontWeight.bold,
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<GrandTotalCubit>().refetch();
+      },
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8.0),
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: _CashierSalesDateToggle()),
+                Center(
+                  child: Text(
+                    "Today P 0 - Ground Zero",
+                    style: textTheme.headline6?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 24),
-              GrandTotalContainer(),
-              GrandTotalLoadingIndicator(),
-            ],
+                SizedBox(height: 24),
+                GrandTotalContainer(),
+                GrandTotalLoadingIndicator(),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -358,7 +363,7 @@ class GrandTotalContainer extends StatelessWidget {
               ),
               Column(
                 children: [
-                  Text("Tapal", style: textTheme.button),
+                  Text("TAPAL", style: textTheme.button),
                   GrandTotalBuilder(
                     builder: (state) {
                       final tapal = state.betAmount - state.hits;
