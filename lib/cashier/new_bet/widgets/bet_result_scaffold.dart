@@ -76,7 +76,7 @@ class BetResultTable extends StatelessWidget {
                 .map((e) => DataRow(cells: [
                       DataCell(Text("${e.betNumber}")),
                       DataCell(Text("${e.readableBetAmount}")),
-                      DataCell(Text("${e.draw?.winningAmount}")),
+                      DataCell(Text("${e.prize}")),
                       DataCell(Text("${e.draw?.drawTypeId}")),
                     ]))
                 .toList(),
