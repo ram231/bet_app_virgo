@@ -77,7 +77,7 @@ class BetResultTable extends StatelessWidget {
                       DataCell(Text("${e.betNumber}")),
                       DataCell(Text("${e.readableBetAmount}")),
                       DataCell(Text("${e.prize}")),
-                      DataCell(Text("${e.draw?.drawTypeId}")),
+                      DataCell(Text("${e.draw?.id}")),
                     ]))
                 .toList(),
             columns: [
