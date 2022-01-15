@@ -84,7 +84,7 @@ class BetResultTable extends StatelessWidget {
               DataColumn(label: Text("Bet Comb")),
               DataColumn(label: Text("Bet Amt")),
               DataColumn(label: Text("Prize")),
-              DataColumn(label: Text("Sched")),
+              DataColumn(label: Text("Draw")),
             ],
           ),
         ),

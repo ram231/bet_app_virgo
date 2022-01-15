@@ -28,7 +28,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
           'branch_id': drawBet.employee?.branchId ?? cashier.branchId,
           'bet_amount': e.betAmount,
           'bet_number': e.betNumber,
-          'draw_id': drawBet.id,
+          'draw_id': e.drawTypeBet?.id,
           'prize': e.winAmount,
         };
         return _httpClient.post(
