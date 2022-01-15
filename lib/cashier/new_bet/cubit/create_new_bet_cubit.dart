@@ -26,7 +26,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
         final data = {
           'cashier_id': cashier.id,
           'branch_id': drawBet.employee?.branchId ?? cashier.branchId,
-          'bet_amount': items.first.betAmount,
+          'bet_amount': e.betAmount,
           'bet_number': e.betNumber,
           'draw_id': drawBet.id,
           'prize': e.winAmount,
