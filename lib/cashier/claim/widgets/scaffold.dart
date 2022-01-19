@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:bet_app_virgo/models/models.dart';
+import 'package:bet_app_virgo/utils/http_client.dart';
+import 'package:bet_app_virgo/utils/loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -122,21 +125,67 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
 
   void _showResult() async {
     if (_dialog) {
-      _dialog = await showDialog<bool>(
+      final code = _result?.code;
+      if (code != null) {
+        try {
+          _controller?.pauseCamera();
+          final result = await showDialog<BetReceipt>(
             context: context,
             builder: (context) {
-              return AlertDialog(
-                title: Text("Result"),
-                content: Text("${_result?.code}"),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text("CLOSE"))
-                ],
+              return LoadingDialog(
+                onLoading: () async {
+                  try {
+                    final _http = STLHttpClient();
+                    final response = await _http.post(
+                      "$adminEndpoint/receipts/claim-prizes/$code",
+                      onSerialize: (json) => BetReceipt.fromMap(json),
+                    );
+
+                    Navigator.pop(context, response);
+                  } catch (e) {
+                    debugPrint('$e');
+                    Navigator.pop(context, null);
+                  }
+                },
               );
             },
-          ) ??
-          false;
+          );
+          if (result != null) {
+            final showWinner = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Claim Prize"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [Text("Prize:${result.readablePrizesClaimed}")],
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text("CLOSE"))
+                    ],
+                  );
+                });
+            _dialog = showWinner ?? false;
+          }
+          _dialog = false;
+        } catch (e) {
+          _dialog = false;
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text("Something went wrong"),
+              content: Text(
+                "${e}",
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          );
+        }
+        _controller?.resumeCamera();
+      }
     }
   }
 }

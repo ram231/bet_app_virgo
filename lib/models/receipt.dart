@@ -13,6 +13,8 @@ class BetReceipt extends Equatable {
   final List<BetResult?> bets;
   final String? createdAt;
   final String? createdAtText;
+  final int? prizesClaimed;
+  final String? readablePrizesClaimed;
   const BetReceipt({
     this.id,
     this.cashier,
@@ -22,6 +24,8 @@ class BetReceipt extends Equatable {
     this.bets = const [],
     this.createdAt,
     this.createdAtText,
+    this.prizesClaimed,
+    this.readablePrizesClaimed,
   });
 
   BetReceipt copyWith({
@@ -33,6 +37,8 @@ class BetReceipt extends Equatable {
     List<BetResult?>? bets,
     String? createdAt,
     String? createdAtText,
+    int? prizesClaimed,
+    String? readablePrizesClaimed,
   }) {
     return BetReceipt(
       id: id ?? this.id,
@@ -43,6 +49,9 @@ class BetReceipt extends Equatable {
       bets: bets ?? this.bets,
       createdAt: createdAt ?? this.createdAt,
       createdAtText: createdAtText ?? this.createdAtText,
+      prizesClaimed: prizesClaimed ?? this.prizesClaimed,
+      readablePrizesClaimed:
+          readablePrizesClaimed ?? this.readablePrizesClaimed,
     );
   }
 
@@ -56,6 +65,8 @@ class BetReceipt extends Equatable {
       'bets': bets.map((x) => x?.toMap()).toList(),
       'created_at': createdAt,
       'created_at_text': createdAtText,
+      'readable_prizes_claimed': readablePrizesClaimed,
+      'prizes_claimed': prizesClaimed,
     };
   }
 
@@ -64,13 +75,17 @@ class BetReceipt extends Equatable {
       id: map['id']?.toInt(),
       cashier:
           map['cashier'] != null ? UserAccount.fromMap(map['cashier']) : null,
-      receiptNo: map['receipt_no'],
+      receiptNo: map['receipt_no'] is int
+          ? map['receipt_no'].toString()
+          : map['receipt_no'],
       status: map['status'],
       readableStatus: map['readable_status'],
       bets: List<BetResult?>.from(
           map['bets']?.map((x) => BetResult.fromMap(x)) ?? const []),
       createdAt: map['created_at'],
       createdAtText: map['created_at_text'],
+      readablePrizesClaimed: map['readable_prizes_claimed'],
+      prizesClaimed: map['prizes_claimed'],
     );
   }
 
@@ -92,6 +107,8 @@ class BetReceipt extends Equatable {
       bets,
       createdAt,
       createdAtText,
+      prizesClaimed,
+      readablePrizesClaimed,
     ];
   }
 }

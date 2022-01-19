@@ -12,8 +12,8 @@ class BetResult extends Equatable {
   final UserAccount? cashier;
   final num? betAmount;
   final String? readableBetAmount;
-  final int betNumber;
-  final int prize;
+  final int? betNumber;
+  final int? prize;
   BetResult({
     required this.id,
     this.draw,
