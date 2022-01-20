@@ -63,6 +63,9 @@ class BetResultTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final betResult = context.watch<CreateNewBetCubit>().state;
+    if (betResult is CreateNewBetError) {
+      return Text("${betResult.error}");
+    }
     if (betResult is CreateNewBetLoading) {
       return Center(child: CircularProgressIndicator.adaptive());
     } else if (betResult is CreateNewBetLoaded) {

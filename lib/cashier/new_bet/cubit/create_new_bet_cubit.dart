@@ -42,7 +42,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
       emit(CreateNewBetLoaded(result: result));
     } catch (e) {
       if (e is DioError) {
-        emit(CreateNewBetError(error: e.response?.data['message']));
+        emit(CreateNewBetError(error: "${e.response?.statusMessage}"));
       }
       addError(e);
       debugPrint("$e");
