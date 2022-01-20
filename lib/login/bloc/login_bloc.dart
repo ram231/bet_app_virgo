@@ -31,7 +31,7 @@ class LoginBloc extends HydratedBloc<LoginEvent, LoginState> {
       );
       emit(LoginSuccess(user: UserAccount.fromMap(result["user"])));
     } catch (e) {
-      emit(LoginSuccess(user: fakeUserAccount));
+      emit(LoginFailed(error: "$e"));
       addError("$e");
     }
   }

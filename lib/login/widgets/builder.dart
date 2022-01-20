@@ -6,12 +6,12 @@ import '../bloc/login_bloc.dart';
 class LoginAuthenticator extends StatefulWidget {
   const LoginAuthenticator({
     Key? key,
-    required this.child,
+    required this.builder,
     required this.successListener,
     this.onLoading,
     this.onError,
   }) : super(key: key);
-  final Widget child;
+  final Widget Function(BuildContext context, LoginState state) builder;
   final void Function(LoginSuccess state) successListener;
   final void Function(LoginFailed state)? onError;
   final VoidCallback? onLoading;
@@ -22,7 +22,7 @@ class LoginAuthenticator extends StatefulWidget {
 class _LoginAuthenticatorState extends State<LoginAuthenticator> {
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
+    return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is LoginLoading) {
           widget.onLoading?.call();
@@ -36,7 +36,7 @@ class _LoginAuthenticatorState extends State<LoginAuthenticator> {
           return;
         }
       },
-      child: widget.child,
+      builder: widget.builder,
     );
   }
 }

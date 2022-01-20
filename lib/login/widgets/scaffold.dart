@@ -49,7 +49,7 @@ class _BetLoginBodyState extends State<BetLoginBody> {
         await ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text("Incorrect Password")));
       },
-      child: Form(
+      builder: (context, state) => Form(
         key: _formKey,
         child: Column(
           children: [
@@ -106,38 +106,35 @@ class _BetLoginBodyState extends State<BetLoginBody> {
               ),
             ),
             Spacer(),
-            BlocBuilder<LoginBloc, LoginState>(
-              builder: (context, state) {
-                if (state is LoginLoading) {
-                  return Center(child: CircularProgressIndicator.adaptive());
-                }
-                return SizedBox(
-                  width: MediaQuery.of(context).size.width - 100,
-                  height: 32,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.yellow[700],
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        context.read<LoginBloc>().add(
-                              SignInEvent(
-                                username: _userController.text,
-                                password: _passController.text,
-                              ),
-                            );
-                      }
-                    },
-                    child: Text(
-                      "LOGIN",
-                      style: Theme.of(context).textTheme.button?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+            if (state is LoginLoading)
+              Center(child: CircularProgressIndicator.adaptive())
+            else
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 100,
+                height: 32,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.yellow[700],
                   ),
-                );
-              },
-            ),
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      context.read<LoginBloc>().add(
+                            SignInEvent(
+                              username: _userController.text,
+                              password: _passController.text,
+                            ),
+                          );
+                    }
+                  },
+                  child: Text(
+                    "LOGIN",
+                    style: Theme.of(context).textTheme.button?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
+            if (state is LoginFailed) Text("${state.error}"),
           ],
         ),
       ),
