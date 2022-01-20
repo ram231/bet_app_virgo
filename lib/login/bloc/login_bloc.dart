@@ -1,5 +1,6 @@
 import 'package:bet_app_virgo/models/user_account.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -31,7 +32,11 @@ class LoginBloc extends HydratedBloc<LoginEvent, LoginState> {
       );
       emit(LoginSuccess(user: UserAccount.fromMap(result["user"])));
     } catch (e) {
-      emit(LoginFailed(error: "$e"));
+      if (e is DioError) {
+        emit(LoginFailed(error: "${e.response?.statusMessage}"));
+      } else {
+        emit(LoginFailed(error: "Incorrect password"));
+      }
       addError("$e");
     }
   }

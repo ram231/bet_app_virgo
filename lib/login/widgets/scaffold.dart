@@ -42,13 +42,6 @@ class _BetLoginBodyState extends State<BetLoginBody> {
               context, CashierDashboardScaffold.path);
         }
       },
-      onError: (state) async {
-        if (_dialog) {
-          return;
-        }
-        await ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Incorrect Password")));
-      },
       builder: (context, state) => Form(
         key: _formKey,
         child: Column(
@@ -134,7 +127,17 @@ class _BetLoginBodyState extends State<BetLoginBody> {
                   ),
                 ),
               ),
-            if (state is LoginFailed) Text("${state.error}"),
+            if (state is LoginFailed)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "ERROR:${state.error}",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
