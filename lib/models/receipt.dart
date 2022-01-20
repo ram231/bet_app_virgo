@@ -85,7 +85,9 @@ class BetReceipt extends Equatable {
       createdAt: map['created_at'],
       createdAtText: map['created_at_text'],
       readablePrizesClaimed: map['readable_prizes_claimed'],
-      prizesClaimed: map['prizes_claimed'],
+      prizesClaimed: map['prizes_claimed'] is String?
+          ? double.parse(map['prizes_claimed']).toInt()
+          : map['prizes_claimed'],
     );
   }
 

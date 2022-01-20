@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../utils/nil.dart';
+import '../../cashier.dart';
 import '../cubit/create_new_bet_cubit.dart';
 import 'scaffold.dart';
 
@@ -118,6 +119,18 @@ class __PrintResultState extends State<_PrintResult> {
       final isConnected =
           (await BlueThermalPrinter.instance.isConnected) ?? false;
       if (!isConnected) {
+        await showDialog(
+          context: context,
+          builder: (context) => PrinterNotFoundDialog(),
+        );
+        return;
+      }
+      final isOn = (await BlueThermalPrinter.instance.isOn) ?? false;
+      if (!isOn) {
+        await showDialog(
+          context: context,
+          builder: (context) => PrinterNotFoundDialog(),
+        );
         return;
       }
       final betResult = context.read<CreateNewBetCubit>().state;
@@ -221,5 +234,25 @@ class __PrintResultState extends State<_PrintResult> {
         ),
       );
     }
+  }
+}
+
+class PrinterNotFoundDialog extends StatelessWidget {
+  const PrinterNotFoundDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Printer not found"),
+      content: Text("Printer not connected, Try connecting it."),
+      actions: [
+        ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, CashierPrinterScaffold.path);
+            },
+            child: Text("CONNECT"))
+      ],
+    );
   }
 }
