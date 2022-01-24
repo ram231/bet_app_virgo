@@ -7,10 +7,12 @@ class GrandTotalBuilder extends StatelessWidget {
   const GrandTotalBuilder({
     required this.builder,
     this.onLoading,
+    this.onError,
     Key? key,
   }) : super(key: key);
   final Widget? onLoading;
   final Widget Function(GrandTotalLoaded state) builder;
+  final Widget Function(Object state)? onError;
   @override
   Widget build(BuildContext context) {
     final grandTotalState = context.watch<GrandTotalCubit>().state;
@@ -18,6 +20,10 @@ class GrandTotalBuilder extends StatelessWidget {
       return onLoading ?? notNil;
     }
     if (grandTotalState is GrandTotalLoaded) {
+      final error = grandTotalState.error;
+      if (error != null) {
+        return onError?.call(error) ?? notNil;
+      }
       return builder(grandTotalState);
     }
     return notNil;

@@ -17,14 +17,16 @@ class GrandTotalLoaded extends GrandTotalState {
   final int hits;
   final String? fromDate;
   final String? toDate;
+  final Object? error;
   GrandTotalLoaded({
     required this.betAmount,
     required this.readableBetAmount,
     required this.hits,
     this.fromDate,
     this.toDate,
+    this.error,
   });
-
+  bool get hasError => error != null;
   GrandTotalLoaded copyWith({
     int? betAmount,
     String? readableBetAmount,
@@ -48,5 +50,6 @@ class GrandTotalLoaded extends GrandTotalState {
         readableBetAmount,
         fromDate,
         toDate,
+        error,
       ];
 }

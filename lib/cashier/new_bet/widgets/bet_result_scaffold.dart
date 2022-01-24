@@ -146,7 +146,7 @@ class __PrintResultState extends State<_PrintResult> {
                   },
                   onSerialize: (json) => BetReceipt.fromMap(json));
 
-          /// DATE FORMAT:  MM/DD/YYYY H:MM A
+          /// DATE FORMAT:  MM/DD/yyyy H:MM A
           final datePrinted = DateFormat.yMd().add_jm().format(DateTime.now());
           await BlueThermalPrinter.instance.printCustom(
             "Receipt Date: $datePrinted",

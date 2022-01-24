@@ -18,8 +18,14 @@ class GrandTotalProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final fromDate = DateFormat("yyyy-MM-DD").format(now);
     return BlocProvider(
-      create: (context) => GrandTotalCubit()..fetch(),
+      create: (context) => GrandTotalCubit()
+        ..fetch(
+          fromDate: fromDate,
+          toDate: fromDate,
+        ),
       child: child,
     );
   }
@@ -175,7 +181,7 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
           /// TODAY
           case 0:
             final now = DateTime.now();
-            final fromDate = DateFormat("YYYY-MM-DD").format(now);
+            final fromDate = DateFormat("yyyy-MM-DD").format(now);
             context.read<GrandTotalCubit>().fetch(
                   fromDate: fromDate,
                   toDate: fromDate,
@@ -186,7 +192,7 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
           case 1:
             final yesterday = DateTime.now().subtract(const Duration(days: 1));
 
-            final fromDate = DateFormat("YYYY-MM-DD").format(yesterday);
+            final fromDate = DateFormat("yyyy-MM-DD").format(yesterday);
             context.read<GrandTotalCubit>().fetch(
                   fromDate: fromDate,
                   toDate: fromDate,
@@ -197,7 +203,7 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
           case 2:
             final lastWeek = DateTime.now().subtract(const Duration(days: 7));
 
-            final fromDate = DateFormat("YYYY-MM-DD").format(lastWeek);
+            final fromDate = DateFormat("yyyy-MM-DD").format(lastWeek);
             context.read<GrandTotalCubit>().fetch(
                   fromDate: fromDate,
                   toDate: fromDate,
@@ -211,8 +217,8 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
               initialEntryMode: DatePickerEntryMode.calendarOnly,
             );
             if (result != null) {
-              final fromDate = DateFormat("YYYY-MM-DD").format(result.start);
-              final toDate = DateFormat("YYYY-MM-DD").format(result.end);
+              final fromDate = DateFormat("yyyy-MM-DD").format(result.start);
+              final toDate = DateFormat("yyyy-MM-DD").format(result.end);
               context.read<GrandTotalCubit>().fetch(
                     fromDate: fromDate,
                     toDate: toDate,
@@ -397,6 +403,7 @@ class GrandTotalLoadingIndicator extends StatelessWidget {
     return GrandTotalBuilder(
       builder: (state) => notNil,
       onLoading: Center(child: CircularProgressIndicator.adaptive()),
+      onError: (err) => Text("$err"),
     );
   }
 }

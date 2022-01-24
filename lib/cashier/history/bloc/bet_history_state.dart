@@ -17,3 +17,13 @@ class BetHistoryLoaded extends BetHistoryState {
   @override
   List<Object> get props => [bets];
 }
+
+class BetHistoryError extends BetHistoryState {
+  final Object error;
+  BetHistoryError({
+    required this.error,
+  });
+
+  @override
+  List<Object> get props => [error];
+}

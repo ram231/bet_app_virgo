@@ -13,9 +13,9 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
 
   final STLHttpClient _httpClient;
 
-  /// [fromDate] format - YYYY-MM-DD
+  /// [fromDate] format - yyyy-MM-DD
   ///
-  /// [toDate] format - YYYY-MM-DD
+  /// [toDate] format - yyyy-MM-DD
   void fetch({
     String? fromDate,
     String? toDate,
@@ -39,6 +39,15 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     } catch (e) {
       debugPrint("$e");
       addError(e);
+      final grandTotal = GrandTotalLoaded(
+        betAmount: 0,
+        readableBetAmount: "P 0.00",
+        hits: 0,
+        fromDate: fromDate,
+        toDate: toDate,
+        error: e,
+      );
+      emit(grandTotal);
     }
   }
 
@@ -46,7 +55,7 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     final _state = state;
     if (_state is GrandTotalLoaded) {
       emit(GrandTotalLoading());
-      final now = DateFormat("YYYY-MM-DD").format(DateTime.now());
+      final now = DateFormat("yyyy-MM-DD").format(DateTime.now());
       final fromDate = _state.fromDate ?? now;
       final toDate = _state.toDate ?? now;
       fetch(

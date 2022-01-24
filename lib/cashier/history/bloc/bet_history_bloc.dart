@@ -16,12 +16,14 @@ class BetHistoryBloc extends Bloc<BetHistoryEvent, BetHistoryState> {
   final STLHttpClient _httpClient;
   void _onFetch(FetchBetHistoryEvent event, Emitter emit) async {
     try {
+      emit(BetHistoryLoading());
       final result = await _httpClient.get<List>("$adminEndpoint/bets",
           onSerialize: (json) => json['data']);
       debugPrint("$result");
       final list = result.map((e) => BetResult.fromMap(e)).toList();
       emit(BetHistoryLoaded(list));
     } catch (e) {
+      emit(BetHistoryError(error: e));
       debugPrint("$e");
     }
   }

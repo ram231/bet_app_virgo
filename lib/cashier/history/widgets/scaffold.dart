@@ -1,4 +1,6 @@
 import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
+import 'package:bet_app_virgo/models/models.dart';
+import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,18 +62,88 @@ class BetHistoryTable extends StatelessWidget {
     if (historyState is BetHistoryLoading) {
       return Center(child: CircularProgressIndicator.adaptive());
     }
+    if (historyState is BetHistoryError) {
+      return Center(child: Text("${historyState.error}"));
+    }
     if (historyState is BetHistoryLoaded) {
       final bets = historyState.bets;
       return DataTable(
+        showBottomBorder: true,
+        showCheckboxColumn: true,
         rows: bets
             .map(
               (e) => DataRow(
+                color: e.isCancel
+                    ? MaterialStateProperty.all(Colors.red[200])
+                    : null,
                 cells: [
                   DataCell(Text("${e.id}")),
                   DataCell(Text("${e.betNumber}")),
                   DataCell(Text("${e.readableBetAmount}")),
                   DataCell(
                       Text("${DateFormat.yMMMEd().format(DateTime.now())}")),
+                  DataCell(e.isCancel
+                      ? Text("CANCELLED")
+                      : IconButton(
+                          icon: Icon(
+                            Icons.delete_forever,
+                          ),
+                          onPressed: () async {
+                            final result = await showDialog<bool>(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Delete Bet #${e.id}?"),
+                                    content: Text(
+                                        "Are you sure you want to delete this bet?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context, false);
+                                        },
+                                        child: Text("CANCEL"),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context, true);
+                                        },
+                                        child: Text("CONFIRM"),
+                                      )
+                                    ],
+                                  );
+                                });
+                            if (result != null && result) {
+                              await ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Deleting...")));
+
+                              try {
+                                final http = STLHttpClient();
+                                await http.post(
+                                    "$adminEndpoint/bets/cancel/${e.id}",
+                                    onSerialize: (json) =>
+                                        BetResult.fromMap(json));
+                                context
+                                    .read<BetHistoryBloc>()
+                                    .add(FetchBetHistoryEvent());
+                                await ScaffoldMessenger.of(context)
+                                    .showSnackBar(
+                                  SnackBar(
+                                    content: Text("Deleted Bet #${e.id}"),
+                                  ),
+                                );
+                              } catch (e) {
+                                await ScaffoldMessenger.of(context)
+                                  ..removeCurrentSnackBar()
+                                  ..showSnackBar(
+                                    SnackBar(
+                                      content: Text("Something went wrong..."),
+                                    ),
+                                  );
+                              }
+                            }
+                          },
+                          color: Colors.red,
+                        ))
                 ],
               ),
             )
@@ -81,6 +153,7 @@ class BetHistoryTable extends StatelessWidget {
           DataColumn(label: Text("Bet Numbers")),
           DataColumn(label: Text("Bet Amount")),
           DataColumn(label: Text("Bet Date")),
+          DataColumn(label: Text("Actions")),
         ],
       );
     }
