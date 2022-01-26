@@ -54,3 +54,12 @@ class InsertNewBetEvent extends NewBetEvent {
 class SaveBetEvent extends NewBetEvent {}
 
 class ResetBetEvent extends NewBetEvent {}
+
+class ValidateBetNumberEvent extends NewBetEvent {
+  final String betNumber;
+  final DrawBet draw;
+  ValidateBetNumberEvent({
+    required this.betNumber,
+    required this.draw,
+  });
+}

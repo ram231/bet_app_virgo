@@ -1,6 +1,7 @@
 import 'package:bet_app_virgo/cashier/new_bet/cubit/create_new_bet_cubit.dart';
 import 'package:bet_app_virgo/cashier/new_bet/dto/append_bet_dto.dart';
 import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
+import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -78,20 +79,18 @@ class _AddNewBetIcon extends StatelessWidget {
           final userState = context.read<LoginBloc>().state;
           if (userState is LoginSuccess) {
             final _state = context.read<NewBetBloc>().state;
-            if (_state is NewBetLoaded) {
-              Navigator.pushReplacement(context,
-                  CupertinoPageRoute(builder: (context) {
-                return BlocProvider(
-                  create: (_) => CreateNewBetCubit()
-                    ..onSave(
-                      userState.user,
-                      _state.items,
-                      _state.drawTypeBet!,
-                    ),
-                  child: BetResultScaffold(),
-                );
-              }));
-            }
+            Navigator.pushReplacement(context,
+                CupertinoPageRoute(builder: (context) {
+              return BlocProvider(
+                create: (_) => CreateNewBetCubit()
+                  ..onSave(
+                    userState.user,
+                    _state.items,
+                    _state.drawTypeBet!,
+                  ),
+                child: BetResultScaffold(),
+              );
+            }));
           }
         },
         icon: Icon(Icons.save));
@@ -220,6 +219,27 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                 child: Text("APPEND"),
               ),
             ),
+            NewBetBuilder(
+              builder: (state) {
+                if (state.isLoading) {
+                  return Center(child: CircularProgressIndicator.adaptive());
+                }
+                if (state.error.isNotEmpty) {
+                  return Center(
+                    child: Text(
+                      "${state.error}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }
+                return notNil;
+              },
+            ),
             SizedBox(height: 250, child: _BetTable())
           ],
         ),
@@ -237,48 +257,47 @@ class _BetNumberTextField extends StatelessWidget {
         super(key: key);
   final FocusNode focusNode;
   final TextEditingController _betNumberController;
-
   @override
   Widget build(BuildContext context) {
     return DrawTypeBuilder(builder: (state) {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextFormField(
-          focusNode: focusNode,
-          controller: _betNumberController,
-          textAlign: TextAlign.center,
-          decoration: InputDecoration(
-            hintText: "Bet Number",
-          ),
-          keyboardType:
-              TextInputType.numberWithOptions(decimal: false, signed: false),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r"[0-9]*$"))
-          ],
-          validator: (val) {
-            if (val != null && val.isNotEmpty) {
-              final appendBet = context.read<NewBetBloc>().state;
-              if (appendBet is NewBetLoaded) {
+      return Form(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            focusNode: focusNode,
+            controller: _betNumberController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              hintText: "Bet Number",
+            ),
+            keyboardType:
+                TextInputType.numberWithOptions(decimal: false, signed: false),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r"[0-9]*$"))
+            ],
+            validator: (val) {
+              if (val != null && val.isNotEmpty) {
+                final appendBet = context.read<NewBetBloc>().state;
                 final isDup = appendBet.items
                     .where((element) => element.betNumber == int.parse(val))
                     .toList();
                 if (isDup.isNotEmpty) {
                   return "Bet Number already taken";
                 }
+                return null;
               }
-              return null;
-            }
-            return "Required";
-          },
-          onChanged: (val) {
-            if (val.isNotEmpty) {
-              final betNumber = int.parse(val);
-              context.read<NewBetBloc>().add(InsertNewBetEvent(
-                    betNumber: betNumber,
-                  ));
-            }
-            context.read<DrawTypeCubit>().changeDrawTypeByLength(val);
-          },
+              return "Required";
+            },
+            onChanged: (val) {
+              if (val.isNotEmpty) {
+                final betNumber = int.parse(val);
+                context.read<NewBetBloc>().add(InsertNewBetEvent(
+                      betNumber: betNumber,
+                    ));
+              }
+              context.read<DrawTypeCubit>().changeDrawTypeByLength(val);
+            },
+          ),
         ),
       );
     });
@@ -326,29 +345,33 @@ class _GroundZeroLabel extends StatelessWidget {
     final labelStyle = textTheme.subtitle1?.copyWith(
       color: Colors.white,
     );
-    return Container(
-      padding: const EdgeInsets.all(8),
-      width: double.infinity,
-      color: Colors.blue[700],
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Ground Zero",
-            style: labelStyle,
-          ),
-          Text(
-            ":",
-            style: labelStyle,
-          ),
-          Text(
-            "Ground Zero",
-            style: labelStyle,
-          ),
-        ],
-      ),
-    );
+    final loginState = context.watch<LoginBloc>().state;
+    if (loginState is LoginSuccess) {
+      return Container(
+        padding: const EdgeInsets.all(8),
+        width: double.infinity,
+        color: Colors.blue[700],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Branch Name",
+              style: labelStyle,
+            ),
+            Text(
+              ":",
+              style: labelStyle,
+            ),
+            Text(
+              "${loginState.user.company}",
+              style: labelStyle,
+            ),
+          ],
+        ),
+      );
+    }
+    return notNil;
   }
 }
 

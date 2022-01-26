@@ -18,13 +18,18 @@ class NewBetLoaded extends NewBetState {
   final DrawBet? drawTypeBet;
   final double? winAmount;
   final UserAccount? cashier;
-  NewBetLoaded(
-      {this.items = const [],
-      this.betNumber,
-      this.betAmount,
-      this.drawTypeBet,
-      this.winAmount,
-      this.cashier});
+  final String error;
+  final bool isLoading;
+  NewBetLoaded({
+    this.items = const [],
+    this.betNumber,
+    this.betAmount,
+    this.drawTypeBet,
+    this.winAmount,
+    this.cashier,
+    this.error = '',
+    this.isLoading = false,
+  });
 
   NewBetLoaded copyWith({
     List<AppendBetDTO>? items,
@@ -34,6 +39,8 @@ class NewBetLoaded extends NewBetState {
     int? branchId,
     double? winAmount,
     UserAccount? cashier,
+    String error = '',
+    bool isLoading = false,
   }) {
     return NewBetLoaded(
       items: items ?? this.items,
@@ -42,6 +49,8 @@ class NewBetLoaded extends NewBetState {
       drawTypeBet: drawTypeBet ?? this.drawTypeBet,
       winAmount: winAmount ?? this.winAmount,
       cashier: cashier ?? this.cashier,
+      error: error,
+      isLoading: isLoading,
     );
   }
 
@@ -52,5 +61,7 @@ class NewBetLoaded extends NewBetState {
         betAmount,
         drawTypeBet,
         winAmount,
+        error,
+        isLoading,
       ];
 }
