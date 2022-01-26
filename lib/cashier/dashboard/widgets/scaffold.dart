@@ -18,14 +18,8 @@ class GrandTotalProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final fromDate = DateFormat("yyyy-MM-DD").format(now);
     return BlocProvider(
-      create: (context) => GrandTotalCubit()
-        ..fetch(
-          fromDate: fromDate,
-          toDate: fromDate,
-        ),
+      create: (context) => GrandTotalCubit()..refetch(),
       child: child,
     );
   }
@@ -65,7 +59,7 @@ class _CashierDashboardScaffoldState extends State<CashierDashboardScaffold> {
             elevation: 0,
             title: Text("Main Menu"),
             actions: [
-              Icon(Icons.notifications_active),
+              _RefreshGrandTotalIcon(),
             ],
           ),
           body: PageView(
@@ -110,6 +104,19 @@ class _CashierDashboardScaffoldState extends State<CashierDashboardScaffold> {
         ),
       ),
     );
+  }
+}
+
+class _RefreshGrandTotalIcon extends StatelessWidget {
+  const _RefreshGrandTotalIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          context.read<GrandTotalCubit>().refetch();
+        },
+        icon: Icon(Icons.refresh));
   }
 }
 
@@ -403,7 +410,11 @@ class GrandTotalLoadingIndicator extends StatelessWidget {
     return GrandTotalBuilder(
       builder: (state) => notNil,
       onLoading: Center(child: CircularProgressIndicator.adaptive()),
-      onError: (err) => Text("$err"),
+      onError: (err) => Text(
+        "$err",
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
     );
   }
 }
