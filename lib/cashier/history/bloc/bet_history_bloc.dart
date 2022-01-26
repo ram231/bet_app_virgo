@@ -21,7 +21,7 @@ class BetHistoryBloc extends Bloc<BetHistoryEvent, BetHistoryState> {
           onSerialize: (json) => json['data']);
       debugPrint("$result");
       final list = result.map((e) => BetResult.fromMap(e)).toList();
-      emit(BetHistoryLoaded(list));
+      emit(BetHistoryLoaded(bets: list, date: event.dateTime));
     } catch (e) {
       emit(BetHistoryError(error: e));
       debugPrint("$e");

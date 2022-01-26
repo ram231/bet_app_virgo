@@ -177,7 +177,7 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
             builder: (context) => AlertDialog(
               title: Text("Something went wrong"),
               content: Text(
-                "${e}",
+                "Unable to scan QR Code",
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

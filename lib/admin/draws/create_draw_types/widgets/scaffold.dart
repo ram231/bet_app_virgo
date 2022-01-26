@@ -66,7 +66,6 @@ class __CreateDrawTypeBodyState extends State<_CreateDrawTypeBody> {
               decoration: InputDecoration(labelText: "Digits"),
             )),
 
-            /// TODO: use time picker here
             /// time Start
             SizedBox(
                 child: TextFormField(

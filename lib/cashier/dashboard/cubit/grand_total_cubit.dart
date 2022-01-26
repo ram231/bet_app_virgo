@@ -62,6 +62,15 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
         fromDate: fromDate,
         toDate: toDate,
       );
+      return;
     }
+    emit(GrandTotalLoading());
+    final now = DateFormat("yyyy-MM-DD").format(DateTime.now());
+    final fromDate = now;
+    final toDate = now;
+    fetch(
+      fromDate: fromDate,
+      toDate: toDate,
+    );
   }
 }

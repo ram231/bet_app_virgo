@@ -13,9 +13,16 @@ class BetHistoryLoading extends BetHistoryState {}
 
 class BetHistoryLoaded extends BetHistoryState {
   final List<BetResult> bets;
-  const BetHistoryLoaded(this.bets);
+  final DateTime date;
+  const BetHistoryLoaded({
+    this.bets = const [],
+    required this.date,
+  });
   @override
-  List<Object> get props => [bets];
+  List<Object> get props => [
+        bets,
+        date,
+      ];
 }
 
 class BetHistoryError extends BetHistoryState {

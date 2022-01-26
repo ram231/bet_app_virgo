@@ -74,8 +74,6 @@ class _HitsBodyState extends State<_HitsBody> {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final today = DateFormat.yMd().format(now);
     return RefreshIndicator(
       onRefresh: () async {
         context.read<HitsReportBloc>().add(FetchHitReportsEvent(
@@ -88,13 +86,10 @@ class _HitsBodyState extends State<_HitsBody> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                children: [
-                  Text("Draw date: $today"),
+                children: const [
+                  _HitsReportDrawDateText(),
                   Spacer(),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text("CHANGE DATE"),
-                  ),
+                  HitsReportChangeDateButton(),
                 ],
               ),
             ),
@@ -142,5 +137,47 @@ class _HitsTable extends StatelessWidget {
             ),
           );
         });
+  }
+}
+
+class HitsReportChangeDateButton extends StatelessWidget {
+  const HitsReportChangeDateButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        final result = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2022),
+          lastDate: DateTime.now(),
+        );
+        if (result != null) {
+          context.read<HitsReportBloc>().add(
+                FetchHitReportsEvent(
+                  dateTime: result,
+                ),
+              );
+        }
+      },
+      child: Text("CHANGE DATE"),
+    );
+  }
+}
+
+class _HitsReportDrawDateText extends StatelessWidget {
+  const _HitsReportDrawDateText({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return HitsReportBuilder(
+      builder: (state) {
+        return Text(
+            "Draw date: ${DateFormat('DD/MM/yyyy').format(state.drawDate)}",
+            style: textTheme.subtitle2);
+      },
+    );
   }
 }

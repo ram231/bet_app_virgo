@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import 'builder.dart';
+
 class BetHistoryProvider extends StatelessWidget {
   const BetHistoryProvider({required this.child, Key? key}) : super(key: key);
   final Widget child;
@@ -30,7 +32,22 @@ class CashierBetHistoryScaffold extends StatelessWidget {
           title: Text("History"),
           elevation: 0,
         ),
-        body: _BetHistoryBody(),
+        body: Column(
+          children: [
+            Flexible(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: const [
+                  _BetHistoryDrawDateText(),
+                  Spacer(),
+                  _BetHistoryChangeDateButton(),
+                ],
+              ),
+            )),
+            Flexible(child: _BetHistoryBody()),
+          ],
+        ),
       ),
     );
   }
@@ -158,5 +175,46 @@ class BetHistoryTable extends StatelessWidget {
       );
     }
     return notNil;
+  }
+}
+
+class _BetHistoryChangeDateButton extends StatelessWidget {
+  const _BetHistoryChangeDateButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        final result = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2022),
+          lastDate: DateTime.now(),
+        );
+        if (result != null) {
+          context.read<BetHistoryBloc>().add(
+                FetchBetHistoryEvent(
+                  dateTime: result,
+                ),
+              );
+        }
+      },
+      child: Text("CHANGE DATE"),
+    );
+  }
+}
+
+class _BetHistoryDrawDateText extends StatelessWidget {
+  const _BetHistoryDrawDateText({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return BetHistoryBuilder(
+      builder: (state) {
+        return Text("Draw date: ${DateFormat('DD/MM/yyyy').format(state.date)}",
+            style: textTheme.subtitle2);
+      },
+    );
   }
 }
