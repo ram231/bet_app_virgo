@@ -3,6 +3,7 @@ import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 part 'bet_history_event.dart';
 part 'bet_history_state.dart';
@@ -18,6 +19,10 @@ class BetHistoryBloc extends Bloc<BetHistoryEvent, BetHistoryState> {
     try {
       emit(BetHistoryLoading());
       final result = await _httpClient.get<List>("$adminEndpoint/bets",
+          queryParams: {
+            'filter[from_this_day]':
+                DateFormat("yyyy-MM-DD").format(event.dateTime),
+          },
           onSerialize: (json) => json['data']);
       debugPrint("$result");
       final list = result.map((e) => BetResult.fromMap(e)).toList();
