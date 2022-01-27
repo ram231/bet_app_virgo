@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:bet_app_virgo/models/models.dart';
-import 'package:bet_app_virgo/utils/http_client.dart';
-import 'package:bet_app_virgo/utils/loading_dialog.dart';
+import 'package:bet_app_virgo/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -22,7 +21,7 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
   QRViewController? _controller;
   bool _dialog = false;
   bool _isGranted = true;
-
+  String err = '';
   @override
   void initState() {
     WidgetsBinding.instance?.addObserver(this);
@@ -85,6 +84,17 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
             });
           },
         ),
+        if (err.isNotEmpty)
+          Center(
+            child: Text(
+              "$err",
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+            ),
+          ),
         Positioned(
           bottom: 10,
           right: size.width / 3,
@@ -129,6 +139,15 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
       if (code != null) {
         try {
           _controller?.pauseCamera();
+          // await showDialog(
+          //     context: context, builder: (context) => AlertDialog(
+          //       title: Text("Prize"),
+          //       content: Text("${code}"),
+
+          //     ));
+          if (!code.contains("_")) {
+            throw "Invalid Format.";
+          }
           final result = await showDialog<BetReceipt>(
             context: context,
             builder: (context) {
@@ -136,14 +155,20 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
                 onLoading: () async {
                   try {
                     final _http = STLHttpClient();
-                    final response = await _http.post(
-                      "$adminEndpoint/receipts/claim-prizes/$code",
-                      onSerialize: (json) => BetReceipt.fromMap(json),
-                    );
+                    final data = code.split("_");
+                    final id = int.tryParse(data.last);
+                    if (id != null) {
+                      final betResultById = await _http.get(
+                          '$adminEndpoint/receipts/$id',
+                          onSerialize: (json) => BetReceipt.fromMap(json));
 
-                    Navigator.pop(context, response);
+                      Navigator.pop(context, betResultById);
+                    } else {
+                      throw "Invalid Format";
+                    }
                   } catch (e) {
                     debugPrint('$e');
+                    showInvalidMessage(e);
                     Navigator.pop(context, null);
                   }
                 },
@@ -151,6 +176,9 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
             },
           );
           if (result != null) {
+            if (result.status != 'V') {
+              throw "${result.readableStatus}";
+            }
             final showWinner = await showDialog<bool>(
                 context: context,
                 builder: (context) {
@@ -161,9 +189,36 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
                       children: [Text("Prize:${result.readablePrizesClaimed}")],
                     ),
                     actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text("CLOSE"))
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40))),
+                          onPressed: () async {
+                            final claimPrize = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => LoadingDialog(
+                                onLoading: () async {
+                                  final _http = STLHttpClient();
+                                  final response = await _http.post(
+                                    "$adminEndpoint/receipts/claim-prizes/${result.receiptNo}",
+                                    onSerialize: (json) =>
+                                        BetReceipt.fromMap(json),
+                                  );
+                                  Navigator.pop(context, true);
+                                },
+                              ),
+                            );
+                            debugPrint("claimPrize");
+                            Navigator.pop(context);
+                          },
+                          child: Text("CLAIM"),
+                        ),
+                      )
+                      // TextButton(
+                      //     onPressed: () => Navigator.pop(context, false),
+                      //     child: Text("CLOSE"))
                     ],
                   );
                 });
@@ -172,20 +227,23 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
           _dialog = false;
         } catch (e) {
           _dialog = false;
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text("Something went wrong"),
-              content: Text(
-                "Unable to scan QR Code",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          );
+          showInvalidMessage(e);
         }
         _controller?.resumeCamera();
       }
     }
+  }
+
+  void showInvalidMessage(Object e) {
+    setState(() {
+      err = "$e";
+    });
+    Future.delayed(Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          err = "";
+        });
+      }
+    });
   }
 }
