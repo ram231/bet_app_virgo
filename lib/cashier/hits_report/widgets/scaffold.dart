@@ -147,18 +147,23 @@ class HitsReportChangeDateButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () async {
-        final result = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2022),
-          lastDate: DateTime.now(),
-        );
-        if (result != null) {
-          context.read<HitsReportBloc>().add(
-                FetchHitReportsEvent(
-                  dateTime: result,
-                ),
-              );
+        final state = context.read<HitsReportBloc>().state;
+        if (state is HitsReportLoaded) {
+          final startDate = state.drawDate;
+
+          final result = await showDatePicker(
+            context: context,
+            initialDate: startDate,
+            firstDate: DateTime(2022),
+            lastDate: DateTime.now(),
+          );
+          if (result != null) {
+            context.read<HitsReportBloc>().add(
+                  FetchHitReportsEvent(
+                    dateTime: result,
+                  ),
+                );
+          }
         }
       },
       child: Text("CHANGE DATE"),

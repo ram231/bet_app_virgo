@@ -185,18 +185,23 @@ class _BetHistoryChangeDateButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () async {
-        final result = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2022),
-          lastDate: DateTime.now(),
-        );
-        if (result != null) {
-          context.read<BetHistoryBloc>().add(
-                FetchBetHistoryEvent(
-                  dateTime: result,
-                ),
-              );
+        final state = context.read<BetHistoryBloc>().state;
+        if (state is BetHistoryLoaded) {
+          final startDate = state.date;
+
+          final result = await showDatePicker(
+            context: context,
+            initialDate: startDate,
+            firstDate: DateTime(2022),
+            lastDate: DateTime.now(),
+          );
+          if (result != null) {
+            context.read<BetHistoryBloc>().add(
+                  FetchBetHistoryEvent(
+                    dateTime: result,
+                  ),
+                );
+          }
         }
       },
       child: Text("CHANGE DATE"),
