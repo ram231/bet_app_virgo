@@ -1,6 +1,7 @@
 import 'package:bet_app_virgo/models/sold_out.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 part 'sold_out_state.dart';
@@ -30,6 +31,27 @@ class SoldOutCubit extends Cubit<SoldOutState> {
         items: newItems,
       ));
     } catch (e) {
+      addError(e);
+    }
+  }
+
+  void delete({
+    bool soldOut = false,
+    required int id,
+  }) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      String endPoint = soldOut ? 'sold-outs' : 'low-wins';
+      final result = await _http.delete('$adminEndpoint/$endPoint/$id');
+      final newItems = state.items.where((e) => e.id != id).toList();
+      emit(state.copyWith(items: newItems));
+    } catch (e) {
+      if (e is DioError) {
+        final err = e.response?.statusMessage ?? e.message;
+        emit(state.copyWith(error: err));
+      } else {
+        emit(state.copyWith(error: "$e"));
+      }
       addError(e);
     }
   }

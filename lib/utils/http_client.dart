@@ -10,6 +10,13 @@ const adminEndpoint = 'api/lotto';
 typedef string = String;
 
 class STLHttpClient {
+  STLHttpClient({Options? options})
+      : _options = options ??
+            Options(
+              followRedirects: false,
+              headers: {"Accept": "application/json"},
+            );
+  final Options _options;
   final _httpClient = Dio();
 
   Future<Response> get<Response>(
@@ -18,8 +25,11 @@ class STLHttpClient {
     dynamic Function(Object error)? onError,
     Response Function(Map<String, dynamic> json)? onSerialize,
   }) async {
-    final response =
-        await _httpClient.get("$_url/$path", queryParameters: queryParams);
+    final response = await _httpClient.get(
+      "$_url/$path",
+      queryParameters: queryParams,
+      options: _options,
+    );
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
       throw onError?.call(response.data) ??
@@ -37,11 +47,35 @@ class STLHttpClient {
     dynamic Function(Object error)? onError,
     Response Function(Map<String, dynamic> json)? onSerialize,
   }) async {
-    final response = await _httpClient.post("$_url/$path",
-        data: body,
-        queryParameters: queryParams,
-        options: Options(
-            followRedirects: false, headers: {"Accept": "application/json"}));
+    final response = await _httpClient.post(
+      "$_url/$path",
+      data: body,
+      queryParameters: queryParams,
+      options: _options,
+    );
+    final statusCode = response.statusCode ?? 400;
+    if (statusCode >= 400) {
+      throw HttpException(onError?.call(response.data) ??
+          response.data['message'] ??
+          response.data);
+    }
+
+    return onSerialize?.call(response.data) ?? response.data as Response;
+  }
+
+  Future<Response> delete<Response>(
+    String path, {
+    Map<string, dynamic>? queryParams,
+    Map<String, dynamic>? body,
+    dynamic Function(Object error)? onError,
+    Response Function(Map<String, dynamic> json)? onSerialize,
+  }) async {
+    final response = await _httpClient.delete(
+      "$_url/$path",
+      data: body,
+      queryParameters: queryParams,
+      options: _options,
+    );
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
       throw HttpException(onError?.call(response.data) ??

@@ -187,7 +187,12 @@ class SoldOutListView extends StatelessWidget {
                       DataCell(Text("${e.soldOutNumber}")),
                       DataCell(Text("${e.winAmount}")),
                       DataCell(ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          context.read<SoldOutCubit>().delete(
+                                soldOut: e.winAmount == "0",
+                                id: e.id,
+                              );
+                        },
                         child: Text("DELETE"),
                       )),
                     ]))
