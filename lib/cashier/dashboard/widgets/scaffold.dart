@@ -1,6 +1,7 @@
+import 'package:bet_app_virgo/cashier/grand_total_draws/grand_total_draws.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../login/bloc/login_bloc.dart';
 import '../../../login/widgets/scaffold.dart';
@@ -187,22 +188,16 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
 
           /// TODAY
           case 0:
-            final now = DateTime.now();
-            final fromDate = DateFormat("yyyy-MM-DD").format(now);
-            context.read<GrandTotalCubit>().fetch(
-                  fromDate: fromDate,
-                  toDate: fromDate,
-                );
+            context.read<GrandTotalCubit>().fetch();
             break;
 
           /// YESTERDAY
           case 1:
             final yesterday = DateTime.now().subtract(const Duration(days: 1));
 
-            final fromDate = DateFormat("yyyy-MM-DD").format(yesterday);
             context.read<GrandTotalCubit>().fetch(
-                  fromDate: fromDate,
-                  toDate: fromDate,
+                  fromDate: yesterday,
+                  toDate: yesterday,
                 );
             break;
 
@@ -210,10 +205,9 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
           case 2:
             final lastWeek = DateTime.now().subtract(const Duration(days: 7));
 
-            final fromDate = DateFormat("yyyy-MM-DD").format(lastWeek);
             context.read<GrandTotalCubit>().fetch(
-                  fromDate: fromDate,
-                  toDate: fromDate,
+                  fromDate: lastWeek,
+                  toDate: lastWeek,
                 );
             break;
           case 3:
@@ -224,11 +218,9 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
               initialEntryMode: DatePickerEntryMode.calendarOnly,
             );
             if (result != null) {
-              final fromDate = DateFormat("yyyy-MM-DD").format(result.start);
-              final toDate = DateFormat("yyyy-MM-DD").format(result.end);
               context.read<GrandTotalCubit>().fetch(
-                    fromDate: fromDate,
-                    toDate: toDate,
+                    fromDate: result.start,
+                    toDate: result.end,
                   );
             } else {
               return;
@@ -325,79 +317,108 @@ class GrandTotalContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.yellow,
-          width: 0.5,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            "GRAND TOTAL",
-            style: textTheme.subtitle1?.copyWith(
-              fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: () {
+        final state = context.read<GrandTotalCubit>().state;
+        if (state is GrandTotalLoaded) {
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) => GrandTotalDrawsCubit()
+                  ..fetch(
+                    fromDate: state.fromDate,
+                    toDate: state.toDate,
+                  ),
+                child: GrandTotalDrawsScaffold(),
+              ),
             ),
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.yellow,
+            width: 0.5,
           ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  Text("BET", style: textTheme.button),
-                  GrandTotalBuilder(builder: (state) {
-                    return Text(
-                      "${state.betAmount}",
-                      style: textTheme.subtitle1,
-                      overflow: TextOverflow.ellipsis,
-                    );
-                  })
-                ],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              "GRAND TOTAL",
+              style: textTheme.subtitle1?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              Column(
-                children: [
-                  Text("HITS", style: textTheme.button),
-                  GrandTotalBuilder(
-                    builder: (state) {
-                      return Text(
-                        "${state.hits}",
-                        style: textTheme.subtitle1,
-                        overflow: TextOverflow.ellipsis,
-                      );
-                    },
-                  )
-                ],
-              ),
-              Column(
-                children: [
-                  Text("TAPAL", style: textTheme.button),
-                  GrandTotalBuilder(
-                    builder: (state) {
-                      final tapal = state.betAmount - state.hits;
-                      final isPositive = tapal > 0;
-                      final color =
-                          isPositive ? Colors.green[600] : Colors.red[600];
-                      return Text(
-                        "${tapal}",
-                        style: textTheme.subtitle1?.copyWith(
-                          color: color,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      );
-                    },
-                  )
-                ],
-              ),
-            ],
-          ),
-        ],
+            ),
+            const GrandTotalCard(),
+            SizedBox(height: 8),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class GrandTotalCard extends StatelessWidget {
+  const GrandTotalCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Column(
+          children: [
+            Text("BET", style: textTheme.button),
+            GrandTotalBuilder(builder: (state) {
+              return Text(
+                "${state.readableBetAmount}",
+                style: textTheme.subtitle1,
+                overflow: TextOverflow.ellipsis,
+              );
+            })
+          ],
+        ),
+        Column(
+          children: [
+            Text("HITS", style: textTheme.button),
+            GrandTotalBuilder(
+              builder: (state) {
+                return Text(
+                  "${state.readableHits}",
+                  style: textTheme.subtitle1,
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
+            )
+          ],
+        ),
+        Column(
+          children: [
+            Text("TAPAL", style: textTheme.button),
+            GrandTotalBuilder(
+              builder: (state) {
+                final tapal = state.betAmount - state.hits;
+                final isPositive = tapal > 0;
+                final color = isPositive ? Colors.green[600] : Colors.red[600];
+                return Text(
+                  "${tapal}",
+                  style: textTheme.subtitle1?.copyWith(
+                    color: color,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
+            )
+          ],
+        ),
+      ],
     );
   }
 }

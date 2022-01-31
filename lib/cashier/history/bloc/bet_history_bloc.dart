@@ -8,28 +8,44 @@ import 'package:intl/intl.dart';
 part 'bet_history_event.dart';
 part 'bet_history_state.dart';
 
-class BetHistoryBloc extends Bloc<BetHistoryEvent, BetHistoryState> {
+class BetHistoryBloc extends Cubit<BetHistoryState> {
   BetHistoryBloc({STLHttpClient? httpClient})
       : _httpClient = httpClient ?? STLHttpClient(),
-        super(BetHistoryInitial()) {
-    on<FetchBetHistoryEvent>(_onFetch);
-  }
+        super(BetHistoryState(date: DateTime.now()));
   final STLHttpClient _httpClient;
-  void _onFetch(FetchBetHistoryEvent event, Emitter emit) async {
+  void fetch({DateTime? fromDate}) async {
+    emit(state.copyWith(isLoading: true));
+    final startDate = fromDate ?? state.date;
     try {
-      emit(BetHistoryLoading());
       final result = await _httpClient.get<List>("$adminEndpoint/bets",
           queryParams: {
-            'filter[from_this_day]':
-                DateFormat("yyyy-MM-DD").format(event.dateTime),
+            'filter[from_this_day]': DateFormat("yyyy-MM-DD").format(startDate),
           },
           onSerialize: (json) => json['data']);
       debugPrint("$result");
       final list = result.map((e) => BetResult.fromMap(e)).toList();
-      emit(BetHistoryLoaded(bets: list, date: event.dateTime));
+      emit(BetHistoryState(bets: list, date: startDate));
     } catch (e) {
-      emit(BetHistoryError(error: e));
+      emit(state.copyWith(error: "$e"));
       debugPrint("$e");
+    }
+  }
+
+  Future<void> delete(int id) async {
+    try {
+      await _httpClient.post("$adminEndpoint/bets/cancel/${id}");
+      fetch();
+    } catch (e) {
+      emit(state.copyWith(error: '$e'));
+    }
+  }
+
+  Future<void> cancelReceipt(int receiptNo) async {
+    try {
+      await _httpClient.post('$adminEndpoint/receipts/no/$receiptNo');
+      fetch();
+    } catch (e) {
+      emit(state.copyWith(error: "$e"));
     }
   }
 }

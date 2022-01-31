@@ -33,7 +33,8 @@ class LoginBloc extends HydratedBloc<LoginEvent, LoginState> {
       emit(LoginSuccess(user: UserAccount.fromMap(result["user"])));
     } catch (e) {
       if (e is DioError) {
-        emit(LoginFailed(error: "${e.response?.statusMessage}"));
+        final error = e.response?.statusMessage ?? e.message;
+        emit(LoginFailed(error: "${error}"));
       } else {
         emit(LoginFailed(error: "Incorrect password"));
       }

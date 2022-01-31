@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:bet_app_virgo/models/branch.dart';
-import 'package:bet_app_virgo/models/user_account.dart';
 import 'package:equatable/equatable.dart';
+
+import 'models.dart';
 
 class BetResult extends Equatable {
   final int? id;
-  final BetDrawResult? draw;
+  final DrawBet? draw;
   final BetBranch? branch;
   final UserAccount? gambler;
   final UserAccount? cashier;
@@ -16,7 +16,7 @@ class BetResult extends Equatable {
   final int? prize;
   final bool isCancel;
   final bool isWinner;
-
+  final BetReceipt? receipt;
   BetResult({
     required this.id,
     this.draw,
@@ -29,20 +29,21 @@ class BetResult extends Equatable {
     this.prize = 0,
     this.isCancel = false,
     this.isWinner = false,
+    this.receipt,
   });
 
-  BetResult copyWith({
-    int? id,
-    BetDrawResult? draw,
-    BetBranch? branch,
-    UserAccount? gambler,
-    UserAccount? cashier,
-    int? betAmount,
-    String? readableBetAmount,
-    int? betNumber,
-    bool? isWinner,
-    int? prize,
-  }) {
+  BetResult copyWith(
+      {int? id,
+      DrawBet? draw,
+      BetBranch? branch,
+      UserAccount? gambler,
+      UserAccount? cashier,
+      int? betAmount,
+      String? readableBetAmount,
+      int? betNumber,
+      bool? isWinner,
+      int? prize,
+      BetReceipt? receipt}) {
     return BetResult(
       id: id ?? this.id,
       draw: draw ?? this.draw,
@@ -53,6 +54,7 @@ class BetResult extends Equatable {
       readableBetAmount: readableBetAmount ?? this.readableBetAmount,
       betNumber: betNumber ?? this.betNumber,
       prize: prize ?? this.prize,
+      receipt: receipt ?? this.receipt,
     );
   }
 
@@ -69,14 +71,17 @@ class BetResult extends Equatable {
       'prize': prize,
       'is_winner': isWinner ? 1 : 0,
       'is_cancel': isCancel,
+      'receipt': receipt?.toMap(),
     };
   }
 
   factory BetResult.fromMap(Map<String, dynamic> map) {
     return BetResult(
       id: map['id'] != null ? map['id'] : null,
-      draw: map['draw'] != null ? BetDrawResult.fromMap(map['draw']) : null,
+      draw: map['draw'] != null ? DrawBet.fromMap(map['draw']) : null,
       branch: map['branch'] != null ? BetBranch.fromMap(map['branch']) : null,
+      receipt:
+          map['receipt'] != null ? BetReceipt.fromMap(map['receipt']) : null,
       gambler:
           map['gambler'] != null ? UserAccount.fromMap(map['gambler']) : null,
       cashier:
@@ -122,91 +127,7 @@ class BetResult extends Equatable {
       prize,
       isWinner,
       isCancel,
-    ];
-  }
-}
-
-class BetDrawResult extends Equatable {
-  final int? id;
-  final int? drawTypeId;
-  final int? employeeId;
-  final String? drawStart;
-  final String? drawEnd;
-  final String? winningAmount;
-  final int? winningNumber;
-  BetDrawResult({
-    this.id = 1,
-    this.drawTypeId,
-    this.employeeId,
-    this.drawStart,
-    this.drawEnd,
-    this.winningAmount,
-    this.winningNumber,
-  });
-
-  BetDrawResult copyWith({
-    int? id,
-    int? drawTypeId,
-    int? employeeId,
-    String? drawStart,
-    String? drawEnd,
-    String? winningAmount,
-    int? winningNumber,
-  }) {
-    return BetDrawResult(
-      id: id ?? this.id,
-      drawTypeId: drawTypeId ?? this.drawTypeId,
-      employeeId: employeeId ?? this.employeeId,
-      drawStart: drawStart ?? this.drawStart,
-      drawEnd: drawEnd ?? this.drawEnd,
-      winningAmount: winningAmount ?? this.winningAmount,
-      winningNumber: winningNumber ?? this.winningNumber,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'draw_type_id': drawTypeId,
-      'employee_id': employeeId,
-      'draw_start': drawStart,
-      'draw_end': drawEnd,
-      'winning_amount': winningAmount,
-      'winning_number': winningNumber,
-    };
-  }
-
-  factory BetDrawResult.fromMap(Map<String, dynamic> map) {
-    return BetDrawResult(
-      id: map['id'] != null ? map['id'] : null,
-      drawTypeId: map['draw_type_id'] != null ? map['draw_type_id'] : null,
-      employeeId: map['employee_id'] != null ? map['employee_id'] : null,
-      drawStart: map['draw_start'] != null ? map['draw_start'] : null,
-      drawEnd: map['draw_end'] != null ? map['draw_end'] : null,
-      winningAmount:
-          map['winning_amount'] != null ? map['winning_amount'] : null,
-      winningNumber: map['winning_number'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory BetDrawResult.fromJson(String source) =>
-      BetDrawResult.fromMap(json.decode(source));
-
-  @override
-  bool get stringify => true;
-
-  @override
-  List<Object?> get props {
-    return [
-      id,
-      drawTypeId,
-      employeeId,
-      drawStart,
-      drawEnd,
-      winningAmount,
-      winningNumber,
+      receipt,
     ];
   }
 }

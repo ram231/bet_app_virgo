@@ -1,6 +1,4 @@
 import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
-import 'package:bet_app_virgo/models/models.dart';
-import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +12,7 @@ class BetHistoryProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => BetHistoryBloc()..add(FetchBetHistoryEvent()),
+      create: (context) => BetHistoryBloc()..fetch(),
       child: child,
     );
   }
@@ -76,14 +74,14 @@ class BetHistoryTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final historyState = context.watch<BetHistoryBloc>().state;
-    if (historyState is BetHistoryLoading) {
+    if (historyState.isLoading) {
       return Center(child: CircularProgressIndicator.adaptive());
     }
-    if (historyState is BetHistoryError) {
+    if (historyState.hasError) {
       return Center(child: Text("${historyState.error}"));
     }
-    if (historyState is BetHistoryLoaded) {
-      final bets = historyState.bets;
+    final bets = historyState.bets;
+    if (bets.isNotEmpty) {
       return DataTable(
         showBottomBorder: true,
         showCheckboxColumn: true,
@@ -99,12 +97,75 @@ class BetHistoryTable extends StatelessWidget {
                   DataCell(Text("${e.readableBetAmount}")),
                   DataCell(
                       Text("${DateFormat.yMMMEd().format(DateTime.now())}")),
-                  DataCell(e.isCancel
-                      ? Text("CANCELLED")
-                      : IconButton(
+                  DataCell(Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (e.receipt?.status != 'I')
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              primary: Colors.red,
+                              onPrimary: Colors.white,
+                            ),
+                            onPressed: () async {
+                              final result = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text(
+                                              "Cancel Receipt #${e.receipt?.receiptNo}?"),
+                                          content: Text(
+                                              "Are you sure you want to delete this bet?"),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context, false);
+                                              },
+                                              child: Text("CANCEL"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context, true);
+                                              },
+                                              child: Text("CONFIRM"),
+                                            )
+                                          ],
+                                        );
+                                      }) ??
+                                  false;
+                              if (result) {
+                                final receipt = e.receipt?.receiptNo;
+                                if (receipt != null) {
+                                  await context
+                                      .read<BetHistoryBloc>()
+                                      .cancelReceipt(int.parse(receipt));
+                                  await ScaffoldMessenger.of(context)
+                                      .showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text("Cancelled Bet No. #${receipt}"),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            label: Text("CANCEL BET"),
+                            icon: Icon(Icons.bookmark_remove),
+                          ),
+                        ),
+                      if (!e.isCancel)
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            primary: Colors.red,
+                            onPrimary: Colors.white,
+                          ),
                           icon: Icon(
                             Icons.delete_forever,
                           ),
+                          label: Text("DELETE BET"),
                           onPressed: () async {
                             final result = await showDialog<bool>(
                                 context: context,
@@ -134,14 +195,9 @@ class BetHistoryTable extends StatelessWidget {
                                   SnackBar(content: Text("Deleting...")));
 
                               try {
-                                final http = STLHttpClient();
-                                await http.post(
-                                    "$adminEndpoint/bets/cancel/${e.id}",
-                                    onSerialize: (json) =>
-                                        BetResult.fromMap(json));
-                                context
+                                await context
                                     .read<BetHistoryBloc>()
-                                    .add(FetchBetHistoryEvent());
+                                    .delete(e.id!);
                                 await ScaffoldMessenger.of(context)
                                     .showSnackBar(
                                   SnackBar(
@@ -159,8 +215,9 @@ class BetHistoryTable extends StatelessWidget {
                               }
                             }
                           },
-                          color: Colors.red,
-                        ))
+                        ),
+                    ],
+                  ))
                 ],
               ),
             )
@@ -186,22 +243,16 @@ class _BetHistoryChangeDateButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () async {
         final state = context.read<BetHistoryBloc>().state;
-        if (state is BetHistoryLoaded) {
-          final startDate = state.date;
+        final startDate = state.date;
 
-          final result = await showDatePicker(
-            context: context,
-            initialDate: startDate,
-            firstDate: DateTime(2022),
-            lastDate: DateTime.now(),
-          );
-          if (result != null) {
-            context.read<BetHistoryBloc>().add(
-                  FetchBetHistoryEvent(
-                    dateTime: result,
-                  ),
-                );
-          }
+        final result = await showDatePicker(
+          context: context,
+          initialDate: startDate,
+          firstDate: DateTime(2022),
+          lastDate: DateTime.now(),
+        );
+        if (result != null) {
+          context.read<BetHistoryBloc>().fetch(fromDate: result);
         }
       },
       child: Text("CHANGE DATE"),

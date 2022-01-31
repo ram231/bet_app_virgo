@@ -15,15 +15,17 @@ class GrandTotalLoaded extends GrandTotalState {
   final int betAmount;
   final String readableBetAmount;
   final int hits;
-  final String? fromDate;
-  final String? toDate;
+  final String readableHits;
+  final DateTime fromDate;
+  final DateTime toDate;
   final Object? error;
   GrandTotalLoaded({
     required this.betAmount,
     required this.readableBetAmount,
     required this.hits,
-    this.fromDate,
-    this.toDate,
+    this.readableHits = '',
+    required this.fromDate,
+    required this.toDate,
     this.error,
   });
   bool get hasError => error != null;
@@ -31,8 +33,9 @@ class GrandTotalLoaded extends GrandTotalState {
     int? betAmount,
     String? readableBetAmount,
     int? hits,
-    String? fromDate,
-    String? toDate,
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? readableHits,
   }) {
     return GrandTotalLoaded(
       betAmount: betAmount ?? this.betAmount,
@@ -40,6 +43,7 @@ class GrandTotalLoaded extends GrandTotalState {
       hits: hits ?? this.hits,
       fromDate: fromDate ?? this.fromDate,
       toDate: toDate ?? this.toDate,
+      readableHits: readableHits ?? this.readableHits,
     );
   }
 
@@ -51,5 +55,6 @@ class GrandTotalLoaded extends GrandTotalState {
         fromDate,
         toDate,
         error,
+        readableHits,
       ];
 }

@@ -17,37 +17,52 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
   ///
   /// [toDate] format - yyyy-MM-DD
   void fetch({
-    String? fromDate,
-    String? toDate,
+    DateTime? fromDate,
+    DateTime? toDate,
   }) async {
+    final startDate = DateFormat("yyyy-MM-DD").format(
+      fromDate ?? DateTime.now(),
+    );
+    final endDate = DateFormat('yyyy-MM-DD').format(
+      toDate ?? DateTime.now(),
+    );
     try {
       emit(GrandTotalLoading());
       final result = await _httpClient.get('$adminEndpoint/bets/grand-total',
           queryParams: {
-            'fromDate': fromDate,
-            'toDate': toDate,
+            'from_date': startDate,
+            'to_date': endDate,
           },
           onSerialize: (json) => json);
+      final rawAmount = result['bet_amount'];
+      final rawHits = result['hits'];
+      final amount = rawAmount is String
+          ? int.parse(rawAmount.split(".").first)
+          : rawAmount as int;
+      final hits = rawHits is String
+          ? int.parse(rawHits.split(".").first)
+          : rawHits as int;
       final grandTotal = GrandTotalLoaded(
-        betAmount: result['bet_amount'],
+        betAmount: amount,
         readableBetAmount: result['readable_bet_amount'],
-        hits: result['hits'],
-        fromDate: fromDate,
-        toDate: toDate,
+        hits: hits,
+        fromDate: fromDate ?? DateTime.now(),
+        toDate: toDate ?? DateTime.now(),
+        readableHits: result['readable_hits'] ?? '',
       );
       emit(grandTotal);
     } catch (e) {
       debugPrint("$e");
-      addError(e);
       final grandTotal = GrandTotalLoaded(
         betAmount: 0,
         readableBetAmount: "P 0.00",
         hits: 0,
-        fromDate: fromDate,
-        toDate: toDate,
+        fromDate: fromDate ?? DateTime.now(),
+        toDate: toDate ?? DateTime.now(),
         error: e,
       );
       emit(grandTotal);
+      addError(e);
     }
   }
 
@@ -55,9 +70,8 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     final _state = state;
     if (_state is GrandTotalLoaded) {
       emit(GrandTotalLoading());
-      final now = DateFormat("yyyy-MM-DD").format(DateTime.now());
-      final fromDate = _state.fromDate ?? now;
-      final toDate = _state.toDate ?? now;
+      final fromDate = _state.fromDate;
+      final toDate = _state.toDate;
       fetch(
         fromDate: fromDate,
         toDate: toDate,
@@ -65,12 +79,6 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
       return;
     }
     emit(GrandTotalLoading());
-    final now = DateFormat("yyyy-MM-DD").format(DateTime.now());
-    final fromDate = now;
-    final toDate = now;
-    fetch(
-      fromDate: fromDate,
-      toDate: toDate,
-    );
+    fetch();
   }
 }

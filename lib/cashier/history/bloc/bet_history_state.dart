@@ -1,36 +1,38 @@
 part of 'bet_history_bloc.dart';
 
-abstract class BetHistoryState extends Equatable {
-  const BetHistoryState();
-
-  @override
-  List<Object> get props => [];
-}
-
-class BetHistoryInitial extends BetHistoryState {}
-
-class BetHistoryLoading extends BetHistoryState {}
-
-class BetHistoryLoaded extends BetHistoryState {
+class BetHistoryState extends Equatable {
   final List<BetResult> bets;
   final DateTime date;
-  const BetHistoryLoaded({
+  final bool isLoading;
+  final String error;
+  const BetHistoryState({
     this.bets = const [],
+    this.isLoading = false,
+    this.error = '',
     required this.date,
   });
+
+  bool get hasError => error.isNotEmpty;
+
   @override
   List<Object> get props => [
         bets,
+        error,
+        isLoading,
         date,
       ];
-}
 
-class BetHistoryError extends BetHistoryState {
-  final Object error;
-  BetHistoryError({
-    required this.error,
-  });
-
-  @override
-  List<Object> get props => [error];
+  BetHistoryState copyWith({
+    List<BetResult>? bets,
+    DateTime? date,
+    bool isLoading = false,
+    String error = '',
+  }) {
+    return BetHistoryState(
+      bets: bets ?? this.bets,
+      date: date ?? this.date,
+      isLoading: isLoading,
+      error: error,
+    );
+  }
 }

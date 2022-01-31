@@ -10,6 +10,7 @@ import 'admin/draws/create_draw/widgets/scaffold.dart';
 import 'admin/draws/widgets/scaffold.dart';
 import 'bluetooth/cubit/bluetooth_cubit.dart';
 import 'cashier/cashier.dart';
+import 'cashier/grand_total_draws/grand_total_draws.dart';
 import 'cashier/printer/cubit/blue_thermal_cubit.dart';
 import 'login/bloc/login_bloc.dart';
 import 'login/widgets/scaffold.dart';
@@ -115,6 +116,10 @@ class MyApp extends StatelessWidget {
           case CashierPrinterScaffold.path:
             return CupertinoPageRoute(
                 builder: (context) => CashierPrinterScaffold());
+          case GrandTotalDrawsScaffold.path:
+            return CupertinoPageRoute(
+                builder: (context) => GrandTotalDrawsScaffold());
+
           case CreateDrawScaffold.path:
             final args = settings.arguments as DrawBet;
             return PageRouteBuilder(

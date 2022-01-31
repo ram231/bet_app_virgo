@@ -1,11 +1,10 @@
 import 'dart:io';
 
-import 'package:bet_app_virgo/models/models.dart';
-import 'package:bet_app_virgo/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-import '../../../utils/nil.dart';
+import '../../../models/models.dart';
+import '../../../utils/utils.dart';
 
 class ClaimQRScaffold extends StatefulWidget {
   const ClaimQRScaffold({Key? key}) : super(key: key);
