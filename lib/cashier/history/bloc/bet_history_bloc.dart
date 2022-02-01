@@ -19,7 +19,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
     try {
       final result = await _httpClient.get<List>("$adminEndpoint/bets",
           queryParams: {
-            'filter[from_this_day]': DateFormat("yyyy-MM-DD").format(startDate),
+            'filter[from_this_day]': DateFormat.yMd().format(startDate),
           },
           onSerialize: (json) => json['data']);
       debugPrint("$result");

@@ -20,10 +20,10 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
-    final startDate = DateFormat("yyyy-MM-DD").format(
+    final startDate = DateFormat.yMd().format(
       fromDate ?? DateTime.now(),
     );
-    final endDate = DateFormat('yyyy-MM-DD').format(
+    final endDate = DateFormat.yMd().format(
       toDate ?? DateTime.now(),
     );
     try {

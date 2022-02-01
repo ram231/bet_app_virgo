@@ -179,8 +179,7 @@ class _HitsReportDrawDateText extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return HitsReportBuilder(
       builder: (state) {
-        return Text(
-            "Draw date: ${DateFormat('DD/MM/yyyy').format(state.drawDate)}",
+        return Text("Draw date: ${DateFormat.yMd().format(state.drawDate)}",
             style: textTheme.subtitle2);
       },
     );

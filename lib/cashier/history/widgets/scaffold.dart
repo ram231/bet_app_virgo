@@ -268,7 +268,7 @@ class _BetHistoryDrawDateText extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return BetHistoryBuilder(
       builder: (state) {
-        return Text("Draw date: ${DateFormat('DD/MM/yyyy').format(state.date)}",
+        return Text("Draw date: ${DateFormat.yMd().format(state.date)}",
             style: textTheme.subtitle2);
       },
     );
