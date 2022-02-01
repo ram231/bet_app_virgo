@@ -393,7 +393,7 @@ class _BetTable extends StatelessWidget {
                       DataCell(Text("${draw.betNumber}")),
                       DataCell(Text("${draw.betAmount}")),
                       DataCell(Text("${draw.winAmount}")),
-                      DataCell(Text("${draw.drawTypeBet?.id}")),
+                      DataCell(Text("${draw.drawTypeBet?.drawType?.name}")),
                     ],
                   ),
                 )
