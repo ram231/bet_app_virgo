@@ -1,4 +1,6 @@
 import 'package:bet_app_virgo/cashier/grand_total_draws/grand_total_draws.dart';
+import 'package:bet_app_virgo/models/branch.dart';
+import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -141,14 +143,7 @@ class _CashierBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(child: _CashierSalesDateToggle()),
-                Center(
-                  child: Text(
-                    "Today P 0 - Ground Zero",
-                    style: textTheme.headline6?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                UserBranchName(),
                 SizedBox(height: 24),
                 GrandTotalContainer(),
                 GrandTotalLoadingIndicator(),
@@ -437,5 +432,65 @@ class GrandTotalLoadingIndicator extends StatelessWidget {
         maxLines: 2,
       ),
     );
+  }
+}
+
+class UserBranchName extends StatelessWidget {
+  const UserBranchName({
+    Key? key,
+    this.onLoading,
+    this.onError,
+  }) : super(key: key);
+  final Widget? onLoading;
+  final Widget Function(String error)? onError;
+  Future<BetBranch> _fetchBranchById(int? id) async {
+    assert(id != null, "Branch ID not found");
+    try {
+      final _http = STLHttpClient();
+      final result = await _http.get(
+        '$adminEndpoint/branches/$id',
+        onSerialize: (json) {
+          debugPrint("$json");
+          return BetBranch(
+            id: json['id'],
+            name: json['name'],
+          );
+        },
+      );
+      return result;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final userState = context.watch<LoginBloc>().state;
+    if (userState is LoginSuccess) {
+      return FutureBuilder<BetBranch>(
+          future: _fetchBranchById(userState.user.branchId),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return onLoading ?? notNil;
+            }
+            if (snapshot.hasError) {
+              return onError?.call(snapshot.error.toString()) ?? notNil;
+            }
+            final branch = snapshot.data;
+            if (branch != null) {
+              return Center(
+                child: Text(
+                  "Today - ${branch.name}",
+                  style: textTheme.headline6?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            }
+            return notNil;
+          });
+    }
+    return notNil;
   }
 }
