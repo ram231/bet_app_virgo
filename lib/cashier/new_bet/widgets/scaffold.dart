@@ -196,22 +196,22 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                           final userState = context.read<LoginBloc>().state;
                           if (userState is LoginSuccess) {
                             final _state = context.read<NewBetBloc>().state;
-                            if (_state is NewBetLoaded) {
-                              final winAmount = double.parse(
-                                  _state.drawTypeBet?.winningAmount ?? "0");
-                              context.read<NewBetBloc>().add(
-                                    AddNewBetEvent(
-                                      dto: AppendBetDTO(
-                                        betAmount: _state.betAmount!,
-                                        betNumber: _state.betNumber!,
-                                        drawTypeBet: _state.drawTypeBet,
-                                        winAmount: winAmount,
-                                        cashier: userState.user,
-                                      ),
+                            final winAmount = double.parse(
+                                _state.drawTypeBet?.winningAmount ?? "0");
+                            context.read<NewBetBloc>().add(
+                                  AddNewBetEvent(
+                                    dto: AppendBetDTO(
+                                      betAmount: _state.betAmount!,
+                                      betNumber: _state.betNumber!,
+                                      drawTypeBet: _state.drawTypeBet,
+                                      winAmount: winAmount,
+                                      cashier: userState.user,
                                     ),
-                                  );
-                              _betNumberFocusNode.requestFocus();
-                            }
+                                  ),
+                                );
+                            _betAmountController.clear();
+                            _betNumberController.clear();
+                            _betNumberFocusNode.requestFocus();
                           }
                         }
                       }

@@ -69,6 +69,12 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
 
   void _onAppend(AddNewBetEvent event, Emitter emit) async {
     emit(state.copyWith(isLoading: true));
+    final itemExist = state.items
+        .where((element) => event.dto.betNumber == element.betNumber);
+    if (itemExist.isNotEmpty) {
+      emit(state.copyWith(error: "Bet Number already exists"));
+      return;
+    }
     final result = await _onValidateEvent(event.dto);
     emit(result);
   }
