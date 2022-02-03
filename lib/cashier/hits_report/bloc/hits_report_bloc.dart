@@ -1,8 +1,8 @@
 import 'package:bet_app_virgo/models/winning_hits.dart';
+import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:intl/intl.dart';
 
 part 'hits_report_event.dart';
 part 'hits_report_state.dart';
@@ -18,7 +18,7 @@ class HitsReportBloc extends Bloc<HitsReportEvent, HitsReportState> {
     emit(HitsReportLoading());
     final result = await _httpClient
         .get<List>("$adminEndpoint/winning-hits", queryParams: {
-      'filter[from_this_day]': DateFormat.yMd().format(event.dateTime),
+      'filter[from_this_day]': YEAR_MONTH_DATE.format(event.dateTime),
     }, onSerialize: (json) {
       return json['data'];
     });

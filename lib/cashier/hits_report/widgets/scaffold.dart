@@ -1,6 +1,6 @@
+import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../bloc/hits_report_bloc.dart';
 import 'builder.dart';
@@ -179,7 +179,7 @@ class _HitsReportDrawDateText extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return HitsReportBuilder(
       builder: (state) {
-        return Text("Draw date: ${DateFormat.yMd().format(state.drawDate)}",
+        return Text("Draw date: ${YEAR_MONTH_DATE.format(state.drawDate)}",
             style: textTheme.subtitle2);
       },
     );

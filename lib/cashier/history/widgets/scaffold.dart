@@ -1,4 +1,5 @@
 import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
+import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -268,7 +269,7 @@ class _BetHistoryDrawDateText extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return BetHistoryBuilder(
       builder: (state) {
-        return Text("Draw date: ${DateFormat.yMd().format(state.date)}",
+        return Text("Draw date: ${YEAR_MONTH_DATE.format(state.date)}",
             style: textTheme.subtitle2);
       },
     );

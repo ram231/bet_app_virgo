@@ -1,8 +1,8 @@
+import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/utils.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 
 part 'grand_total_state.dart';
 
@@ -20,10 +20,10 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
-    final startDate = DateFormat.yMd().format(
+    final startDate = YEAR_MONTH_DATE.format(
       fromDate ?? DateTime.now(),
     );
-    final endDate = DateFormat.yMd().format(
+    final endDate = YEAR_MONTH_DATE.format(
       toDate ?? DateTime.now(),
     );
     try {

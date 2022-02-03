@@ -1,5 +1,5 @@
+import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class CashierBetCancelScaffold extends StatelessWidget {
   static const path = "/cashier/cancel-bet";
@@ -51,7 +51,7 @@ class _BetCancelTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final today = DateFormat.yMd().format(now);
+    final today = YEAR_MONTH_DATE.format(now);
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: SingleChildScrollView(

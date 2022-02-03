@@ -1,9 +1,9 @@
 import 'package:bet_app_virgo/models/bet_result.dart';
+import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 
 part 'bet_history_event.dart';
 part 'bet_history_state.dart';
@@ -19,7 +19,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
     try {
       final result = await _httpClient.get<List>("$adminEndpoint/bets",
           queryParams: {
-            'filter[from_this_day]': DateFormat.yMd().format(startDate),
+            'filter[from_this_day]': YEAR_MONTH_DATE.format(startDate),
           },
           onSerialize: (json) => json['data']);
       debugPrint("$result");
