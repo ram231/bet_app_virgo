@@ -114,7 +114,7 @@ class _GrandTotalCard extends StatelessWidget {
           children: [
             Text("BET", style: textTheme.button),
             Text(
-              "${state.readableWinningAmount}",
+              "${state.totalBetAmount}",
               style: textTheme.subtitle1,
               overflow: TextOverflow.ellipsis,
             ),
