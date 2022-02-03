@@ -13,10 +13,10 @@ class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
         super(GrandTotalDrawsState());
   final STLHttpClient _httpClient;
   void fetch({DateTime? fromDate, DateTime? toDate}) async {
-    final startDate = YEAR_MONTH_DATE.format(
+    final startDate = YEAR_MONTH_DAY.format(
       fromDate ?? DateTime.now(),
     );
-    final endDate = YEAR_MONTH_DATE.format(
+    final endDate = YEAR_MONTH_DAY.format(
       toDate ?? DateTime.now(),
     );
     emit(state.copyWith(isLoading: true));

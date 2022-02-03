@@ -18,7 +18,7 @@ class HitsReportBloc extends Bloc<HitsReportEvent, HitsReportState> {
     emit(HitsReportLoading());
     final result = await _httpClient
         .get<List>("$adminEndpoint/winning-hits", queryParams: {
-      'filter[from_this_day]': YEAR_MONTH_DATE.format(event.dateTime),
+      'filter[from_this_day]': YEAR_MONTH_DAY.format(event.dateTime),
     }, onSerialize: (json) {
       return json['data'];
     });

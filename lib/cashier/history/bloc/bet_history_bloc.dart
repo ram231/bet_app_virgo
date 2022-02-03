@@ -1,13 +1,15 @@
-import 'package:bet_app_virgo/models/bet_result.dart';
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
 part 'bet_history_event.dart';
 part 'bet_history_state.dart';
 
+// this is now receipt history
 class BetHistoryBloc extends Cubit<BetHistoryState> {
   BetHistoryBloc({STLHttpClient? httpClient})
       : _httpClient = httpClient ?? STLHttpClient(),
@@ -17,16 +19,21 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
     emit(state.copyWith(isLoading: true));
     final startDate = fromDate ?? state.date;
     try {
-      final result = await _httpClient.get<List>("$adminEndpoint/bets",
+      final result = await _httpClient.get<List>("$adminEndpoint/receipts",
           queryParams: {
-            'filter[from_this_day]': YEAR_MONTH_DATE.format(startDate),
+            'filter[from_this_day]': YEAR_MONTH_DAY.format(startDate),
           },
           onSerialize: (json) => json['data']);
       debugPrint("$result");
-      final list = result.map((e) => BetResult.fromMap(e)).toList();
+      final list = result.map((e) => BetReceipt.fromMap(e)).toList();
       emit(BetHistoryState(bets: list, date: startDate));
     } catch (e) {
-      emit(state.copyWith(error: "$e"));
+      if (e is DioError) {
+        final err = e.response?.statusMessage ?? e.message;
+        emit(state.copyWith(error: "$err"));
+      } else {
+        emit(state.copyWith(error: "$e"));
+      }
       debugPrint("$e");
     }
   }

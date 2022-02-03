@@ -1,7 +1,7 @@
 part of 'bet_history_bloc.dart';
 
 class BetHistoryState extends Equatable {
-  final List<BetResult> bets;
+  final List<BetReceipt> bets;
   final DateTime date;
   final bool isLoading;
   final String error;
@@ -23,7 +23,7 @@ class BetHistoryState extends Equatable {
       ];
 
   BetHistoryState copyWith({
-    List<BetResult>? bets,
+    List<BetReceipt>? bets,
     DateTime? date,
     bool isLoading = false,
     String error = '',

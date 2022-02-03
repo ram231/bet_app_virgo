@@ -51,7 +51,7 @@ class _BetCancelTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final today = YEAR_MONTH_DATE.format(now);
+    final today = YEAR_MONTH_DAY.format(now);
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: SingleChildScrollView(

@@ -1,10 +1,12 @@
 import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
+import 'bet_items.dart';
 import 'builder.dart';
 
 class BetHistoryProvider extends StatelessWidget {
@@ -71,6 +73,17 @@ class BetHistoryTable extends StatelessWidget {
   const BetHistoryTable({
     Key? key,
   }) : super(key: key);
+  void onPress(BuildContext context, BetReceipt receipt) async {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (c) => BetHistoryItemProvider(
+          child: BetHistoryItemScaffold(),
+          receipt: receipt,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,160 +92,115 @@ class BetHistoryTable extends StatelessWidget {
       return Center(child: CircularProgressIndicator.adaptive());
     }
     if (historyState.hasError) {
-      return Center(child: Text("${historyState.error}"));
+      return Center(
+          child: Text("${historyState.error}",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis));
     }
-    final bets = historyState.bets;
-    if (bets.isNotEmpty) {
+    final receipts = historyState.bets;
+    if (receipts.isNotEmpty) {
       return DataTable(
         showBottomBorder: true,
         showCheckboxColumn: true,
-        rows: bets
-            .map(
-              (e) => DataRow(
-                color: e.isCancel
-                    ? MaterialStateProperty.all(Colors.red[200])
-                    : null,
-                cells: [
-                  DataCell(Text("${e.id}")),
-                  DataCell(Text("${e.betNumber}")),
-                  DataCell(Text("${e.readableBetAmount}")),
-                  DataCell(
-                      Text("${DateFormat.yMMMEd().format(DateTime.now())}")),
-                  DataCell(Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (e.receipt?.status != 'I')
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              primary: Colors.red,
-                              onPrimary: Colors.white,
-                            ),
-                            onPressed: () async {
-                              final result = await showDialog<bool>(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text(
-                                              "Cancel Receipt #${e.receipt?.receiptNo}?"),
-                                          content: Text(
-                                              "Are you sure you want to delete this bet?"),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context, false);
-                                              },
-                                              child: Text("CANCEL"),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.pop(context, true);
-                                              },
-                                              child: Text("CONFIRM"),
-                                            )
-                                          ],
-                                        );
-                                      }) ??
-                                  false;
-                              if (result) {
-                                final receipt = e.receipt?.receiptNo;
-                                if (receipt != null) {
-                                  await context
-                                      .read<BetHistoryBloc>()
-                                      .cancelReceipt(int.parse(receipt));
-                                  await ScaffoldMessenger.of(context)
-                                      .showSnackBar(
-                                    SnackBar(
-                                      content:
-                                          Text("Cancelled Bet No. #${receipt}"),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            label: Text("CANCEL BET"),
-                            icon: Icon(Icons.bookmark_remove),
-                          ),
-                        ),
-                      if (!e.isCancel)
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            primary: Colors.red,
-                            onPrimary: Colors.white,
-                          ),
-                          icon: Icon(
-                            Icons.delete_forever,
-                          ),
-                          label: Text("DELETE BET"),
-                          onPressed: () async {
-                            final result = await showDialog<bool>(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text("Delete Bet #${e.id}?"),
-                                    content: Text(
-                                        "Are you sure you want to delete this bet?"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context, false);
-                                        },
-                                        child: Text("CANCEL"),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context, true);
-                                        },
-                                        child: Text("CONFIRM"),
-                                      )
-                                    ],
-                                  );
-                                });
-                            if (result != null && result) {
-                              await ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Deleting...")));
-
-                              try {
-                                await context
-                                    .read<BetHistoryBloc>()
-                                    .delete(e.id!);
-                                await ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                  SnackBar(
-                                    content: Text("Deleted Bet #${e.id}"),
-                                  ),
-                                );
-                              } catch (e) {
-                                await ScaffoldMessenger.of(context)
-                                  ..removeCurrentSnackBar()
-                                  ..showSnackBar(
-                                    SnackBar(
-                                      content: Text("Something went wrong..."),
-                                    ),
-                                  );
-                              }
-                            }
-                          },
-                        ),
-                    ],
-                  ))
-                ],
-              ),
-            )
-            .toList(),
+        rows: receipts.map((receipt) {
+          return DataRow(
+            color: receipt.status == 'I'
+                ? MaterialStateProperty.all(Colors.red[200])
+                : null,
+            cells: <Widget>[
+              Text("${receipt.receiptNo}"),
+              Text("${receipt.createdAt}"),
+              _CancelReceiptButton(receipt: receipt),
+            ]
+                .map(
+                  (data) => DataCell(
+                    data,
+                    onTap: () => onPress(context, receipt),
+                  ),
+                )
+                .toList(),
+          );
+        }).toList(),
         columns: [
-          DataColumn(label: Text("ID")),
-          DataColumn(label: Text("Bet Numbers")),
-          DataColumn(label: Text("Bet Amount")),
+          DataColumn(label: Text("Receipt No.")),
           DataColumn(label: Text("Bet Date")),
           DataColumn(label: Text("Actions")),
         ],
       );
     }
     return notNil;
+  }
+}
+
+class _CancelReceiptButton extends StatelessWidget {
+  const _CancelReceiptButton({
+    Key? key,
+    required this.receipt,
+  }) : super(key: key);
+  final BetReceipt receipt;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (receipt.status != 'I')
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                primary: Colors.red,
+                onPrimary: Colors.white,
+              ),
+              onPressed: () async {
+                final result = await showDialog<bool>(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title:
+                                Text("Cancel Receipt #${receipt.receiptNo}?"),
+                            content: Text(
+                                "Are you sure you want to delete this bet?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                },
+                                child: Text("CANCEL"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context, true);
+                                },
+                                child: Text("CONFIRM"),
+                              )
+                            ],
+                          );
+                        }) ??
+                    false;
+                if (result) {
+                  final id = receipt.id;
+                  if (id != null) {
+                    await context.read<BetHistoryBloc>().cancelReceipt(id);
+                    await ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Cancelled Bet No. #${receipt}"),
+                      ),
+                    );
+                  }
+                }
+              },
+              label: Text("CANCEL BET"),
+              icon: Icon(Icons.bookmark_remove),
+            ),
+          ),
+      ],
+    );
   }
 }
 
@@ -269,7 +237,7 @@ class _BetHistoryDrawDateText extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return BetHistoryBuilder(
       builder: (state) {
-        return Text("Draw date: ${YEAR_MONTH_DATE.format(state.date)}",
+        return Text("Draw date: ${YEAR_MONTH_DAY.format(state.date)}",
             style: textTheme.subtitle2);
       },
     );
