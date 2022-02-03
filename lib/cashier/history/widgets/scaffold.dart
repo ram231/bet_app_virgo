@@ -1,4 +1,5 @@
 import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
+import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
 import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
@@ -145,6 +146,8 @@ class _CancelReceiptButton extends StatelessWidget {
   final BetReceipt receipt;
   @override
   Widget build(BuildContext context) {
+    final userState = context.watch<LoginBloc>().state;
+    final cashierId = userState is LoginSuccess ? userState.user.id : null;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -186,10 +189,14 @@ class _CancelReceiptButton extends StatelessWidget {
                 if (result) {
                   final id = receipt.id;
                   if (id != null) {
-                    await context.read<BetHistoryBloc>().cancelReceipt(id);
+                    await context.read<BetHistoryBloc>().cancelReceipt(
+                          receiptNo: receipt.receiptNo!,
+                          cashierId: cashierId!,
+                        );
                     await ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("Cancelled Bet No. #${receipt}"),
+                        content:
+                            Text("Cancelled Bet No. #${receipt.receiptNo}"),
                       ),
                     );
                   }

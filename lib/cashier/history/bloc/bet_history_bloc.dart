@@ -47,12 +47,22 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
     }
   }
 
-  Future<void> cancelReceipt(int receiptNo) async {
+  Future<void> cancelReceipt(
+      {required String receiptNo, required int cashierId}) async {
     try {
-      await _httpClient.post('$adminEndpoint/receipts/no/$receiptNo');
+      await _httpClient.post('$adminEndpoint/receipts/no/$receiptNo', body: {
+        "cashier_id": cashierId,
+        "status": "I",
+      });
       fetch();
     } catch (e) {
-      emit(state.copyWith(error: "$e"));
+      if (e is DioError) {
+        final err = e.response?.data['errors'].toString() ?? e.message;
+        emit(state.copyWith(error: "$err"));
+      } else {
+        emit(state.copyWith(error: "$e"));
+      }
+      addError(e);
     }
   }
 }
