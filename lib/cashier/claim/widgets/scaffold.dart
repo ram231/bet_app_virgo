@@ -195,21 +195,19 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(40))),
                           onPressed: () async {
-                            final claimPrize = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => LoadingDialog(
-                                onLoading: () async {
-                                  final _http = STLHttpClient();
-                                  final response = await _http.post(
-                                    "$adminEndpoint/receipts/claim-prizes/${result.receiptNo}",
-                                    onSerialize: (json) =>
-                                        BetReceipt.fromMap(json),
-                                  );
-                                  Navigator.pop(context, true);
-                                },
-                              ),
-                            );
-                            debugPrint("claimPrize");
+                            try {
+                              final _http = STLHttpClient();
+                              final response = await _http.post(
+                                "$adminEndpoint/receipts/claim-prizes/${result.receiptNo}",
+                                onSerialize: (json) => BetReceipt.fromMap(json),
+                              );
+                            } catch (e) {
+                              await ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Something went wrong"),
+                                ),
+                              );
+                            }
                             Navigator.pop(context);
                           },
                           child: Text("CLAIM"),
