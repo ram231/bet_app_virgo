@@ -16,6 +16,9 @@ class BetResult extends Equatable {
   final int? prize;
   final bool isCancel;
   final bool isWinner;
+  final String? readablePrize;
+  final String? winningAmount;
+  final String? readableWinningAmount;
   final BetReceipt? receipt;
   BetResult({
     required this.id,
@@ -29,34 +32,11 @@ class BetResult extends Equatable {
     this.prize = 0,
     this.isCancel = false,
     this.isWinner = false,
+    this.readablePrize,
+    this.winningAmount,
+    this.readableWinningAmount,
     this.receipt,
   });
-
-  BetResult copyWith(
-      {int? id,
-      DrawBet? draw,
-      BetBranch? branch,
-      UserAccount? gambler,
-      UserAccount? cashier,
-      int? betAmount,
-      String? readableBetAmount,
-      int? betNumber,
-      bool? isWinner,
-      int? prize,
-      BetReceipt? receipt}) {
-    return BetResult(
-      id: id ?? this.id,
-      draw: draw ?? this.draw,
-      branch: branch ?? this.branch,
-      gambler: gambler ?? this.gambler,
-      cashier: cashier ?? this.cashier,
-      betAmount: betAmount ?? this.betAmount,
-      readableBetAmount: readableBetAmount ?? this.readableBetAmount,
-      betNumber: betNumber ?? this.betNumber,
-      prize: prize ?? this.prize,
-      receipt: receipt ?? this.receipt,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -102,6 +82,9 @@ class BetResult extends Equatable {
           map['is_cancel'] is bool ? map['is_cancel'] : map['is_cancel'] == 1,
       isWinner:
           map['is_winner'] is bool ? map['is_winner'] : map['is_cancel'] == 1,
+      readablePrize: map['readable_prize'],
+      winningAmount: map['winning_amount'],
+      readableWinningAmount: map['readable_winning_amount'],
     );
   }
 
@@ -129,5 +112,42 @@ class BetResult extends Equatable {
       isCancel,
       receipt,
     ];
+  }
+
+  BetResult copyWith({
+    int? id,
+    DrawBet? draw,
+    BetBranch? branch,
+    UserAccount? gambler,
+    UserAccount? cashier,
+    num? betAmount,
+    String? readableBetAmount,
+    int? betNumber,
+    int? prize,
+    bool? isCancel,
+    bool? isWinner,
+    String? readablePrize,
+    String? winningAmount,
+    String? readableWinningAmount,
+    BetReceipt? receipt,
+  }) {
+    return BetResult(
+      id: id ?? this.id,
+      draw: draw ?? this.draw,
+      branch: branch ?? this.branch,
+      gambler: gambler ?? this.gambler,
+      cashier: cashier ?? this.cashier,
+      betAmount: betAmount ?? this.betAmount,
+      readableBetAmount: readableBetAmount ?? this.readableBetAmount,
+      betNumber: betNumber ?? this.betNumber,
+      prize: prize ?? this.prize,
+      isCancel: isCancel ?? this.isCancel,
+      isWinner: isWinner ?? this.isWinner,
+      readablePrize: readablePrize ?? this.readablePrize,
+      winningAmount: winningAmount ?? this.winningAmount,
+      readableWinningAmount:
+          readableWinningAmount ?? this.readableWinningAmount,
+      receipt: receipt ?? this.receipt,
+    );
   }
 }

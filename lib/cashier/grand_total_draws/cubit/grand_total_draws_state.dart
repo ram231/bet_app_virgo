@@ -6,7 +6,7 @@ class GrandTotalDrawsState extends Equatable {
     this.error = '',
     this.draws = const [],
   });
-  final List<WinningHitsResult> draws;
+  final List<BetResult> draws;
   final bool isLoading;
   final String error;
   bool get hasErrors => error.isNotEmpty;
@@ -18,7 +18,7 @@ class GrandTotalDrawsState extends Equatable {
       ];
 
   GrandTotalDrawsState copyWith({
-    List<WinningHitsResult>? draws,
+    List<BetResult>? draws,
     bool isLoading = false,
     String? error,
   }) {
