@@ -7,11 +7,16 @@ import 'package:flutter/cupertino.dart';
 part 'grand_total_state.dart';
 
 class GrandTotalCubit extends Cubit<GrandTotalState> {
-  GrandTotalCubit({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  GrandTotalCubit({
+    STLHttpClient? httpClient,
+    required this.cashierId,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(GrandTotalInitial());
 
   final STLHttpClient _httpClient;
+  final String cashierId;
+
+  Map<string, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
 
   /// [fromDate] format - yyyy-MM-DD
   ///
@@ -32,6 +37,7 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
           queryParams: {
             'from_date': startDate,
             'to_date': endDate,
+            ...cashierIdParam,
           },
           onSerialize: (json) => json);
       final rawAmount = result['bet_amount'];

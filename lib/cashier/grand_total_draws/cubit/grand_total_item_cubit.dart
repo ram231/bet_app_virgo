@@ -7,10 +7,16 @@ import 'package:equatable/equatable.dart';
 part 'grand_total_item_state.dart';
 
 class GrandTotalItemCubit extends Cubit<GrandTotalItemState> {
-  GrandTotalItemCubit({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  GrandTotalItemCubit({
+    STLHttpClient? httpClient,
+    required this.cashierId,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(GrandTotalItemState());
   final STLHttpClient _httpClient;
+  final String cashierId;
+
+  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+
   void fetchByDrawId(int id) async {
     emit(state.copyWith(
       isLoading: true,
@@ -21,6 +27,7 @@ class GrandTotalItemCubit extends Cubit<GrandTotalItemState> {
         '$adminEndpoint/bets',
         queryParams: {
           'filter[draw_id]': id,
+          ...cashierIdParam,
         },
         onSerialize: (json) =>
             (json['data'] as List).map((e) => BetResult.fromMap(e)).toList(),

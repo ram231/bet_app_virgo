@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bet_app_virgo/login/widgets/builder.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -150,28 +151,34 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
           final result = await showDialog<BetReceipt>(
             context: context,
             builder: (context) {
-              return LoadingDialog(
-                onLoading: () async {
-                  try {
-                    final _http = STLHttpClient();
-                    final data = code.split("_");
-                    final id = int.tryParse(data.last);
-                    if (id != null) {
-                      final betResultById = await _http.get(
+              return LoginSuccessBuilder(builder: (user) {
+                return LoadingDialog(
+                  onLoading: () async {
+                    try {
+                      final _http = STLHttpClient();
+                      final data = code.split("_");
+                      final id = int.tryParse(data.last);
+                      if (id != null) {
+                        final betResultById = await _http.get(
                           '$adminEndpoint/receipts/$id',
-                          onSerialize: (json) => BetReceipt.fromMap(json));
+                          onSerialize: (json) => BetReceipt.fromMap(json),
+                          queryParams: {
+                            'filter[cashier_id]': user.id,
+                          },
+                        );
 
-                      Navigator.pop(context, betResultById);
-                    } else {
-                      throw "Invalid Format";
+                        Navigator.pop(context, betResultById);
+                      } else {
+                        throw "Invalid Format";
+                      }
+                    } catch (e) {
+                      debugPrint('$e');
+                      showInvalidMessage(e);
+                      Navigator.pop(context, null);
                     }
-                  } catch (e) {
-                    debugPrint('$e');
-                    showInvalidMessage(e);
-                    Navigator.pop(context, null);
-                  }
-                },
-              );
+                  },
+                );
+              });
             },
           );
           if (result != null) {
@@ -181,42 +188,8 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
             final showWinner = await showDialog<bool>(
                 context: context,
                 builder: (context) {
-                  return AlertDialog(
-                    title: Text("Claim Prize"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [Text("Prize:${result.readablePrizesClaimed}")],
-                    ),
-                    actions: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(40))),
-                          onPressed: () async {
-                            try {
-                              final _http = STLHttpClient();
-                              final response = await _http.post(
-                                "$adminEndpoint/receipts/claim-prizes/${result.receiptNo}",
-                                onSerialize: (json) => BetReceipt.fromMap(json),
-                              );
-                            } catch (e) {
-                              await ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Something went wrong"),
-                                ),
-                              );
-                            }
-                            Navigator.pop(context);
-                          },
-                          child: Text("CLAIM"),
-                        ),
-                      )
-                      // TextButton(
-                      //     onPressed: () => Navigator.pop(context, false),
-                      //     child: Text("CLOSE"))
-                    ],
+                  return _ClaimPrizeButton(
+                    receipt: result,
                   );
                 });
             _dialog = showWinner ?? false;
@@ -242,5 +215,78 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
         });
       }
     });
+  }
+}
+
+class _ClaimPrizeButton extends StatefulWidget {
+  const _ClaimPrizeButton({required this.receipt, Key? key}) : super(key: key);
+  final BetReceipt receipt;
+  @override
+  State<_ClaimPrizeButton> createState() => _ClaimPrizeButtonState();
+}
+
+class _ClaimPrizeButtonState extends State<_ClaimPrizeButton> {
+  bool _isLoading = false;
+  String err = '';
+  void changeState() {
+    setState(() {
+      _isLoading = !_isLoading;
+    });
+  }
+
+  void _onClaim(String cashierId) async {
+    changeState();
+    try {
+      final _http = STLHttpClient();
+      final response = await _http.post(
+        "$adminEndpoint/receipts/claim-prizes/${widget.receipt.receiptNo}",
+        onSerialize: (json) => BetReceipt.fromMap(json),
+      );
+    } catch (e) {
+      err = e.toString();
+    } finally {
+      changeState();
+    }
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Claim Prize"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("Prize:${widget.receipt.readablePrizesClaimed}"),
+          if (err.isNotEmpty)
+            Text(
+              "$err",
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+        ],
+      ),
+      actions: [
+        LoginSuccessBuilder(builder: (user) {
+          return SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40))),
+              onPressed: _isLoading ? null : () => _onClaim("${user.id}"),
+              child: _isLoading
+                  ? CircularProgressIndicator.adaptive()
+                  : Text("CLAIM"),
+            ),
+          );
+        })
+        // TextButton(
+        //     onPressed: () => Navigator.pop(context, false),
+        //     child: Text("CLOSE"))
+      ],
+    );
   }
 }

@@ -7,18 +7,27 @@ import 'package:flutter/foundation.dart';
 part 'draw_type_state.dart';
 
 class DrawTypeCubit extends Cubit<DrawTypeState> {
-  DrawTypeCubit({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  DrawTypeCubit({
+    STLHttpClient? httpClient,
+    required this.cashierId,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(DrawTypeInitial());
+
   final STLHttpClient _httpClient;
+  final String cashierId;
+
+  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
 
   void fetchDrawTypes() async {
     try {
       emit(DrawTypeLoading());
-      final result = await _httpClient.get('$adminEndpoint/draws/availables',
-          onSerialize: (json) {
-        return json['data'];
-      });
+      final result = await _httpClient.get(
+        '$adminEndpoint/draws/availables',
+        onSerialize: (json) {
+          return json['data'];
+        },
+        queryParams: cashierIdParam,
+      );
       debugPrint("$result");
       final list =
           (result as List).map((json) => DrawBet.fromMap(json)).toList();

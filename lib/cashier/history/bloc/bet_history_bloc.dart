@@ -11,25 +11,40 @@ part 'bet_history_state.dart';
 
 // this is now receipt history
 class BetHistoryBloc extends Cubit<BetHistoryState> {
-  BetHistoryBloc({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  BetHistoryBloc({
+    STLHttpClient? httpClient,
+    required this.cashierId,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(BetHistoryState(date: DateTime.now()));
+
   final STLHttpClient _httpClient;
+
+  final String cashierId;
+
+  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+
   void fetch({DateTime? fromDate}) async {
     emit(state.copyWith(isLoading: true));
+
     final startDate = fromDate ?? state.date;
+
     try {
       final result = await _httpClient.get<List>("$adminEndpoint/receipts",
           queryParams: {
             'filter[from_this_day]': YEAR_MONTH_DAY.format(startDate),
+            ...cashierIdParam,
           },
           onSerialize: (json) => json['data']);
+
       debugPrint("$result");
+
       final list = result.map((e) => BetReceipt.fromMap(e)).toList();
+
       emit(BetHistoryState(bets: list, date: startDate));
     } catch (e) {
       if (e is DioError) {
         final err = e.response?.statusMessage ?? e.message;
+
         emit(state.copyWith(error: "$err"));
       } else {
         emit(state.copyWith(error: "$e"));
@@ -40,7 +55,11 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
 
   Future<void> delete(int id) async {
     try {
-      await _httpClient.post("$adminEndpoint/bets/cancel/${id}");
+      await _httpClient.post(
+        "$adminEndpoint/bets/cancel/${id}",
+        queryParams: cashierIdParam,
+      );
+
       fetch();
     } catch (e) {
       emit(state.copyWith(error: '$e'));
@@ -50,14 +69,20 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
   Future<void> cancelReceipt(
       {required String receiptNo, required int cashierId}) async {
     try {
-      await _httpClient.post('$adminEndpoint/receipts/no/$receiptNo', body: {
-        "cashier_id": cashierId,
-        "status": "I",
-      });
+      await _httpClient.post(
+        '$adminEndpoint/receipts/no/$receiptNo',
+        body: {
+          "cashier_id": cashierId,
+          "status": "I",
+        },
+        queryParams: cashierIdParam,
+      );
+
       fetch();
     } catch (e) {
       if (e is DioError) {
         final err = e.response?.data['errors'].toString() ?? e.message;
+
         emit(state.copyWith(error: "$err"));
       } else {
         emit(state.copyWith(error: "$e"));

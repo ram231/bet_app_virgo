@@ -8,47 +8,36 @@ import '../../../utils/loading_dialog.dart';
 
 class PrintReceiptButton extends StatefulWidget {
   const PrintReceiptButton({
-    required this.bets,
+    required this.receipt,
     required this.cashier,
     Key? key,
   }) : super(key: key);
   final UserAccount cashier;
-  final List<BetResult> bets;
+  final BetReceipt receipt;
 
   @override
   State<PrintReceiptButton> createState() => _PrintReceiptButtonState();
 }
 
 class _PrintReceiptButtonState extends State<PrintReceiptButton> {
+  bool _isPrinting = false;
+
+  void changePrintState() {
+    setState(() {
+      _isPrinting = !_isPrinting;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: onPrintReceipt,
+      onPressed: _isPrinting ? null : onPrintReceipt,
       icon: Icon(Icons.print),
       label: Text("Print"),
     );
   }
 
   Future<void> onPrintReceipt() async {
-    if (widget.bets.isEmpty) {
-      await showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Empty Bet"),
-            content: Text("No bet to be printed"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text("CLOSE"),
-              )
-            ],
-          );
-        },
-      );
-      return;
-    }
-
     try {
       final isConnected =
           (await BlueThermalPrinter.instance.isConnected) ?? false;
@@ -70,8 +59,9 @@ class _PrintReceiptButtonState extends State<PrintReceiptButton> {
         );
         return;
       }
+      changePrintState();
       final fetchReceipt = context.read<STLHttpClient>().get(
-        '$adminEndpoint/receipt',
+        '$adminEndpoint/receipts/${widget.receipt.id}',
         onSerialize: (json) {
           return BetReceipt.fromMap(json);
         },
@@ -92,6 +82,8 @@ class _PrintReceiptButtonState extends State<PrintReceiptButton> {
       if (result) {}
     } catch (e) {
       //TODO: create dialog that fails to print or fetch
+    } finally {
+      changePrintState();
     }
   }
 

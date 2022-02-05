@@ -1,5 +1,6 @@
 import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
 import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
+import 'package:bet_app_virgo/login/widgets/builder.dart';
 import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
@@ -15,10 +16,12 @@ class BetHistoryProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => BetHistoryBloc()..fetch(),
-      child: child,
-    );
+    return LoginSuccessBuilder(builder: (user) {
+      return BlocProvider(
+        create: (context) => BetHistoryBloc(cashierId: '${user.id}')..fetch(),
+        child: child,
+      );
+    });
   }
 }
 

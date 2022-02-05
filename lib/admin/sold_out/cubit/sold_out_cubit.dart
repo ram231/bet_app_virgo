@@ -7,11 +7,12 @@ import 'package:equatable/equatable.dart';
 part 'sold_out_state.dart';
 
 class SoldOutCubit extends Cubit<SoldOutState> {
-  SoldOutCubit({STLHttpClient? httpClient})
+  SoldOutCubit({required this.cashierId, STLHttpClient? httpClient})
       : _http = httpClient ?? STLHttpClient(),
         super(SoldOutState());
   final STLHttpClient _http;
-
+  final String cashierId;
+  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
   void submit({
     required String number,
     required String type,
@@ -20,6 +21,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
     emit(state.copyWith(isLoading: true));
     try {
       final result = await _http.post('$adminEndpoint/${type}',
+          queryParams: cashierIdParam,
           body: {
             'sold_out_number': int.parse(number),
             'winning_amount': amount,
@@ -42,7 +44,10 @@ class SoldOutCubit extends Cubit<SoldOutState> {
     emit(state.copyWith(isLoading: true));
     try {
       String endPoint = soldOut ? 'sold-outs' : 'low-wins';
-      final result = await _http.delete('$adminEndpoint/$endPoint/$id');
+      final result = await _http.delete(
+        '$adminEndpoint/$endPoint/$id',
+        queryParams: cashierIdParam,
+      );
       final newItems = state.items.where((e) => e.id != id).toList();
       emit(state.copyWith(items: newItems));
     } catch (e) {
@@ -65,6 +70,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
               .toList());
       final lowWins = await _http.get(
         '$adminEndpoint/low-wins',
+        queryParams: cashierIdParam,
         onSerialize: (json) =>
             (json['data'] as List).map((e) => BetSoldOut.fromMap(e)).toList(),
       );

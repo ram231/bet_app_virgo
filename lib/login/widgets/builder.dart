@@ -1,6 +1,8 @@
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../utils/utils.dart';
 import '../bloc/login_bloc.dart';
 
 class LoginAuthenticator extends StatefulWidget {
@@ -38,5 +40,21 @@ class _LoginAuthenticatorState extends State<LoginAuthenticator> {
       },
       builder: widget.builder,
     );
+  }
+}
+
+class LoginSuccessBuilder extends StatelessWidget {
+  const LoginSuccessBuilder({
+    required this.builder,
+    Key? key,
+  }) : super(key: key);
+  final Widget Function(UserAccount cashier) builder;
+  @override
+  Widget build(BuildContext context) {
+    final userState = context.watch<LoginBloc>().state;
+    if (userState is LoginSuccess) {
+      return builder(userState.user);
+    }
+    return notNil;
   }
 }

@@ -8,18 +8,29 @@ import 'package:equatable/equatable.dart';
 part 'grand_total_draws_state.dart';
 
 class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
-  GrandTotalDrawsCubit({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  GrandTotalDrawsCubit({
+    STLHttpClient? httpClient,
+    required this.cashierId,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(GrandTotalDrawsState());
+
   final STLHttpClient _httpClient;
+
+  final String cashierId;
+
+  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+
   void fetch({DateTime? fromDate, DateTime? toDate}) async {
     final startDate = YEAR_MONTH_DAY.format(
       fromDate ?? DateTime.now(),
     );
+
     final endDate = YEAR_MONTH_DAY.format(
       toDate ?? DateTime.now(),
     );
+
     emit(state.copyWith(isLoading: true));
+
     try {
       final result = await _httpClient.get(
         '$adminEndpoint/bets',
@@ -27,6 +38,7 @@ class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
           'filter[from_this_day]': startDate,
           'filter[to_this_day]': endDate,
           'filter[is_cancel]': 0,
+          ...cashierIdParam,
         },
         onSerialize: (json) => (json['data'] as List),
       );

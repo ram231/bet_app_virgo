@@ -3,6 +3,8 @@ import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../login/widgets/builder.dart';
+
 class BetSoldOutScaffold extends StatelessWidget {
   static const path = "/sold-out";
   const BetSoldOutScaffold({Key? key}) : super(key: key);
@@ -154,10 +156,14 @@ class SoldOutProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SoldOutCubit(),
-      child: child,
-    );
+    return LoginSuccessBuilder(builder: (user) {
+      return BlocProvider(
+        create: (context) => SoldOutCubit(
+          cashierId: "${user.id}",
+        ),
+        child: child,
+      );
+    });
   }
 }
 

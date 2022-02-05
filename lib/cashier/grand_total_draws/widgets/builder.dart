@@ -1,3 +1,4 @@
+import 'package:bet_app_virgo/login/widgets/builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,10 +14,13 @@ class GrandTotalDrawProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => GrandTotalDrawsCubit()..fetch(),
-      child: child,
-    );
+    return LoginSuccessBuilder(builder: (user) {
+      return BlocProvider(
+        create: (context) =>
+            GrandTotalDrawsCubit(cashierId: '${user.id}')..fetch(),
+        child: child,
+      );
+    });
   }
 }
 

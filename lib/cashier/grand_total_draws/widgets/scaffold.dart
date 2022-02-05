@@ -1,3 +1,4 @@
+import 'package:bet_app_virgo/login/widgets/builder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,11 +53,15 @@ class _GrandTotalDrawBodyState extends State<GrandTotalDrawBody> {
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                      builder: (context) => BlocProvider(
-                        create: (context) =>
-                            GrandTotalItemCubit()..fetchByDrawId(item.draw!.id),
-                        child: GrandTotalDrawItemScaffold(),
-                      ),
+                      builder: (context) =>
+                          LoginSuccessBuilder(builder: (user) {
+                        return BlocProvider(
+                          create: (context) => GrandTotalItemCubit(
+                            cashierId: '${user.id}',
+                          )..fetchByDrawId(item.draw!.id),
+                          child: GrandTotalDrawItemScaffold(),
+                        );
+                      }),
                     ),
                   );
                 },

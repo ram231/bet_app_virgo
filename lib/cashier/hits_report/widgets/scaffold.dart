@@ -1,3 +1,4 @@
+import 'package:bet_app_virgo/login/widgets/builder.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,10 +15,12 @@ class HitReportsProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => HitsReportBloc(),
-      child: child,
-    );
+    return LoginSuccessBuilder(builder: (user) {
+      return BlocProvider(
+        create: (context) => HitsReportBloc(cashierId: '${user.id}'),
+        child: child,
+      );
+    });
   }
 }
 

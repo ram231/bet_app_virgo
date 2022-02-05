@@ -11,10 +11,17 @@ import 'package:flutter/foundation.dart';
 part 'create_new_bet_state.dart';
 
 class CreateNewBetCubit extends Cubit<CreateNewBetState> {
-  CreateNewBetCubit({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  CreateNewBetCubit({
+    STLHttpClient? httpClient,
+    required this.cashierId,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(CreateNewBetInitial());
+
   final STLHttpClient _httpClient;
+  final String cashierId;
+
+  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+
   void onSave(
     UserAccount cashier,
     List<AppendBetDTO> items,
@@ -35,6 +42,7 @@ class CreateNewBetCubit extends Cubit<CreateNewBetState> {
           '$adminEndpoint/bets',
           body: data,
           onSerialize: (json) => BetResult.fromMap(json),
+          queryParams: cashierIdParam,
         );
       }).toList();
       final result = await Future.wait(request);

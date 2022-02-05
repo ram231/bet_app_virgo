@@ -1,31 +1,38 @@
-import 'package:bet_app_virgo/cashier/bet_cancel/repository/bet_cancel_repository.dart';
 import 'package:bet_app_virgo/models/bet_result.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../../utils/http_client.dart';
+
 part 'bet_cancel_event.dart';
 part 'bet_cancel_state.dart';
 
 class BetCancelBloc extends Bloc<BetCancelEvent, BetCancelState> {
-  BetCancelBloc({BetCancelInterface? repository})
-      : _repository = repository ?? BetCancelRepository(),
+  BetCancelBloc({
+    required this.cashierId,
+    STLHttpClient? httpClient,
+  })  : _http = httpClient ?? STLHttpClient(),
         super(BetCancelState()) {
     on<BetCancelFetchEvent>(_onFetch);
   }
-  final BetCancelInterface _repository;
+  final String cashierId;
+  final STLHttpClient _http;
   void _onFetch(
     BetCancelFetchEvent event,
     Emitter<BetCancelState> emit,
   ) async {
     try {
       emit(BetCancelState(status: BetCancelStatus.loading));
-
-      final result = await _repository.fetch(search: event.searchItem);
-
+      final result = await _http.get(
+        '$adminEndpoint/bets',
+        queryParams: {'filter[cashier_id]': cashierId},
+        onSerialize: (json) => json['data'] as List,
+      );
+      final lists = result.map((e) => BetResult.fromMap(e)).toList();
       emit(BetCancelState(
         status: BetCancelStatus.success,
-        items: result,
+        items: lists,
         searchItem: event.searchItem,
       ));
     } catch (e) {

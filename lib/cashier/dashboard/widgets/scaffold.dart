@@ -1,5 +1,6 @@
 import 'package:bet_app_virgo/cashier/grand_total_draws/grand_total_draws.dart';
-import 'package:bet_app_virgo/models/branch.dart';
+import 'package:bet_app_virgo/login/widgets/builder.dart';
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +22,14 @@ class GrandTotalProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => GrandTotalCubit()..refetch(),
-      child: child,
-    );
+    return LoginSuccessBuilder(builder: (user) {
+      return BlocProvider(
+        create: (context) => GrandTotalCubit(
+          cashierId: "${user.id}",
+        )..refetch(),
+        child: child,
+      );
+    });
   }
 }
 
@@ -319,13 +324,18 @@ class GrandTotalContainer extends StatelessWidget {
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => BlocProvider(
-                create: (context) => GrandTotalDrawsCubit()
-                  ..fetch(
-                    fromDate: state.fromDate,
-                    toDate: state.toDate,
-                  ),
-                child: GrandTotalDrawsScaffold(),
+              builder: (context) => LoginSuccessBuilder(
+                builder: (user) {
+                  return BlocProvider(
+                    create: (context) =>
+                        GrandTotalDrawsCubit(cashierId: '${user.id}')
+                          ..fetch(
+                            fromDate: state.fromDate,
+                            toDate: state.toDate,
+                          ),
+                    child: GrandTotalDrawsScaffold(),
+                  );
+                },
               ),
             ),
           );
@@ -443,20 +453,19 @@ class UserBranchName extends StatelessWidget {
   }) : super(key: key);
   final Widget? onLoading;
   final Widget Function(String error)? onError;
-  Future<BetBranch> _fetchBranchById(int? id) async {
-    assert(id != null, "Branch ID not found");
+  Future<BetBranch> _fetchBranchById(UserAccount user) async {
     try {
       final _http = STLHttpClient();
-      final result = await _http.get(
-        '$adminEndpoint/branches/$id',
-        onSerialize: (json) {
-          debugPrint("$json");
-          return BetBranch(
-            id: json['id'],
-            name: json['name'],
-          );
-        },
-      );
+      final result = await _http.get('$adminEndpoint/branches/${user.branchId}',
+          onSerialize: (json) {
+        debugPrint("$json");
+        return BetBranch(
+          id: json['id'],
+          name: json['name'],
+        );
+      }, queryParams: {
+        'filter[cashier_id]': user.id,
+      });
       return result;
     } catch (e) {
       rethrow;
@@ -469,7 +478,7 @@ class UserBranchName extends StatelessWidget {
     final userState = context.watch<LoginBloc>().state;
     if (userState is LoginSuccess) {
       return FutureBuilder<BetBranch>(
-          future: _fetchBranchById(userState.user.branchId),
+          future: _fetchBranchById(userState.user),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return onLoading ?? notNil;

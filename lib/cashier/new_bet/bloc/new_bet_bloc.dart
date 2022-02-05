@@ -11,13 +11,17 @@ part 'new_bet_event.dart';
 part 'new_bet_state.dart';
 
 class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
-  NewBetBloc({STLHttpClient? httpClient})
-      : _httpClient = httpClient ?? STLHttpClient(),
+  NewBetBloc({
+    required this.cashierId,
+    STLHttpClient? httpClient,
+  })  : _httpClient = httpClient ?? STLHttpClient(),
         super(NewBetLoaded()) {
     on<AddNewBetEvent>(_onAppend);
     on<InsertNewBetEvent>(_onInsert);
     on<ResetBetEvent>(_onReset);
   }
+  final String cashierId;
+  Map<String, String> get cashierIdParam => {'filter[cashier_id': cashierId};
   final STLHttpClient _httpClient;
   Future<NewBetLoaded> _onValidateEvent(AppendBetDTO dto) async {
     final rawState = state.copyWith(items: [
@@ -29,6 +33,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     try {
       final result = await _httpClient.post(
         '$adminEndpoint/bets/append/${dto.betNumber}',
+        queryParams: cashierIdParam,
       );
       if (result != null) {
         if (result is String) {
@@ -69,8 +74,9 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
 
   void _onAppend(AddNewBetEvent event, Emitter emit) async {
     emit(state.copyWith(isLoading: true));
-    final itemExist = state.items
-        .where((element) => event.dto.betNumber == element.betNumber);
+    final itemExist = state.items.where(
+      (element) => event.dto.betNumber == element.betNumber,
+    );
     if (itemExist.isNotEmpty) {
       emit(state.copyWith(error: "Bet Number already exists"));
       return;

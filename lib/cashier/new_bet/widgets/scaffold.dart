@@ -1,6 +1,7 @@
 import 'package:bet_app_virgo/cashier/new_bet/cubit/create_new_bet_cubit.dart';
 import 'package:bet_app_virgo/cashier/new_bet/dto/append_bet_dto.dart';
 import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
+import 'package:bet_app_virgo/login/widgets/builder.dart';
 import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,17 +22,23 @@ class _DrawTypeProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => DrawTypeCubit(),
-        ),
-        BlocProvider(
-          create: (context) => NewBetBloc(),
-        ),
-      ],
-      child: child,
-    );
+    return LoginSuccessBuilder(builder: (state) {
+      return MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => DrawTypeCubit(
+              cashierId: "${state.id}",
+            ),
+          ),
+          BlocProvider(
+            create: (context) => NewBetBloc(
+              cashierId: "${state.id}",
+            ),
+          ),
+        ],
+        child: child,
+      );
+    });
   }
 }
 
@@ -82,8 +89,9 @@ class _AddNewBetIcon extends StatelessWidget {
             Navigator.pushReplacement(context,
                 CupertinoPageRoute(builder: (context) {
               return BlocProvider(
-                create: (_) => CreateNewBetCubit()
-                  ..onSave(
+                create: (_) => CreateNewBetCubit(
+                  cashierId: "${userState.user.id}",
+                )..onSave(
                     userState.user,
                     _state.items,
                     _state.drawTypeBet!,
