@@ -107,18 +107,20 @@ class __PrintResultState extends State<_PrintResult> with PrinterMixin {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        final betResult = context.read<CreateNewBetCubit>().state;
-        final userState = context.read<LoginBloc>().state;
-        if (userState is LoginSuccess) {
-          if (betResult is CreateNewBetLoaded) {
-            final cashierId = userState.user.id;
-            final result = betResult.result;
+      onPressed: isPrinting
+          ? null
+          : () {
+              final betResult = context.read<CreateNewBetCubit>().state;
+              final userState = context.read<LoginBloc>().state;
+              if (userState is LoginSuccess) {
+                if (betResult is CreateNewBetLoaded) {
+                  final cashierId = userState.user.id;
+                  final result = betResult.result;
 
-            printResult(cashierId, result);
-          }
-        }
-      },
+                  printResult(cashierId, result);
+                }
+              }
+            },
       child: Icon(Icons.print),
     );
   }

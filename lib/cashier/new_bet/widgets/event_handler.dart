@@ -8,10 +8,18 @@ import '../../../utils/utils.dart';
 import '../../printer/widgets/scaffold.dart';
 
 mixin PrinterMixin<T extends StatefulWidget> on State<T> {
+  bool isPrinting = false;
+  void changePrinterState() {
+    setState(() {
+      isPrinting = !isPrinting;
+    });
+  }
+
   Future<void> printResult(
     int cashierId,
     List<BetResult> result,
   ) async {
+    changePrinterState();
     try {
       final isConnected =
           (await BlueThermalPrinter.instance.isConnected) ?? false;
@@ -124,6 +132,8 @@ mixin PrinterMixin<T extends StatefulWidget> on State<T> {
           ],
         ),
       );
+    } finally {
+      changePrinterState();
     }
   }
 }
