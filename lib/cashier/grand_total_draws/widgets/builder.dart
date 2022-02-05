@@ -33,7 +33,7 @@ class GrandTotalDrawBuilder extends StatelessWidget {
   }) : super(key: key);
   final Widget? onLoading;
   final Widget Function(String err)? onError;
-  final Widget Function(List<BetResult> draws) builder;
+  final Widget Function(List<WinningHitsResult> draws) builder;
   @override
   Widget build(BuildContext context) {
     final state = context.watch<GrandTotalDrawsCubit>().state;

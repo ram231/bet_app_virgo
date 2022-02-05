@@ -1,18 +1,13 @@
 part of 'new_bet_bloc.dart';
 
-abstract class NewBetState extends Equatable {
-  const NewBetState();
-
-  @override
-  List<Object?> get props => [];
+enum PrintStatus {
+  printing,
+  idle,
 }
 
-class NewBetInitial extends NewBetState {}
-
-class NewBetLoading extends NewBetState {}
-
-class NewBetLoaded extends NewBetState {
+class NewBetLoaded extends Equatable {
   final List<AppendBetDTO> items;
+  final List<BetResult> result;
   final int? betNumber;
   final double? betAmount;
   final DrawBet? drawTypeBet;
@@ -20,8 +15,11 @@ class NewBetLoaded extends NewBetState {
   final UserAccount? cashier;
   final String error;
   final bool isLoading;
-  NewBetLoaded({
+  final bool isConnected;
+  final PrintStatus status;
+  const NewBetLoaded({
     this.items = const [],
+    this.result = const [],
     this.betNumber,
     this.betAmount,
     this.drawTypeBet,
@@ -29,7 +27,15 @@ class NewBetLoaded extends NewBetState {
     this.cashier,
     this.error = '',
     this.isLoading = false,
+    this.isConnected = false,
+    this.status = PrintStatus.idle,
   });
+
+  bool get canSave =>
+      status == PrintStatus.idle &&
+      !isLoading &&
+      isConnected &&
+      items.isNotEmpty;
 
   NewBetLoaded copyWith({
     List<AppendBetDTO>? items,
@@ -41,6 +47,9 @@ class NewBetLoaded extends NewBetState {
     UserAccount? cashier,
     String error = '',
     bool isLoading = false,
+    bool? isConnected,
+    List<BetResult>? result,
+    PrintStatus status = PrintStatus.idle,
   }) {
     return NewBetLoaded(
       items: items ?? this.items,
@@ -51,6 +60,8 @@ class NewBetLoaded extends NewBetState {
       cashier: cashier ?? this.cashier,
       error: error,
       isLoading: isLoading,
+      isConnected: isConnected ?? this.isConnected,
+      result: result ?? this.result,
     );
   }
 
@@ -63,5 +74,8 @@ class NewBetLoaded extends NewBetState {
         winAmount,
         error,
         isLoading,
+        isConnected,
+        result,
+        status,
       ];
 }

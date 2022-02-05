@@ -33,16 +33,15 @@ class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
 
     try {
       final result = await _httpClient.get(
-        '$adminEndpoint/bets',
+        '$adminEndpoint/winning-hits',
         queryParams: {
           'filter[from_this_day]': startDate,
           'filter[to_this_day]': endDate,
-          'filter[is_cancel]': 0,
           ...cashierIdParam,
         },
         onSerialize: (json) => (json['data'] as List),
       );
-      final items = result.map((e) => BetResult.fromMap(e)).toList();
+      final items = result.map((e) => WinningHitsResult.fromMap(e)).toList();
       emit(state.copyWith(draws: items));
     } catch (e) {
       if (e is DioError) {

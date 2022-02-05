@@ -63,3 +63,7 @@ class ValidateBetNumberEvent extends NewBetEvent {
     required this.draw,
   });
 }
+
+class SubmitBetEvent extends NewBetEvent {}
+
+class ConnectPrinterEvent extends NewBetEvent {}

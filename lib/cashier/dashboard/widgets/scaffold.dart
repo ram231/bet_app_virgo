@@ -406,7 +406,7 @@ class GrandTotalCard extends StatelessWidget {
         ),
         Column(
           children: [
-            Text("TAPAL", style: textTheme.button),
+            Text("TAPAL/KABIG", style: textTheme.button),
             GrandTotalBuilder(
               builder: (state) {
                 final tapal = state.betAmount - state.hits;

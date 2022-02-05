@@ -107,8 +107,8 @@ class _GrandTotalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<DrawTypeData>().state;
     final textTheme = Theme.of(context).textTheme;
-    final tapal =
-        int.parse(state.winningAmount!.split(".").first) - (state.prize ?? 0);
+    final tapal = int.parse(state.totalBetAmount!.split(".").first) -
+        (int.parse(state.prize!.split(".").first));
     final isPositive = tapal > 0;
     final color = isPositive ? Colors.green[600] : Colors.red[600];
 
@@ -119,7 +119,7 @@ class _GrandTotalCard extends StatelessWidget {
           children: [
             Text("BET", style: textTheme.button),
             Text(
-              "${state.readableBetAmount}",
+              "${state.totalBetAmount}",
               style: textTheme.subtitle1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -129,7 +129,7 @@ class _GrandTotalCard extends StatelessWidget {
           children: [
             Text("HITS", style: textTheme.button),
             Text(
-              "${state.readableWinningAmount}",
+              "${state.prize}",
               style: textTheme.subtitle1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -137,7 +137,7 @@ class _GrandTotalCard extends StatelessWidget {
         ),
         Column(
           children: [
-            Text("TAPAL", style: textTheme.button),
+            Text("TAPAL/KABIG", style: textTheme.button),
             Text(
               "${tapal.toStringAsFixed(2)}",
               style: textTheme.subtitle1?.copyWith(

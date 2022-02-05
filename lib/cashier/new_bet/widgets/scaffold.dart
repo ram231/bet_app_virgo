@@ -1,19 +1,17 @@
-import 'package:bet_app_virgo/cashier/new_bet/cubit/create_new_bet_cubit.dart';
-import 'package:bet_app_virgo/cashier/new_bet/dto/append_bet_dto.dart';
-import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
-import 'package:bet_app_virgo/login/widgets/builder.dart';
-import 'package:bet_app_virgo/utils/nil.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../login/bloc/login_bloc.dart';
+import '../../../login/widgets/builder.dart';
 import '../../../models/draw.dart';
+import '../../../utils/nil.dart';
 import '../../../utils/timer.dart';
+import '../../printer/widgets/widgets.dart';
 import '../bloc/new_bet_bloc.dart';
 import '../cubit/draw_type_cubit.dart';
-import 'bet_result_scaffold.dart';
+import '../dto/append_bet_dto.dart';
 import 'draw_type_builder.dart';
 import 'new_bet_builder.dart';
 
@@ -33,7 +31,14 @@ class _DrawTypeProvider extends StatelessWidget {
           BlocProvider(
             create: (context) => NewBetBloc(
               cashierId: "${state.id}",
-            ),
+            )
+              ..add(
+                InsertNewBetEvent(
+                  cashier: state,
+                  branchId: state.branchId,
+                ),
+              )
+              ..add(ConnectPrinterEvent()),
           ),
         ],
         child: child,
@@ -55,7 +60,7 @@ class CashierNewBetScaffold extends StatelessWidget {
           elevation: 0,
           actions: [_AddNewBetIcon(), _UndoBetIconButton()],
         ),
-        body: _CashierNewBetBody(),
+        body: NewBetListener(child: _CashierNewBetBody()),
       ),
     );
   }
@@ -81,26 +86,14 @@ class _AddNewBetIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<NewBetBloc>().state;
+    final disabled = !state.canSave;
     return IconButton(
-        onPressed: () {
-          final userState = context.read<LoginBloc>().state;
-          if (userState is LoginSuccess) {
-            final _state = context.read<NewBetBloc>().state;
-            Navigator.pushReplacement(context,
-                CupertinoPageRoute(builder: (context) {
-              return BlocProvider(
-                create: (_) => CreateNewBetCubit(
-                  cashierId: "${userState.user.id}",
-                )..onSave(
-                    userState.user,
-                    _state.items,
-                    _state.drawTypeBet!,
-                  ),
-                child: BetResultScaffold(),
-              );
-            }));
-          }
-        },
+        onPressed: disabled
+            ? null
+            : () {
+                context.read<NewBetBloc>().add(SubmitBetEvent());
+              },
         icon: Icon(Icons.save));
   }
 }
@@ -139,9 +132,9 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
     return BlocConsumer<DrawTypeCubit, DrawTypeState>(
         listener: (context, state) {
       if (state is DrawTypesLoaded) {
-        context
-            .read<NewBetBloc>()
-            .add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType));
+        context.read<NewBetBloc>()
+          ..add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType))
+          ..add(ConnectPrinterEvent());
       }
     }, builder: (context, state) {
       final isClosed = state is DrawTypesLoaded && state.drawTypes.isNotEmpty;
@@ -229,23 +222,35 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
             ),
             NewBetBuilder(
               builder: (state) {
-                if (state.isLoading) {
-                  return Center(child: CircularProgressIndicator.adaptive());
-                }
-                if (state.error.isNotEmpty) {
-                  return Center(
-                    child: Text(
-                      "${state.error}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (state.isLoading)
+                      Center(child: CircularProgressIndicator.adaptive()),
+                    if (!state.isConnected)
+                      ElevatedButton(
+                          onPressed: () async {
+                            await Navigator.pushNamed(
+                                context, CashierPrinterScaffold.path);
+                            context
+                                .read<NewBetBloc>()
+                                .add(ConnectPrinterEvent());
+                          },
+                          child: Text("Connect Printer")),
+                    if (state.error.isNotEmpty)
+                      Center(
+                        child: Text(
+                          "${state.error}",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }
-                return notNil;
+                  ],
+                );
               },
             ),
             SizedBox(height: 250, child: _BetTable())

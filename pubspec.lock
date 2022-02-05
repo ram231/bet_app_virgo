@@ -32,12 +32,10 @@ packages:
   blue_thermal_printer:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: d980327bfba64632aa9aa7af6cdee26c25187dd4
-      url: "https://github.com/ram231/blue_thermal_printer.git"
-    source: git
-    version: "1.1.8"
+      name: blue_thermal_printer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -319,6 +317,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1"
+  rxdart:
+    dependency: "direct main"
+    description:
+      name: rxdart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.27.3"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -386,7 +391,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.17"
+    version: "6.0.18"
   url_launcher_android:
     dependency: transitive
     description:
