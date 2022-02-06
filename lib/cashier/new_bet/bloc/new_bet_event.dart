@@ -66,4 +66,11 @@ class ValidateBetNumberEvent extends NewBetEvent {
 
 class SubmitBetEvent extends NewBetEvent {}
 
-class ConnectPrinterEvent extends NewBetEvent {}
+class ConnectPrinterEvent extends NewBetEvent {
+  final bool isConnected;
+  ConnectPrinterEvent({this.isConnected = false});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [isConnected];
+}

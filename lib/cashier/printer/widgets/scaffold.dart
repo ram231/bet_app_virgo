@@ -51,6 +51,9 @@ class _PrinterBodyState extends State<_PrinterBody> {
 
         Flexible(child: BlueThermalBuilder(
           builder: (state) {
+            if (state.hasError) {
+              return Text("${state.error}");
+            }
             if (!state.isConnected) {
               return Text("Bluetooth disabled");
             }

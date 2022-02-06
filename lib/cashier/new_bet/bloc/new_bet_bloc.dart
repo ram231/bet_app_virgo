@@ -28,6 +28,11 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     on<ConnectPrinterEvent>(_connectPrinter);
   }
 
+  @override
+  Future<void> close() {
+    return super.close();
+  }
+
   final UserAccount cashier;
 
   Map<String, dynamic> get cashierIdParam => {'filter[cashier_id': cashier.id};
@@ -109,16 +114,6 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     try {
       emit(state.copyWith(isLoading: true));
 
-      final isOn = await isConnected;
-      if (!isOn) {
-        emit(
-          state.copyWith(
-            isConnected: false,
-            error: "Printer not connected",
-          ),
-        );
-        return;
-      }
       final result = await submitBet();
       final cashier = state.cashier;
       emit(
@@ -168,19 +163,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   }
 
   void _connectPrinter(ConnectPrinterEvent event, Emitter emit) async {
-    emit(state.copyWith(isLoading: true));
-    final isOn = await isConnected;
-    if (!isOn) {
-      emit(
-        state.copyWith(
-          isConnected: isOn,
-          error: "Printer not connected",
-        ),
-      );
-      return;
-    }
-
-    emit(state.copyWith(isConnected: true));
+    emit(state.copyWith(isConnected: event.isConnected));
   }
 
   Future<bool> get isConnected async {
@@ -188,7 +171,9 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         (await BlueThermalPrinter.instance.isConnected) ?? false;
     final isOn = (await BlueThermalPrinter.instance.isOn) ?? false;
 
-    return isConnected && isOn;
+    final devices = (await BlueThermalPrinter.instance.getBondedDevices());
+
+    return isConnected && isOn && devices.first.connected;
   }
 
   Future<bool> _printReceipt(

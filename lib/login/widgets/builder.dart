@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:bet_app_virgo/models/models.dart';
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -56,5 +59,43 @@ class LoginSuccessBuilder extends StatelessWidget {
       return builder(userState.user);
     }
     return notNil;
+  }
+}
+
+class BluetoothStatusBuilder extends StatefulWidget {
+  const BluetoothStatusBuilder({
+    required this.builder,
+    Key? key,
+  }) : super(key: key);
+  final Widget Function(int state) builder;
+
+  @override
+  State<BluetoothStatusBuilder> createState() => _BluetoothStatusBuilderState();
+}
+
+class _BluetoothStatusBuilderState extends State<BluetoothStatusBuilder> {
+  late final StreamSubscription<int?> _streamSubscription;
+  int val = 0;
+  @override
+  void initState() {
+    _streamSubscription =
+        BlueThermalPrinter.instance.onStateChanged().listen((event) {
+      debugPrint("$event");
+      setState(() {
+        val = event ?? 0;
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(val);
   }
 }

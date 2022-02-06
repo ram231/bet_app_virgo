@@ -1,3 +1,4 @@
+import 'package:bet_app_virgo/cashier/printer/cubit/blue_thermal_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,13 +47,15 @@ class CashierNewBetScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DrawTypeProvider(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("New Bet"),
-          elevation: 0,
-          actions: [_AddNewBetIcon(), _UndoBetIconButton()],
+      child: NewBetListener(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("New Bet"),
+            elevation: 0,
+            actions: [_AddNewBetIcon(), _UndoBetIconButton()],
+          ),
+          body: _CashierNewBetBody(),
         ),
-        body: NewBetListener(child: _CashierNewBetBody()),
       ),
     );
   }
@@ -79,9 +82,11 @@ class _AddNewBetIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<NewBetBloc>().state;
+    final bluetoothState = context.watch<BlueThermalCubit>().state;
     final disabled = !state.canSave;
+    final disconnected = !bluetoothState.isConnected;
     return IconButton(
-        onPressed: disabled
+        onPressed: disabled || disconnected
             ? null
             : () {
                 context.read<NewBetBloc>().add(SubmitBetEvent());
@@ -121,12 +126,13 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
 
   @override
   Widget build(BuildContext context) {
+    final newBetState = context.watch<NewBetBloc>().state;
+    final bluetoothState = context.watch<BlueThermalCubit>().state;
     return BlocConsumer<DrawTypeCubit, DrawTypeState>(
         listener: (context, state) {
       if (state is DrawTypesLoaded) {
         context.read<NewBetBloc>()
-          ..add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType))
-          ..add(ConnectPrinterEvent());
+          ..add(InsertNewBetEvent(drawTypeBet: state.selectedDrawType));
       }
     }, builder: (context, state) {
       final isClosed = state is DrawTypesLoaded && state.drawTypes.isNotEmpty;
@@ -177,74 +183,43 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
               width: double.infinity,
               child: _BetTypeDropdown(),
             ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isClosed
-                    ? () {
-                        final validate =
-                            formKey.currentState?.validate() ?? false;
-                        if (validate) {
-                          final userState = context.read<LoginBloc>().state;
-                          if (userState is LoginSuccess) {
-                            final _state = context.read<NewBetBloc>().state;
-                            final winAmount = double.parse(
-                                _state.drawTypeBet?.winningAmount ?? "0");
-                            context.read<NewBetBloc>().add(
-                                  AddNewBetEvent(
-                                    dto: AppendBetDTO(
-                                      betAmount: _state.betAmount ?? 0,
-                                      betNumber: _state.betNumber ?? 0,
-                                      drawTypeBet: _state.drawTypeBet,
-                                      winAmount: winAmount,
-                                      cashier: userState.user,
+            if (newBetState.canAppend && bluetoothState.isConnected)
+              Container(
+                padding: const EdgeInsets.all(8),
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isClosed
+                      ? () {
+                          final validate =
+                              formKey.currentState?.validate() ?? false;
+                          if (validate) {
+                            final userState = context.read<LoginBloc>().state;
+                            if (userState is LoginSuccess) {
+                              final _state = context.read<NewBetBloc>().state;
+                              final winAmount = double.parse(
+                                  _state.drawTypeBet?.winningAmount ?? "0");
+                              context.read<NewBetBloc>().add(
+                                    AddNewBetEvent(
+                                      dto: AppendBetDTO(
+                                        betAmount: _state.betAmount ?? 0,
+                                        betNumber: _state.betNumber ?? 0,
+                                        drawTypeBet: _state.drawTypeBet,
+                                        winAmount: winAmount,
+                                        cashier: userState.user,
+                                      ),
                                     ),
-                                  ),
-                                );
-                            _betAmountController.clear();
-                            _betNumberController.clear();
-                            _betNumberFocusNode.requestFocus();
+                                  );
+                              _betAmountController.clear();
+                              _betNumberController.clear();
+                              _betNumberFocusNode.requestFocus();
+                            }
                           }
                         }
-                      }
-                    : null,
-                child: Text("APPEND"),
+                      : null,
+                  child: Text("APPEND"),
+                ),
               ),
-            ),
-            NewBetBuilder(
-              builder: (state) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (state.isLoading)
-                      Center(child: CircularProgressIndicator.adaptive()),
-                    if (!state.isConnected)
-                      ElevatedButton(
-                          onPressed: () async {
-                            await Navigator.pushNamed(
-                                context, CashierPrinterScaffold.path);
-                            context
-                                .read<NewBetBloc>()
-                                .add(ConnectPrinterEvent());
-                          },
-                          child: Text("Connect Printer")),
-                    if (state.error.isNotEmpty)
-                      Center(
-                        child: Text(
-                          "${state.error}",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
+            _ConnectPrinterButton(),
             SizedBox(height: 250, child: _BetTable())
           ],
         ),
@@ -449,6 +424,55 @@ class __BetTypeDropdownState extends State<_BetTypeDropdown> {
                   value: type,
                 ))
             .toList(),
+      );
+    });
+  }
+}
+
+class _ConnectPrinterButton extends StatelessWidget {
+  const _ConnectPrinterButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bluetoothState = context.watch<BlueThermalCubit>().state;
+    return NewBetBuilder(builder: (state) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (state.isLoading)
+            Center(child: CircularProgressIndicator.adaptive()),
+          if (!bluetoothState.isConnected) ...[
+            ElevatedButton(
+                onPressed: () async {
+                  await Navigator.pushNamed(
+                      context, CashierPrinterScaffold.path);
+                },
+                child: Text("Connect Printer")),
+            Center(
+              child: Text(
+                "Printer not connected",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
+          ],
+          if (state.error.isNotEmpty)
+            Center(
+              child: Text(
+                "${state.error}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
       );
     });
   }

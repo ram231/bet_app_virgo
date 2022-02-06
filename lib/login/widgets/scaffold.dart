@@ -30,7 +30,6 @@ class _BetLoginBodyState extends State<BetLoginBody> {
   final _userController = TextEditingController();
   final _passController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _dialog = false;
   @override
   Widget build(BuildContext context) {
     return LoginAuthenticator(

@@ -32,11 +32,8 @@ class NewBetLoaded extends Equatable {
     this.status = PrintStatus.idle,
   });
 
-  bool get canSave =>
-      status == PrintStatus.idle &&
-      !isLoading &&
-      isConnected &&
-      items.isNotEmpty;
+  bool get canSave => items.isNotEmpty && canAppend;
+  bool get canAppend => status == PrintStatus.idle && !isLoading;
 
   NewBetLoaded copyWith({
     List<AppendBetDTO>? items,

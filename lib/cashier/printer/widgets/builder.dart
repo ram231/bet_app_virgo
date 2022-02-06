@@ -11,12 +11,9 @@ class BlueThermalBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<BlueThermalCubit>().state;
-    if (state is BlueThermalLoading) {
+    if (state.isLoading) {
       return onLoading ?? notNil;
     }
-    if (state is BlueThermalLoaded) {
-      return builder(state);
-    }
-    return notNil;
+    return builder(state);
   }
 }
