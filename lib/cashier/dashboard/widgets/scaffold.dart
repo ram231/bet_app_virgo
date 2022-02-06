@@ -207,7 +207,7 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
 
             context.read<GrandTotalCubit>().fetch(
                   fromDate: lastWeek,
-                  toDate: lastWeek,
+                  toDate: DateTime.now(),
                 );
             break;
           case 3:

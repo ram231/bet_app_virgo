@@ -43,15 +43,7 @@ class NewBetListener extends StatelessWidget {
           );
         }
       },
-      listenWhen: (prev, curr) {
-        final isPrinting = prev.status == PrintStatus.printing &&
-            curr.status == PrintStatus.idle &&
-            !curr.isLoading;
-        if (isPrinting) {
-          return true;
-        }
-        return false;
-      },
+      listenWhen: (prev, curr) => curr.status == PrintStatus.done,
       child: child,
     );
   }

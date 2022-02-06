@@ -29,17 +29,9 @@ class _DrawTypeProvider extends StatelessWidget {
             ),
           ),
           BlocProvider(
-            create: (context) => NewBetBloc(
-              cashierId: "${state.id}",
-            )
-              ..add(
-                InsertNewBetEvent(
-                  cashier: state,
-                  branchId: state.branchId,
-                ),
-              )
-              ..add(ConnectPrinterEvent()),
-          ),
+              create: (context) => NewBetBloc(
+                    cashier: state,
+                  )),
         ],
         child: child,
       );
@@ -202,8 +194,8 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                             context.read<NewBetBloc>().add(
                                   AddNewBetEvent(
                                     dto: AppendBetDTO(
-                                      betAmount: _state.betAmount!,
-                                      betNumber: _state.betNumber!,
+                                      betAmount: _state.betAmount ?? 0,
+                                      betNumber: _state.betNumber ?? 0,
                                       drawTypeBet: _state.drawTypeBet,
                                       winAmount: winAmount,
                                       cashier: userState.user,

@@ -8,7 +8,6 @@ import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 
 import '../../../models/models.dart';
-import '../../../utils/debounce_event.dart';
 import '../dto/append_bet_dto.dart';
 
 part 'new_bet_event.dart';
@@ -16,21 +15,22 @@ part 'new_bet_state.dart';
 
 class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   NewBetBloc({
-    required this.cashierId,
+    required this.cashier,
     STLHttpClient? httpClient,
   })  : _httpClient = httpClient ?? STLHttpClient(),
-        super(NewBetLoaded()) {
+        super(NewBetLoaded(
+          cashier: cashier,
+        )) {
     on<AddNewBetEvent>(_onAppend);
-    on<InsertNewBetEvent>(_onInsert,
-        transformer: debounceEvent(const Duration(milliseconds: 500)));
+    on<InsertNewBetEvent>(_onInsert);
     on<ResetBetEvent>(_onReset);
     on<SubmitBetEvent>(_onSubmit);
     on<ConnectPrinterEvent>(_connectPrinter);
   }
 
-  final String cashierId;
+  final UserAccount cashier;
 
-  Map<String, String> get cashierIdParam => {'filter[cashier_id': cashierId};
+  Map<String, dynamic> get cashierIdParam => {'filter[cashier_id': cashier.id};
 
   final STLHttpClient _httpClient;
 
@@ -119,37 +119,52 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         );
         return;
       }
-      final items = state.items;
+      final result = await submitBet();
       final cashier = state.cashier;
-      final request = items.map((e) {
-        final data = {
-          'cashier_id': cashier?.id,
-          'branch_id': cashier?.branchId,
-          'bet_amount': e.betAmount,
-          'bet_number': e.betNumber,
-          'draw_id': e.drawTypeBet?.id,
-          'prize': e.winAmount,
-        };
-        return _httpClient.post(
-          '$adminEndpoint/bets',
-          body: data,
-          onSerialize: (json) => BetResult.fromMap(json),
-          queryParams: cashierIdParam,
-        );
-      }).toList();
-      final result = await Future.wait(request);
       emit(
         state.copyWith(
           result: result,
           status: PrintStatus.printing,
         ),
       );
-      await _printReceipt(result);
+      if (cashier != null) {
+        await _printReceipt(cashier, result);
+      }
 
-      emit(state.copyWith());
+      emit(state.copyWith(
+        status: PrintStatus.done,
+        isLoading: false,
+      ));
     } catch (e) {
       emit(state.copyWith(error: "$e"));
+      addError(e);
+      print(e);
     }
+  }
+
+  Future<List<BetResult>> submitBet() async {
+    final items = state.items;
+    final cashierId = cashier.id;
+    final branchId = cashier.branchId;
+    final request = items.map((e) {
+      final data = {
+        'cashier_id': cashierId,
+        'branch_id': branchId,
+        'bet_amount': e.betAmount,
+        'bet_number': e.betNumber,
+        'draw_id': e.drawTypeBet?.id,
+        'prize': e.winAmount,
+      };
+      return _httpClient.post(
+        '$adminEndpoint/bets',
+        body: data,
+        onSerialize: (json) => BetResult.fromMap(json),
+        queryParams: cashierIdParam,
+      );
+    }).toList();
+
+    final result = await Future.wait(request);
+    return result;
   }
 
   void _connectPrinter(ConnectPrinterEvent event, Emitter emit) async {
@@ -176,11 +191,14 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     return isConnected && isOn;
   }
 
-  Future<bool> _printReceipt(List<BetResult> result) async {
+  Future<bool> _printReceipt(
+    UserAccount cashier,
+    List<BetResult> result,
+  ) async {
     try {
       final receipt = await _httpClient.post('$adminEndpoint/receipts',
           body: {
-            "cashier_id": cashierId,
+            "cashier_id": cashier.id,
             "bet_ids": result.map((e) => e.id).toList(),
           },
           onSerialize: (json) => BetReceipt.fromMap(json));

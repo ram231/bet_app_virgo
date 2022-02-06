@@ -3,6 +3,7 @@ part of 'new_bet_bloc.dart';
 enum PrintStatus {
   printing,
   idle,
+  done,
 }
 
 class NewBetLoaded extends Equatable {
@@ -62,6 +63,7 @@ class NewBetLoaded extends Equatable {
       isLoading: isLoading,
       isConnected: isConnected ?? this.isConnected,
       result: result ?? this.result,
+      status: status,
     );
   }
 
