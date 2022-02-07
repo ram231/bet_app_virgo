@@ -76,7 +76,7 @@ class _CashierDashboardScaffoldState extends State<CashierDashboardScaffold> {
             physics: const BouncingScrollPhysics(),
             children: const [
               _CashierBody(),
-              ClaimQRScaffold(),
+              ClaimPrizeScaffold(),
               _CashierSettingsBody(),
             ],
           ),

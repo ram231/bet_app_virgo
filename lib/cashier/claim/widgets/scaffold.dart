@@ -7,15 +7,148 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../../models/models.dart';
 import '../../../utils/utils.dart';
 
-class ClaimQRScaffold extends StatefulWidget {
-  const ClaimQRScaffold({Key? key}) : super(key: key);
+enum ClaimType { input, qrcode, none }
+mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
+  bool isLoading = false;
+  String err = '';
+  void changeState() {
+    setState(() {
+      isLoading = !isLoading;
+    });
+  }
 
-  @override
-  _ClaimQRScaffoldState createState() => _ClaimQRScaffoldState();
+  Future<void> onClaim(
+    String cashierId,
+    String receiptNo, {
+    VoidCallback? onFinished,
+  }) async {
+    assert(receiptNo.isNotEmpty, "Receipt no. not found");
+    changeState();
+    try {
+      final _http = STLHttpClient();
+      final response = await _http.post(
+        "$adminEndpoint/receipts/claim-prizes/$receiptNo",
+        onSerialize: (json) => BetReceipt.fromMap(json),
+      );
+    } catch (e) {
+      err = e.toString();
+    } finally {
+      changeState();
+    }
+    onFinished?.call();
+  }
+
+  Future<BetReceipt?> fetchReceipt(String receiptNo) {
+    return showDialog<BetReceipt>(
+      context: context,
+      builder: (context) {
+        return LoginSuccessBuilder(builder: (user) {
+          return LoadingDialog(
+            onLoading: () async {
+              try {
+                final _http = STLHttpClient();
+
+                final betResultById = await _http.get(
+                  '$adminEndpoint/receipts/no/$receiptNo',
+                  onSerialize: (json) => BetReceipt.fromMap(json),
+                  queryParams: {
+                    'filter[cashier_id]': user.id,
+                  },
+                );
+
+                Navigator.pop(context, betResultById);
+              } catch (e) {
+                debugPrint('$e');
+                showInvalidMessage(e);
+                Navigator.pop(context, null);
+              }
+            },
+          );
+        });
+      },
+    );
+  }
+
+  void showInvalidMessage(Object e) {
+    setState(() {
+      err = "$e";
+    });
+    Future.delayed(Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          err = "";
+        });
+      }
+    });
+  }
 }
 
-class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
-    with WidgetsBindingObserver {
+class ClaimPrizeScaffold extends StatefulWidget {
+  const ClaimPrizeScaffold({Key? key}) : super(key: key);
+
+  @override
+  State<ClaimPrizeScaffold> createState() => _ClaimPrizeScaffoldState();
+}
+
+class _ClaimPrizeScaffoldState extends State<ClaimPrizeScaffold> {
+  ClaimType _claimType = ClaimType.none;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          "CLAIM BY",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _claimType = ClaimType.input;
+                  });
+                },
+                child: Text("INPUT"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _claimType = ClaimType.qrcode;
+                  });
+                },
+                child: Text("QR CODE"),
+              ),
+            ],
+          ),
+        ),
+        if (_claimType == ClaimType.qrcode)
+          Flexible(
+            child: ClaimQRBody(),
+          )
+        else if (_claimType == ClaimType.input)
+          Flexible(child: ClaimInputBody()),
+      ],
+    );
+  }
+}
+
+class ClaimQRBody extends StatefulWidget {
+  const ClaimQRBody({Key? key}) : super(key: key);
+
+  @override
+  _ClaimQRBodyState createState() => _ClaimQRBodyState();
+}
+
+class _ClaimQRBodyState extends State<ClaimQRBody>
+    with WidgetsBindingObserver, ClaimPOSTMixin {
   final GlobalKey _qrKey = GlobalKey();
   Barcode? _result;
   QRViewController? _controller;
@@ -57,33 +190,26 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    if (!_isGranted) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Permission was denied"),
-          ElevatedButton(onPressed: () {}, child: Text("Retry")),
-        ],
-      );
-    }
     return Stack(
       fit: StackFit.passthrough,
       children: [
-        QRView(
-          key: _qrKey,
-          onQRViewCreated: _onQrViewCreated,
-          overlay: QrScannerOverlayShape(
-            borderLength: 50,
-            borderRadius: 16,
-            borderColor: Colors.yellow,
-          ),
-          onPermissionSet: (controller, permission) {
-            setState(() {
-              _isGranted = permission;
-            });
-          },
-        ),
+        if (_isGranted)
+          QRView(
+            key: _qrKey,
+            onQRViewCreated: _onQrViewCreated,
+            overlay: QrScannerOverlayShape(
+              borderLength: 50,
+              borderRadius: 16,
+              borderColor: Colors.yellow,
+            ),
+            onPermissionSet: (controller, permission) {
+              setState(() {
+                _isGranted = permission;
+              });
+            },
+          )
+        else
+          Text("Camera permission was denied"),
         if (err.isNotEmpty)
           Center(
             child: Text(
@@ -148,39 +274,8 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
           if (!code.contains("_")) {
             throw "Invalid Format.";
           }
-          final result = await showDialog<BetReceipt>(
-            context: context,
-            builder: (context) {
-              return LoginSuccessBuilder(builder: (user) {
-                return LoadingDialog(
-                  onLoading: () async {
-                    try {
-                      final _http = STLHttpClient();
-                      final data = code.split("_");
-                      final id = int.tryParse(data.last);
-                      if (id != null) {
-                        final betResultById = await _http.get(
-                          '$adminEndpoint/receipts/$id',
-                          onSerialize: (json) => BetReceipt.fromMap(json),
-                          queryParams: {
-                            'filter[cashier_id]': user.id,
-                          },
-                        );
 
-                        Navigator.pop(context, betResultById);
-                      } else {
-                        throw "Invalid Format";
-                      }
-                    } catch (e) {
-                      debugPrint('$e');
-                      showInvalidMessage(e);
-                      Navigator.pop(context, null);
-                    }
-                  },
-                );
-              });
-            },
-          );
+          final result = await fetchReceipt(code);
           if (result != null) {
             if (result.status != 'V') {
               throw "${result.readableStatus}";
@@ -193,8 +288,8 @@ class _ClaimQRScaffoldState extends State<ClaimQRScaffold>
                   );
                 });
             _dialog = showWinner ?? false;
+            _dialog = false;
           }
-          _dialog = false;
         } catch (e) {
           _dialog = false;
           showInvalidMessage(e);
@@ -225,31 +320,8 @@ class _ClaimPrizeButton extends StatefulWidget {
   State<_ClaimPrizeButton> createState() => _ClaimPrizeButtonState();
 }
 
-class _ClaimPrizeButtonState extends State<_ClaimPrizeButton> {
-  bool _isLoading = false;
-  String err = '';
-  void changeState() {
-    setState(() {
-      _isLoading = !_isLoading;
-    });
-  }
-
-  void _onClaim(String cashierId) async {
-    changeState();
-    try {
-      final _http = STLHttpClient();
-      final response = await _http.post(
-        "$adminEndpoint/receipts/claim-prizes/${widget.receipt.receiptNo}",
-        onSerialize: (json) => BetReceipt.fromMap(json),
-      );
-    } catch (e) {
-      err = e.toString();
-    } finally {
-      changeState();
-    }
-    Navigator.pop(context);
-  }
-
+class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
+    with ClaimPOSTMixin {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -276,8 +348,14 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton> {
               style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(40))),
-              onPressed: _isLoading ? null : () => _onClaim("${user.id}"),
-              child: _isLoading
+              onPressed: isLoading
+                  ? null
+                  : () => onClaim(
+                        "${user.id}",
+                        widget.receipt.receiptNo ?? '',
+                        onFinished: () => Navigator.pop(context),
+                      ),
+              child: isLoading
                   ? CircularProgressIndicator.adaptive()
                   : Text("CLAIM"),
             ),
@@ -287,6 +365,84 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton> {
         //     onPressed: () => Navigator.pop(context, false),
         //     child: Text("CLOSE"))
       ],
+    );
+  }
+}
+
+class ClaimInputBody extends StatefulWidget {
+  const ClaimInputBody({Key? key}) : super(key: key);
+
+  @override
+  State<ClaimInputBody> createState() => _ClaimInputBodyState();
+}
+
+class _ClaimInputBodyState extends State<ClaimInputBody> with ClaimPOSTMixin {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+  final _formKey = GlobalKey<FormState>();
+  @override
+  void initState() {
+    _controller = TextEditingController();
+    _focusNode = FocusNode();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: "Enter Receipt No.",
+              ),
+              keyboardType: TextInputType.numberWithOptions(),
+              controller: _controller,
+              focusNode: _focusNode,
+              validator: (val) {
+                if (val != null) {
+                  if (val.isEmpty) {
+                    return "Field required";
+                  }
+                }
+                return null;
+              },
+            ),
+          ),
+          LoginSuccessBuilder(builder: (user) {
+            if (isLoading) {
+              return Center(child: CircularProgressIndicator.adaptive());
+            }
+            return ElevatedButton(
+                onPressed: () async {
+                  final isValid = _formKey.currentState?.validate() ?? false;
+                  if (isValid) {
+                    final result = await fetchReceipt(_controller.text);
+                    if (result != null) {
+                      if (result.status != 'V') {
+                        throw "${result.readableStatus}";
+                      }
+                      final showWinner = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return _ClaimPrizeButton(
+                              receipt: result,
+                            );
+                          });
+
+                      _controller.clear();
+                      _focusNode.requestFocus();
+                    }
+                  }
+                },
+                child: Text("CLAIM"));
+          }),
+        ],
+      ),
     );
   }
 }
