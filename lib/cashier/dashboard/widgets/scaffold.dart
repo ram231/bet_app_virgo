@@ -1,16 +1,16 @@
-import 'package:bet_app_virgo/cashier/grand_total_draws/grand_total_draws.dart';
-import 'package:bet_app_virgo/login/widgets/builder.dart';
-import 'package:bet_app_virgo/models/models.dart';
-import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../login/bloc/login_bloc.dart';
+import '../../../login/widgets/builder.dart';
 import '../../../login/widgets/scaffold.dart';
+import '../../../models/models.dart';
+import '../../../utils/http_client.dart';
 import '../../../utils/nil.dart';
 import '../../cashier.dart';
 import '../../claim/widgets/scaffold.dart';
+import '../../grand_total_draws/grand_total_draws.dart';
 import '../cubit/grand_total_cubit.dart';
 import 'grand_total_builder.dart';
 
@@ -25,8 +25,8 @@ class GrandTotalProvider extends StatelessWidget {
     return LoginSuccessBuilder(builder: (user) {
       return BlocProvider(
         create: (context) => GrandTotalCubit(
-          cashierId: "${user.id}",
-        )..refetch(),
+          user: user,
+        ),
         child: child,
       );
     });
@@ -128,8 +128,19 @@ class _RefreshGrandTotalIcon extends StatelessWidget {
   }
 }
 
-class _CashierBody extends StatelessWidget {
+class _CashierBody extends StatefulWidget {
   const _CashierBody({Key? key}) : super(key: key);
+
+  @override
+  State<_CashierBody> createState() => _CashierBodyState();
+}
+
+class _CashierBodyState extends State<_CashierBody> {
+  @override
+  void initState() {
+    context.read<GrandTotalCubit>().refetch();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -327,12 +338,11 @@ class GrandTotalContainer extends StatelessWidget {
               builder: (context) => LoginSuccessBuilder(
                 builder: (user) {
                   return BlocProvider(
-                    create: (context) =>
-                        GrandTotalDrawsCubit(cashierId: '${user.id}')
-                          ..fetch(
-                            fromDate: state.fromDate,
-                            toDate: state.toDate,
-                          ),
+                    create: (context) => GrandTotalDrawsCubit(user: user)
+                      ..fetch(
+                        fromDate: state.fromDate,
+                        toDate: state.toDate,
+                      ),
                     child: GrandTotalDrawsScaffold(),
                   );
                 },
@@ -464,7 +474,7 @@ class UserBranchName extends StatelessWidget {
           name: json['name'],
         );
       }, queryParams: {
-        'filter[user_id]': user.id,
+        'filter[show_all_or_not]': "${user.id},${user.type}",
       });
       return result;
     } catch (e) {

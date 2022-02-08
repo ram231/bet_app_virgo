@@ -1,9 +1,27 @@
 import 'package:bet_app_virgo/admin/sold_out/cubit/sold_out_cubit.dart';
-import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../login/widgets/builder.dart';
+
+class SoldOutProvider extends StatelessWidget {
+  const SoldOutProvider({
+    required this.child,
+    Key? key,
+  }) : super(key: key);
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return LoginSuccessBuilder(builder: (user) {
+      return BlocProvider(
+        create: (context) => SoldOutCubit(
+          user: user,
+        ),
+        child: child,
+      );
+    });
+  }
+}
 
 class BetSoldOutScaffold extends StatelessWidget {
   static const path = "/sold-out";
@@ -128,6 +146,7 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
                   } else {
                     context.read<SoldOutCubit>().submit(
                           number: _controller.text,
+                          amount: _amountController.text,
                           type: "low-wins",
                         );
                   }
@@ -148,25 +167,6 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
   }
 }
 
-class SoldOutProvider extends StatelessWidget {
-  const SoldOutProvider({
-    required this.child,
-    Key? key,
-  }) : super(key: key);
-  final Widget child;
-  @override
-  Widget build(BuildContext context) {
-    return LoginSuccessBuilder(builder: (user) {
-      return BlocProvider(
-        create: (context) => SoldOutCubit(
-          cashierId: "${user.id}",
-        ),
-        child: child,
-      );
-    });
-  }
-}
-
 class SoldOutListView extends StatelessWidget {
   const SoldOutListView({Key? key}) : super(key: key);
 
@@ -174,7 +174,12 @@ class SoldOutListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<SoldOutCubit>().state;
     if (state.hasError) {
-      return notNil;
+      return Text(
+        "${state.error}",
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
     }
     return Expanded(
       flex: 4,

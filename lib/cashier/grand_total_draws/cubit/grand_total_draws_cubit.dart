@@ -10,15 +10,17 @@ part 'grand_total_draws_state.dart';
 class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
   GrandTotalDrawsCubit({
     STLHttpClient? httpClient,
-    required this.cashierId,
+    required this.user,
   })  : _httpClient = httpClient ?? STLHttpClient(),
         super(GrandTotalDrawsState());
 
   final STLHttpClient _httpClient;
 
-  final String cashierId;
+  final UserAccount user;
 
-  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
+  Map<String, String> get cashierIdParam => {
+        'filter[show_all_or_not]': "${user.id},${user.type}",
+      };
 
   void fetch({DateTime? fromDate, DateTime? toDate}) async {
     final startDate = YEAR_MONTH_DAY.format(

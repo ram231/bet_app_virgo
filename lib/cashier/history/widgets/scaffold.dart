@@ -1,13 +1,13 @@
-import 'package:bet_app_virgo/cashier/history/bloc/bet_history_bloc.dart';
-import 'package:bet_app_virgo/login/bloc/login_bloc.dart';
-import 'package:bet_app_virgo/login/widgets/builder.dart';
-import 'package:bet_app_virgo/models/models.dart';
-import 'package:bet_app_virgo/utils/date_format.dart';
-import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../login/bloc/login_bloc.dart';
+import '../../../login/widgets/builder.dart';
+import '../../../models/models.dart';
+import '../../../utils/date_format.dart';
+import '../../../utils/nil.dart';
+import '../bloc/bet_history_bloc.dart';
 import 'bet_items.dart';
 import 'builder.dart';
 
@@ -18,7 +18,7 @@ class BetHistoryProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return LoginSuccessBuilder(builder: (user) {
       return BlocProvider(
-        create: (context) => BetHistoryBloc(cashierId: '${user.id}')..fetch(),
+        create: (context) => BetHistoryBloc(user: user)..fetch(),
         child: child,
       );
     });

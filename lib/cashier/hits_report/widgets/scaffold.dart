@@ -17,7 +17,7 @@ class HitReportsProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return LoginSuccessBuilder(builder: (user) {
       return BlocProvider(
-        create: (context) => HitsReportBloc(cashierId: '${user.id}'),
+        create: (context) => HitsReportBloc(user: user),
         child: child,
       );
     });
@@ -123,7 +123,8 @@ class _HitsTable extends StatelessWidget {
                 rows: state.draws
                     .map((bet) => DataRow(cells: [
                           DataCell(Text("${bet.draw?.id}")),
-                          DataCell(Text("${bet.draw?.winningCombination}")),
+                          DataCell(
+                              Text("${bet.draw?.winningCombination ?? ''}")),
                           DataCell(Text("${bet.totalBetAmount}")),
                           DataCell(Text("${bet.id}")),
                           DataCell(Text("${bet.readablePrize}")),

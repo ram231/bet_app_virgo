@@ -21,17 +21,17 @@ class _DrawTypeProvider extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    return LoginSuccessBuilder(builder: (state) {
+    return LoginSuccessBuilder(builder: (user) {
       return MultiBlocProvider(
         providers: [
           BlocProvider(
             create: (context) => DrawTypeCubit(
-              cashierId: "${state.id}",
+              user: user,
             ),
           ),
           BlocProvider(
               create: (context) => NewBetBloc(
-                    cashier: state,
+                    user: user,
                   )),
         ],
         child: child,

@@ -26,7 +26,6 @@ class BetCancelBloc extends Bloc<BetCancelEvent, BetCancelState> {
       emit(BetCancelState(status: BetCancelStatus.loading));
       final result = await _http.get(
         '$adminEndpoint/bets',
-        queryParams: {'filter[user_id]': cashierId},
         onSerialize: (json) => json['data'] as List,
       );
       final lists = result.map((e) => BetResult.fromMap(e)).toList();

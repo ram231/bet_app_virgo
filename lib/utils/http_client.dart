@@ -107,6 +107,12 @@ class STLHttpClient {
 
 String throwableDioError(Object error) {
   if (error is DioError) {
+    final responseMessage = error.response?.data;
+    if (responseMessage is Map) {
+      final message = responseMessage['message'];
+      final errors = responseMessage['errors'];
+      return "$message: $errors";
+    }
     final statusMessage = error.response?.statusMessage ?? error.message;
     return statusMessage;
   }

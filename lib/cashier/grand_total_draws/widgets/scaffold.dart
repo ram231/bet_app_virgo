@@ -47,7 +47,7 @@ class _GrandTotalDrawBodyState extends State<GrandTotalDrawBody> {
             final item = state[index];
             final textTheme = Theme.of(context).textTheme;
             return BlocProvider(
-              create: (context) => DrawTypeData(state[index]),
+              create: (context) => DrawTypeData(item),
               child: InkWell(
                 onTap: () {
                   Navigator.push(
@@ -57,7 +57,7 @@ class _GrandTotalDrawBodyState extends State<GrandTotalDrawBody> {
                           LoginSuccessBuilder(builder: (user) {
                         return BlocProvider(
                           create: (context) => GrandTotalItemCubit(
-                            cashierId: '${user.id}',
+                            user: user,
                           )..fetchByDrawId(item.draw!.id),
                           child: GrandTotalDrawItemScaffold(),
                         );

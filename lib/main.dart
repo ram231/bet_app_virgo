@@ -1,3 +1,4 @@
+import 'package:bet_app_virgo/admin/history/widgets/scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +120,9 @@ class MyApp extends StatelessWidget {
           case GrandTotalDrawsScaffold.path:
             return CupertinoPageRoute(
                 builder: (context) => GrandTotalDrawsScaffold());
+          case AdminHistoryScaffold.path:
+            return CupertinoPageRoute(
+                builder: (context) => AdminHistoryScaffold());
 
           case CreateDrawScaffold.path:
             final args = settings.arguments as DrawBet;

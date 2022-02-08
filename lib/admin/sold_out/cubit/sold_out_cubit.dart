@@ -1,18 +1,21 @@
-import 'package:bet_app_virgo/models/sold_out.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../models/models.dart';
+
 part 'sold_out_state.dart';
 
 class SoldOutCubit extends Cubit<SoldOutState> {
-  SoldOutCubit({required this.cashierId, STLHttpClient? httpClient})
+  SoldOutCubit({required this.user, STLHttpClient? httpClient})
       : _http = httpClient ?? STLHttpClient(),
         super(SoldOutState());
   final STLHttpClient _http;
-  final String cashierId;
-  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
+  final UserAccount user;
+  Map<String, String> get _userParam => {
+        'filter[show_all_or_not]': "${user.id},${user.type}",
+      };
   void submit({
     required String number,
     required String type,
@@ -21,11 +24,13 @@ class SoldOutCubit extends Cubit<SoldOutState> {
     emit(state.copyWith(isLoading: true));
     try {
       final result = await _http.post('$adminEndpoint/${type}',
-          queryParams: cashierIdParam,
+          queryParams: _userParam,
           body: {
-            'sold_out_number': int.parse(number),
-            'winning_amount': amount,
-            'low_win_number': int.parse(number),
+            if (type == 'low-wins') ...{
+              'winning_amount': int.parse(amount),
+              'low_win_number': int.parse(number),
+            } else
+              'sold_out_number': int.parse(number),
           },
           onSerialize: (json) => BetSoldOut.fromMap(json));
       final newItems = state.items..add(result);
@@ -33,6 +38,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
         items: newItems,
       ));
     } catch (e) {
+      emit(state.copyWith(error: throwableDioError(e)));
       addError(e);
     }
   }
@@ -46,7 +52,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
       String endPoint = soldOut ? 'sold-outs' : 'low-wins';
       final result = await _http.delete(
         '$adminEndpoint/$endPoint/$id',
-        queryParams: cashierIdParam,
+        queryParams: _userParam,
       );
       final newItems = state.items.where((e) => e.id != id).toList();
       emit(state.copyWith(items: newItems));
@@ -70,7 +76,6 @@ class SoldOutCubit extends Cubit<SoldOutState> {
               .toList());
       final lowWins = await _http.get(
         '$adminEndpoint/low-wins',
-        queryParams: cashierIdParam,
         onSerialize: (json) =>
             (json['data'] as List).map((e) => BetSoldOut.fromMap(e)).toList(),
       );
@@ -84,7 +89,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
     } catch (e) {
       addError(e);
 
-      emit(state.copyWith(error: "$e"));
+      emit(state.copyWith(error: throwableDioError(e)));
     }
   }
 }

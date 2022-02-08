@@ -15,11 +15,11 @@ part 'new_bet_state.dart';
 
 class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   NewBetBloc({
-    required this.cashier,
+    required this.user,
     STLHttpClient? httpClient,
   })  : _httpClient = httpClient ?? STLHttpClient(),
         super(NewBetLoaded(
-          cashier: cashier,
+          cashier: user,
         )) {
     on<AddNewBetEvent>(_onAppend);
     on<InsertNewBetEvent>(_onInsert);
@@ -33,9 +33,12 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     return super.close();
   }
 
-  final UserAccount cashier;
+  final UserAccount user;
 
-  Map<String, dynamic> get cashierIdParam => {'filter[user_id': cashier.id};
+  Map<String, dynamic> get cashierIdParam => {
+        'filter[user_id': user.id,
+        'filter[show_all_or_not]': "${user.id},${user.type}"
+      };
 
   final STLHttpClient _httpClient;
 
@@ -139,8 +142,8 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
 
   Future<List<BetResult>> submitBet() async {
     final items = state.items;
-    final cashierId = cashier.id;
-    final branchId = cashier.branchId;
+    final cashierId = user.id;
+    final branchId = user.branchId;
     final request = items.map((e) {
       final data = {
         'user_id': cashierId,

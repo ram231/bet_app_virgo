@@ -52,7 +52,7 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
                   '$adminEndpoint/receipts/no/$receiptNo',
                   onSerialize: (json) => BetReceipt.fromMap(json),
                   queryParams: {
-                    'filter[user_id]': user.id,
+                    'filter[show_all_or_not]': "${user.id},${user.type}",
                   },
                 );
 
@@ -325,26 +325,40 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
     with ClaimPOSTMixin {
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("Claim Prize"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("Prize:${widget.receipt.readablePrizesClaimed}"),
-          if (err.isNotEmpty)
-            Text(
-              "$err",
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            )
-        ],
-      ),
-      actions: [
-        if ((widget.receipt.prizesClaimed ?? 0) > 0)
-          LoginSuccessBuilder(builder: (user) {
-            return SizedBox(
+    return LoginSuccessBuilder(builder: (user) {
+      if (user.id != widget.receipt.cashier?.id) {
+        return AlertDialog(
+          title: Text("NOT ALLOWED"),
+          content: Text("User not allowed to verify transaction"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text("CLOSE"),
+            ),
+          ],
+        );
+      }
+      return AlertDialog(
+        title: Text("Claim Prize"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Prize:${widget.receipt.readablePrizesClaimed}"),
+            if (err.isNotEmpty)
+              Text(
+                "$err",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+          ],
+        ),
+        actions: [
+          if ((widget.receipt.prizesClaimed ?? 0) > 0)
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -361,14 +375,14 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
                     ? CircularProgressIndicator.adaptive()
                     : Text("CLAIM"),
               ),
-            );
-          })
-        else
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text("CLOSE"))
-      ],
-    );
+            )
+          else
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text("CLOSE"))
+        ],
+      );
+    });
   }
 }
 

@@ -13,15 +13,17 @@ part 'bet_history_state.dart';
 class BetHistoryBloc extends Cubit<BetHistoryState> {
   BetHistoryBloc({
     STLHttpClient? httpClient,
-    required this.cashierId,
+    required this.user,
   })  : _httpClient = httpClient ?? STLHttpClient(),
         super(BetHistoryState(date: DateTime.now()));
 
   final STLHttpClient _httpClient;
 
-  final String cashierId;
+  final UserAccount user;
 
-  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
+  Map<String, dynamic> get cashierIdParam => {
+        'filter[show_all_or_not]': "${user.id},${user.type}",
+      };
 
   void fetch({DateTime? fromDate}) async {
     emit(state.copyWith(isLoading: true));

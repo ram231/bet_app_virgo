@@ -4,32 +4,38 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../../models/models.dart';
+
 part 'grand_total_state.dart';
 
 class GrandTotalCubit extends Cubit<GrandTotalState> {
   GrandTotalCubit({
     STLHttpClient? httpClient,
-    required this.cashierId,
+    required this.user,
   })  : _httpClient = httpClient ?? STLHttpClient(),
         super(GrandTotalInitial());
 
   final STLHttpClient _httpClient;
-  final String cashierId;
+  final UserAccount user;
 
-  Map<string, String> get cashierIdParam => {'filter[user_id]': cashierId};
+  Map<string, dynamic> get cashierIdParam =>
+      {'filter[show_all_or_not]': "${user.id},${user.type}"};
 
-  /// [fromDate] format - yyyy-MM-DD
-  ///
-  /// [toDate] format - yyyy-MM-DD
   void fetch({
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
+    if (fromDate == null) {
+      fromDate = DateTime.now();
+    }
+    if (toDate == null) {
+      toDate = DateTime.now();
+    }
     final startDate = YEAR_MONTH_DAY.format(
-      fromDate ?? DateTime.now(),
+      fromDate,
     );
     final endDate = YEAR_MONTH_DAY.format(
-      toDate ?? DateTime.now(),
+      toDate,
     );
     try {
       emit(GrandTotalLoading());
@@ -52,8 +58,8 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
         betAmount: amount,
         readableBetAmount: result['readable_bet_amount'],
         hits: hits,
-        fromDate: fromDate ?? DateTime.now(),
-        toDate: toDate ?? DateTime.now(),
+        fromDate: fromDate,
+        toDate: toDate,
         readableHits: result['readable_hits'] ?? '',
       );
       emit(grandTotal);
@@ -64,8 +70,8 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
         betAmount: 0,
         readableBetAmount: "P 0.00",
         hits: 0,
-        fromDate: fromDate ?? DateTime.now(),
-        toDate: toDate ?? DateTime.now(),
+        fromDate: fromDate,
+        toDate: toDate,
         error: throwableDioError(e),
       );
       emit(grandTotal);
@@ -87,5 +93,62 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     }
     emit(GrandTotalLoading());
     fetch();
+  }
+
+  void fetchAdmin({DateTime? fromDate, DateTime? toDate}) async {
+    if (fromDate == null) {
+      fromDate = DateTime.now();
+    }
+    if (toDate == null) {
+      toDate = DateTime.now();
+    }
+    final startDate = YEAR_MONTH_DAY.format(
+      fromDate,
+    );
+    final endDate = YEAR_MONTH_DAY.format(
+      toDate,
+    );
+    try {
+      emit(GrandTotalLoading());
+      final List result = await _httpClient
+          .get('$adminEndpoint/bets/grand-total-per-cashier', queryParams: {
+        'from_date': startDate,
+        'to_date': endDate,
+        ...cashierIdParam,
+      });
+
+      final list = result.map((json) {
+        return AdminGrandTotal.fromMap(json);
+      }).toList();
+      emit(
+        GrandTotalAdminLoaded(
+          items: list,
+          fromDate: fromDate,
+          toDate: toDate,
+        ),
+      );
+    } catch (e) {
+      emit(GrandTotalAdminLoaded(
+        fromDate: fromDate,
+        toDate: toDate,
+        error: throwableDioError(e),
+      ));
+    }
+  }
+
+  void refetchAdmin() {
+    final _state = state;
+    if (_state is GrandTotalAdminLoaded) {
+      emit(GrandTotalLoading());
+      final fromDate = _state.fromDate;
+      final toDate = _state.toDate;
+      fetchAdmin(
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+      return;
+    }
+    emit(GrandTotalLoading());
+    fetchAdmin();
   }
 }

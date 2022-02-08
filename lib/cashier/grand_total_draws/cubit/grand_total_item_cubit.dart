@@ -9,13 +9,15 @@ part 'grand_total_item_state.dart';
 class GrandTotalItemCubit extends Cubit<GrandTotalItemState> {
   GrandTotalItemCubit({
     STLHttpClient? httpClient,
-    required this.cashierId,
+    required this.user,
   })  : _httpClient = httpClient ?? STLHttpClient(),
         super(GrandTotalItemState());
   final STLHttpClient _httpClient;
-  final String cashierId;
+  final UserAccount user;
 
-  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
+  Map<String, String> get cashierIdParam => {
+        'filter[show_all_or_not]': "${user.id},${user.type}",
+      };
 
   void fetchByDrawId(int id) async {
     emit(state.copyWith(

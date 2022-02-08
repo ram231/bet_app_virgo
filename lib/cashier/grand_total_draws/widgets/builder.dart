@@ -16,8 +16,7 @@ class GrandTotalDrawProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return LoginSuccessBuilder(builder: (user) {
       return BlocProvider(
-        create: (context) =>
-            GrandTotalDrawsCubit(cashierId: '${user.id}')..fetch(),
+        create: (context) => GrandTotalDrawsCubit(user: user)..fetch(),
         child: child,
       );
     });

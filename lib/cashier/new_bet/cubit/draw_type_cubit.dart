@@ -1,4 +1,4 @@
-import 'package:bet_app_virgo/models/draw.dart';
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -9,14 +9,16 @@ part 'draw_type_state.dart';
 class DrawTypeCubit extends Cubit<DrawTypeState> {
   DrawTypeCubit({
     STLHttpClient? httpClient,
-    required this.cashierId,
+    required this.user,
   })  : _httpClient = httpClient ?? STLHttpClient(),
         super(DrawTypeInitial());
 
   final STLHttpClient _httpClient;
-  final String cashierId;
+  final UserAccount user;
 
-  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
+  Map<String, String> get cashierIdParam => {
+        'filter[show_all_or_not]': "${user.id},${user.type}",
+      };
 
   void fetchDrawTypes() async {
     try {
