@@ -20,7 +20,7 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
   Future<void> onClaim(
     String cashierId,
     String receiptNo, {
-    VoidCallback? onFinished,
+    Function(BetReceipt)? onFinished,
   }) async {
     assert(receiptNo.isNotEmpty, "Receipt no. not found");
     changeState();
@@ -30,12 +30,12 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
         "$adminEndpoint/receipts/claim-prizes/$receiptNo",
         onSerialize: (json) => BetReceipt.fromMap(json),
       );
+      onFinished?.call(response);
     } catch (e) {
       err = e.toString();
     } finally {
       changeState();
     }
-    onFinished?.call();
   }
 
   Future<BetReceipt?> fetchReceipt(String receiptNo) {
@@ -48,15 +48,22 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
               try {
                 final _http = STLHttpClient();
 
-                final betResultById = await _http.get(
+                final result = await _http.get(
                   '$adminEndpoint/receipts/no/$receiptNo',
                   onSerialize: (json) => BetReceipt.fromMap(json),
                   queryParams: {
-                    'filter[cashier_id]': user.id,
+                    'filter[user_id]': user.id,
                   },
                 );
 
-                Navigator.pop(context, betResultById);
+                if (result.status != 'V') {
+                  throw "${result.readableStatus}";
+                }
+                if ((result.prizesClaimed ?? 0) == 0) {
+                  throw "No bet won";
+                }
+
+                Navigator.pop(context, result);
               } catch (e) {
                 debugPrint('$e');
                 showInvalidMessage(e);
@@ -271,15 +278,9 @@ class _ClaimQRBodyState extends State<ClaimQRBody>
           //       content: Text("${code}"),
 
           //     ));
-          if (!code.contains("_")) {
-            throw "Invalid Format.";
-          }
 
           final result = await fetchReceipt(code);
           if (result != null) {
-            if (result.status != 'V') {
-              throw "${result.readableStatus}";
-            }
             final showWinner = await showDialog<bool>(
                 context: context,
                 builder: (context) {
@@ -341,29 +342,31 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
         ],
       ),
       actions: [
-        LoginSuccessBuilder(builder: (user) {
-          return SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40))),
-              onPressed: isLoading
-                  ? null
-                  : () => onClaim(
-                        "${user.id}",
-                        widget.receipt.receiptNo ?? '',
-                        onFinished: () => Navigator.pop(context),
-                      ),
-              child: isLoading
-                  ? CircularProgressIndicator.adaptive()
-                  : Text("CLAIM"),
-            ),
-          );
-        })
-        // TextButton(
-        //     onPressed: () => Navigator.pop(context, false),
-        //     child: Text("CLOSE"))
+        if ((widget.receipt.prizesClaimed ?? 0) > 0)
+          LoginSuccessBuilder(builder: (user) {
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40))),
+                onPressed: isLoading
+                    ? null
+                    : () => onClaim(
+                          "${user.id}",
+                          widget.receipt.receiptNo ?? '',
+                          onFinished: (prize) => Navigator.pop(context),
+                        ),
+                child: isLoading
+                    ? CircularProgressIndicator.adaptive()
+                    : Text("CLAIM"),
+              ),
+            );
+          })
+        else
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text("CLOSE"))
       ],
     );
   }
@@ -411,38 +414,49 @@ class _ClaimInputBodyState extends State<ClaimInputBody> with ClaimPOSTMixin {
                 }
                 return null;
               },
+              onFieldSubmitted: (val) {
+                onSubmit();
+              },
             ),
           ),
+          if (err.isNotEmpty)
+            Text(
+              err,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
           LoginSuccessBuilder(builder: (user) {
             if (isLoading) {
               return Center(child: CircularProgressIndicator.adaptive());
             }
-            return ElevatedButton(
-                onPressed: () async {
-                  final isValid = _formKey.currentState?.validate() ?? false;
-                  if (isValid) {
-                    final result = await fetchReceipt(_controller.text);
-                    if (result != null) {
-                      if (result.status != 'V') {
-                        throw "${result.readableStatus}";
-                      }
-                      final showWinner = await showDialog<bool>(
-                          context: context,
-                          builder: (context) {
-                            return _ClaimPrizeButton(
-                              receipt: result,
-                            );
-                          });
-
-                      _controller.clear();
-                      _focusNode.requestFocus();
-                    }
-                  }
-                },
-                child: Text("CLAIM"));
+            return ElevatedButton(onPressed: onSubmit, child: Text("CLAIM"));
           }),
         ],
       ),
     );
+  }
+
+  void onSubmit() async {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (isValid) {
+      final result = await fetchReceipt(_controller.text);
+      if (result != null) {
+        if (result.status != 'V') {
+          throw "${result.readableStatus}";
+        }
+        final showWinner = await showDialog<bool>(
+            context: context,
+            builder: (context) {
+              return _ClaimPrizeButton(
+                receipt: result,
+              );
+            });
+
+        _controller.clear();
+        _focusNode.requestFocus();
+      }
+    }
   }
 }

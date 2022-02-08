@@ -16,7 +16,7 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
   final STLHttpClient _httpClient;
   final String cashierId;
 
-  Map<string, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+  Map<string, String> get cashierIdParam => {'filter[user_id]': cashierId};
 
   /// [fromDate] format - yyyy-MM-DD
   ///
@@ -59,13 +59,14 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
       emit(grandTotal);
     } catch (e) {
       debugPrint("$e");
+
       final grandTotal = GrandTotalLoaded(
         betAmount: 0,
         readableBetAmount: "P 0.00",
         hits: 0,
         fromDate: fromDate ?? DateTime.now(),
         toDate: toDate ?? DateTime.now(),
-        error: e,
+        error: throwableDioError(e),
       );
       emit(grandTotal);
       addError(e);

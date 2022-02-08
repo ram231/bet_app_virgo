@@ -21,7 +21,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
 
   final String cashierId;
 
-  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
 
   void fetch({DateTime? fromDate}) async {
     emit(state.copyWith(isLoading: true));
@@ -72,7 +72,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
       await _httpClient.post(
         '$adminEndpoint/receipts/no/$receiptNo',
         body: {
-          "cashier_id": cashierId,
+          "user_id": cashierId,
           "status": "I",
         },
         queryParams: cashierIdParam,

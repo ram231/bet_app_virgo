@@ -12,7 +12,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
         super(SoldOutState());
   final STLHttpClient _http;
   final String cashierId;
-  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
   void submit({
     required String number,
     required String type,

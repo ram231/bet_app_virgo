@@ -18,7 +18,7 @@ class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
 
   final String cashierId;
 
-  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
 
   void fetch({DateTime? fromDate, DateTime? toDate}) async {
     final startDate = YEAR_MONTH_DAY.format(

@@ -20,7 +20,7 @@ class HitsReportBloc extends Bloc<HitsReportEvent, HitsReportState> {
 
   final String cashierId;
 
-  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
 
   void _onFetch(FetchHitReportsEvent event, Emitter emit) async {
     emit(HitsReportLoading());

@@ -104,3 +104,11 @@ class STLHttpClient {
     return response.data as Response;
   }
 }
+
+String throwableDioError(Object error) {
+  if (error is DioError) {
+    final statusMessage = error.response?.statusMessage ?? error.message;
+    return statusMessage;
+  }
+  return "$error";
+}

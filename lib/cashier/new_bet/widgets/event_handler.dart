@@ -42,7 +42,7 @@ mixin PrinterMixin<T extends StatefulWidget> on State<T> {
       final receipt =
           await context.read<STLHttpClient>().post('$adminEndpoint/receipts',
               body: {
-                "cashier_id": cashierId,
+                "user_id": cashierId,
                 "bet_ids": result.map((e) => e.id).toList(),
               },
               onSerialize: (json) => BetReceipt.fromMap(json));
@@ -98,7 +98,7 @@ mixin PrinterMixin<T extends StatefulWidget> on State<T> {
       );
 
       await BlueThermalPrinter.instance.printCustom(
-        "STRICTLY!!! No ticket no claim. ",
+        "STRICTLY!!! No ticket no claim.",
         1,
         1,
       );
@@ -107,9 +107,9 @@ mixin PrinterMixin<T extends StatefulWidget> on State<T> {
         1,
         1,
       );
-      final data = "${receipt.receiptNo}_${receipt.id}";
+      final data = "${receipt.receiptNo}";
       await await BlueThermalPrinter.instance.printQRcode(
-        "$data",
+        data,
         200,
         200,
         1,

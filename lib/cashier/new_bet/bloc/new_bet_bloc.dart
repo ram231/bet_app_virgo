@@ -35,7 +35,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
 
   final UserAccount cashier;
 
-  Map<String, dynamic> get cashierIdParam => {'filter[cashier_id': cashier.id};
+  Map<String, dynamic> get cashierIdParam => {'filter[user_id': cashier.id};
 
   final STLHttpClient _httpClient;
 
@@ -143,7 +143,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     final branchId = cashier.branchId;
     final request = items.map((e) {
       final data = {
-        'cashier_id': cashierId,
+        'user_id': cashierId,
         'branch_id': branchId,
         'bet_amount': e.betAmount,
         'bet_number': e.betNumber,
@@ -183,7 +183,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     try {
       final receipt = await _httpClient.post('$adminEndpoint/receipts',
           body: {
-            "cashier_id": cashier.id,
+            "user_id": cashier.id,
             "bet_ids": result.map((e) => e.id).toList(),
           },
           onSerialize: (json) => BetReceipt.fromMap(json));
@@ -248,9 +248,9 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         1,
         1,
       );
-      final data = "${receipt.receiptNo}_${receipt.id}";
+      final data = "${receipt.receiptNo}";
       await await BlueThermalPrinter.instance.printQRcode(
-        "$data",
+        data,
         200,
         200,
         1,

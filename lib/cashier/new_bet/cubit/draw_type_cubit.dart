@@ -16,7 +16,7 @@ class DrawTypeCubit extends Cubit<DrawTypeState> {
   final STLHttpClient _httpClient;
   final String cashierId;
 
-  Map<String, String> get cashierIdParam => {'filter[cashier_id]': cashierId};
+  Map<String, String> get cashierIdParam => {'filter[user_id]': cashierId};
 
   void fetchDrawTypes() async {
     try {

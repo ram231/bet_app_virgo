@@ -464,7 +464,7 @@ class UserBranchName extends StatelessWidget {
           name: json['name'],
         );
       }, queryParams: {
-        'filter[cashier_id]': user.id,
+        'filter[user_id]': user.id,
       });
       return result;
     } catch (e) {
