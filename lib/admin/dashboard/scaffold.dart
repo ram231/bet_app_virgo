@@ -86,10 +86,29 @@ class BetDashboardScaffold extends StatelessWidget {
               preferredSize: Size.fromHeight(24),
               child: _AdminGrandTotalAppBar(),
             ),
+            actions: [
+              _RefreshButton(),
+            ],
           ),
           body: BetDashboardBody(),
         ),
       ),
+    );
+  }
+}
+
+class _RefreshButton extends StatelessWidget {
+  const _RefreshButton({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        context.read<GrandTotalCubit>().refetchAdmin();
+      },
+      icon: Icon(Icons.refresh),
     );
   }
 }
@@ -129,16 +148,14 @@ class _AdminGrandTotalAppBar extends StatelessWidget {
                   Text("HITS",
                       style: textTheme.bodyText1?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: Colors.red,
                       )),
                   Text("P ${state.hitGrandTotal}")
                 ],
               ),
               Column(
                 children: [
-                  Text("TAPAL/KABIG",
-                      style: textTheme.bodyText1?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      )),
+                  Text("TAPAL/KABIG", style: textTheme.bodyText1),
                   Text("P ${state.tapalGrandTotal}",
                       style: TextStyle(
                         color: isPositive,
