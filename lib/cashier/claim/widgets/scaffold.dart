@@ -32,7 +32,7 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
       );
       onFinished?.call(response);
     } catch (e) {
-      err = e.toString();
+      err = throwableDioError(e);
     } finally {
       changeState();
     }
@@ -59,9 +59,6 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
                 if (result.status != 'V') {
                   throw "${result.readableStatus}";
                 }
-                if ((result.prizesClaimed ?? 0) == 0) {
-                  throw "No bet won";
-                }
 
                 Navigator.pop(context, result);
               } catch (e) {
@@ -78,7 +75,7 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
 
   void showInvalidMessage(Object e) {
     setState(() {
-      err = "$e";
+      err = throwableDioError(e);
     });
     Future.delayed(Duration(seconds: 5), () {
       if (mounted) {

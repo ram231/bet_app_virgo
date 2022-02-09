@@ -1,7 +1,6 @@
 import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 part 'grand_total_item_state.dart';
@@ -36,12 +35,7 @@ class GrandTotalItemCubit extends Cubit<GrandTotalItemState> {
       );
       emit(state.copyWith(items: result));
     } catch (e) {
-      if (e is DioError) {
-        final err = e.response?.statusMessage ?? e.message;
-        emit(state.copyWith(error: "$err"));
-      } else {
-        emit(state.copyWith(error: "$e"));
-      }
+      emit(state.copyWith(error: throwableDioError(e)));
     }
   }
 }

@@ -38,7 +38,7 @@ class BetCancelBloc extends Bloc<BetCancelEvent, BetCancelState> {
       addError(e);
       emit(BetCancelState(
         status: BetCancelStatus.failed,
-        error: e,
+        error: throwableDioError(e),
       ));
     }
   }

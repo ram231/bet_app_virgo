@@ -2,7 +2,6 @@ import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 part 'grand_total_draws_state.dart';
@@ -46,12 +45,7 @@ class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
       final items = result.map((e) => WinningHitsResult.fromMap(e)).toList();
       emit(state.copyWith(draws: items));
     } catch (e) {
-      if (e is DioError) {
-        final error = e.response?.statusMessage ?? e.message;
-        emit(state.copyWith(error: error));
-      } else {
-        emit(state.copyWith(error: "$e"));
-      }
+      emit(state.copyWith(error: throwableDioError(e)));
       addError(e);
     }
   }

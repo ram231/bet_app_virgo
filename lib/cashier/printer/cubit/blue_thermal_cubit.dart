@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bet_app_virgo/models/bluetooth_device.dart';
+import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:equatable/equatable.dart';
@@ -42,7 +43,7 @@ class BlueThermalCubit extends Cubit<BlueThermalLoaded> {
       final bool isOn = await _instance.isOn ?? false;
       emit(state.copyWith(devices: devices, isConnected: isOn));
     } catch (e) {
-      emit(BlueThermalLoaded(devices: [], error: "$e"));
+      emit(BlueThermalLoaded(devices: [], error: throwableDioError(e)));
     }
   }
 
@@ -60,7 +61,7 @@ class BlueThermalCubit extends Cubit<BlueThermalLoaded> {
       emit(_state.copyWith(devices: devices));
     } catch (e) {
       final _state = state;
-      emit(_state.copyWith(error: "$e"));
+      emit(_state.copyWith(error: throwableDioError(e)));
     }
   }
 

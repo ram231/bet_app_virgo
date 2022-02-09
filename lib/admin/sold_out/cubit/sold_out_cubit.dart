@@ -1,6 +1,5 @@
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../models/models.dart';
@@ -57,12 +56,7 @@ class SoldOutCubit extends Cubit<SoldOutState> {
       final newItems = state.items.where((e) => e.id != id).toList();
       emit(state.copyWith(items: newItems));
     } catch (e) {
-      if (e is DioError) {
-        final err = e.response?.statusMessage ?? e.message;
-        emit(state.copyWith(error: err));
-      } else {
-        emit(state.copyWith(error: "$e"));
-      }
+      emit(state.copyWith(error: throwableDioError(e)));
       addError(e);
     }
   }

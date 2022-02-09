@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
-import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 
@@ -70,12 +69,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
       }
     } catch (e) {
       addError(e);
-      if (e is DioError) {
-        final err = e.response?.data['errors']['message'][0];
-        return state.copyWith(
-          error: err ?? '',
-        );
-      }
+      return state.copyWith(error: throwableDioError(e));
     }
     return rawState;
   }

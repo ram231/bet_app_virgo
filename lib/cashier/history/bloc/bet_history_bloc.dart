@@ -2,7 +2,6 @@ import 'package:bet_app_virgo/models/models.dart';
 import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
@@ -44,13 +43,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
 
       emit(BetHistoryState(bets: list, date: startDate));
     } catch (e) {
-      if (e is DioError) {
-        final err = e.response?.statusMessage ?? e.message;
-
-        emit(state.copyWith(error: "$err"));
-      } else {
-        emit(state.copyWith(error: "$e"));
-      }
+      emit(state.copyWith(error: throwableDioError(e)));
       debugPrint("$e");
     }
   }
@@ -64,7 +57,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
 
       fetch();
     } catch (e) {
-      emit(state.copyWith(error: '$e'));
+      emit(state.copyWith(error: throwableDioError(e)));
     }
   }
 
@@ -82,13 +75,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
 
       fetch();
     } catch (e) {
-      if (e is DioError) {
-        final err = e.response?.data['errors'].toString() ?? e.message;
-
-        emit(state.copyWith(error: "$err"));
-      } else {
-        emit(state.copyWith(error: "$e"));
-      }
+      emit(state.copyWith(error: throwableDioError(e)));
       addError(e);
     }
   }
