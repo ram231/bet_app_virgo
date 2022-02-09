@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:bet_app_virgo/cashier/printer/cubit/blue_thermal_cubit.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart' as printer;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'builder.dart';
 
@@ -180,27 +183,33 @@ class _TestPrintButtonState extends State<_TestPrintButton> {
         );
         return;
       }
-      if (state is BlueThermalLoaded) {
-        await printer.BlueThermalPrinter.instance.printCustom(
-            "Receipt Date: ${DateFormat.yMd().add_jm().format(DateTime.now())}",
-            1,
-            0);
-        await printer.BlueThermalPrinter.instance
-            .printCustom("-------------------------", 1, 1);
+      final bytes = await rootBundle.load("images/print_logo.jpg");
+      final dir = (await getApplicationDocumentsDirectory()).path;
+      final buffer = bytes.buffer;
+      final file = await File("$dir/print_logo.png").writeAsBytes(
+          buffer.asUint8List(bytes.offsetInBytes, buffer.lengthInBytes));
+      await printer.BlueThermalPrinter.instance.printImage(
+        file.path,
+      );
+      // await printer.BlueThermalPrinter.in/stance.printCustom(
+      //     "Receipt Date: ${DateFormat.yMd().add_jm().format(DateTime.now())}",
+      //     1,
+      //     0);
+      // await printer.BlueThermalPrinter.instance
+      //     .printCustom("-------------------------", 1, 1);
 
-        await printer.BlueThermalPrinter.instance
-            .printCustom("PRINT SUCCESSFULLY", 1, 1);
-        await printer.BlueThermalPrinter.instance
-            .printCustom("-------------------------", 1, 1);
-        await printer.BlueThermalPrinter.instance.printNewLine();
-        await printer.BlueThermalPrinter.instance
-            .printQRcode("TEST QR CODE", 192, 192, 1);
-        await printer.BlueThermalPrinter.instance.printNewLine();
-        await printer.BlueThermalPrinter.instance
-            .printCustom("-------------------------", 1, 1);
-        await printer.BlueThermalPrinter.instance.printNewLine();
-        await printer.BlueThermalPrinter.instance.paperCut();
-      }
+      // await printer.BlueThermalPrinter.instance
+      //     .printCustom("PRINT SUCCESSFULLY", 1, 1);
+      // await printer.BlueThermalPrinter.instance
+      //     .printCustom("-------------------------", 1, 1);
+      // await printer.BlueThermalPrinter.instance.printNewLine();
+      // await printer.BlueThermalPrinter.instance
+      //     .printQRcode("TEST QR CODE", 192, 192, 1);
+      // await printer.BlueThermalPrinter.instance.printNewLine();
+      // await printer.BlueThermalPrinter.instance
+      //     .printCustom("-------------------------", 1, 1);
+      // await printer.BlueThermalPrinter.instance.printNewLine();
+      await printer.BlueThermalPrinter.instance.paperCut();
     } catch (e) {
       debugPrint("$e");
     }

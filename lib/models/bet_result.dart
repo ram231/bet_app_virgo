@@ -64,8 +64,7 @@ class BetResult extends Equatable {
           map['receipt'] != null ? BetReceipt.fromMap(map['receipt']) : null,
       gambler:
           map['gambler'] != null ? UserAccount.fromMap(map['gambler']) : null,
-      cashier:
-          map['cashier'] != null ? UserAccount.fromMap(map['cashier']) : null,
+      cashier: map['user'] != null ? UserAccount.fromMap(map['user']) : null,
       betAmount: map['bet_amount'] != null
           ? map['bet_amount'] is String
               ? double.parse(map['bet_amount'])

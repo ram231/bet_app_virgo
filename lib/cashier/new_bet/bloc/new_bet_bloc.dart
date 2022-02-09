@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bet_app_virgo/utils/http_client.dart';
 import 'package:bloc/bloc.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../models/models.dart';
 import '../dto/append_bet_dto.dart';
@@ -58,7 +61,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
           return rawState;
         }
         if (result is Map<String, dynamic>) {
-          final rawAmount = result['winning_amount'];
+          final rawAmount = result['winning_amount'] ?? 0.0;
           final winAmount = rawAmount is String
               ? double.parse(rawAmount)
               : rawAmount as double;
@@ -185,6 +188,15 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
           },
           onSerialize: (json) => BetReceipt.fromMap(json));
 
+      final bytes = await rootBundle.load("images/print_logo.jpg");
+      final dir = (await getApplicationDocumentsDirectory()).path;
+      final buffer = bytes.buffer;
+      final file = await File("$dir/print_logo.png").writeAsBytes(
+          buffer.asUint8List(bytes.offsetInBytes, buffer.lengthInBytes));
+      await BlueThermalPrinter.instance.printImage(
+        file.path,
+      );
+
       /// DATE FORMAT:  MM/DD/yyyy H:MM A
       final datePrinted = DateFormat.yMd().add_jm().format(DateTime.now());
       await BlueThermalPrinter.instance.printCustom(
@@ -235,7 +247,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         1,
       );
       await BlueThermalPrinter.instance.printCustom(
-        "${receipt.cashier?.name}",
+        "${receipt.user?.fullName ?? user.fullName}",
         1,
         1,
       );

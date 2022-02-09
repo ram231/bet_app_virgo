@@ -323,7 +323,7 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
   @override
   Widget build(BuildContext context) {
     return LoginSuccessBuilder(builder: (user) {
-      if (user.id != widget.receipt.cashier?.id) {
+      if (user.id != widget.receipt.user?.id) {
         return AlertDialog(
           title: Text("NOT ALLOWED"),
           content: Text("User not allowed to verify transaction"),

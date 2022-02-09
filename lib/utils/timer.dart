@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Used by TimerBuilder to determine the next DateTime to trigger a rebuild on
@@ -131,7 +132,9 @@ Stream<DateTime> createTimerStream(
     if (now.compareTo(next) > 0) continue;
     Duration waitTime = next.difference(now);
     try {
-      await stopSignal.timeout(waitTime);
+      if (kReleaseMode) {
+        await stopSignal.timeout(waitTime);
+      }
       return;
     } on TimeoutException catch (_) {
       yield next;

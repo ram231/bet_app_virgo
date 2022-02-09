@@ -184,7 +184,7 @@ class UserAccount extends Equatable {
               ? DateTime.parse(map['updated_at'])
               : DateTime.fromMillisecondsSinceEpoch(map['updated_at'])
           : null,
-      fullName: map['full_name'] ?? '',
+      fullName: map['fullname'] ?? '',
       branchId: map['branch_id'],
     );
   }

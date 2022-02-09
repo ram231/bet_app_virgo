@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 
 class BetReceipt extends Equatable {
   final int? id;
-  final UserAccount? cashier;
+  final UserAccount? user;
   final String? receiptNo;
   final String? status;
   final String? readableStatus;
@@ -16,7 +16,7 @@ class BetReceipt extends Equatable {
   final String? readablePrizesClaimed;
   const BetReceipt({
     this.id,
-    this.cashier,
+    this.user,
     this.receiptNo,
     this.status,
     this.readableStatus,
@@ -41,7 +41,7 @@ class BetReceipt extends Equatable {
   }) {
     return BetReceipt(
       id: id ?? this.id,
-      cashier: cashier ?? this.cashier,
+      user: cashier ?? this.user,
       receiptNo: receiptNo ?? this.receiptNo,
       status: status ?? this.status,
       readableStatus: readableStatus ?? this.readableStatus,
@@ -57,7 +57,7 @@ class BetReceipt extends Equatable {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'cashier': cashier?.toMap(),
+      'cashier': user?.toMap(),
       'receipt_o': receiptNo,
       'status': status,
       'readable_status': readableStatus,
@@ -72,8 +72,7 @@ class BetReceipt extends Equatable {
   factory BetReceipt.fromMap(Map<String, dynamic> map) {
     return BetReceipt(
       id: map['id']?.toInt(),
-      cashier:
-          map['cashier'] != null ? UserAccount.fromMap(map['cashier']) : null,
+      user: map['user'] != null ? UserAccount.fromMap(map['user']) : null,
       receiptNo: map['receipt_no'] is int
           ? map['receipt_no'].toString()
           : map['receipt_no'],
@@ -101,7 +100,7 @@ class BetReceipt extends Equatable {
   List<Object?> get props {
     return [
       id,
-      cashier,
+      user,
       receiptNo,
       status,
       readableStatus,
