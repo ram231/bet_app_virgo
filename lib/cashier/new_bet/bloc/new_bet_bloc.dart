@@ -209,7 +209,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
           '${e.betNumber}',
           "${e.betAmount?.toInt()}",
           "${e.prize}",
-          "${e.draw?.id ?? 'N/A'}",
+          "${e.draw?.drawType?.name ?? 'N/A'}",
           0,
         );
       }));
@@ -234,7 +234,11 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         1,
         1,
       );
-
+      await BlueThermalPrinter.instance.printCustom(
+        "${receipt.cashier?.name}",
+        1,
+        1,
+      );
       await BlueThermalPrinter.instance.printCustom(
         "STRICTLY!!! No ticket no claim. ",
         1,
@@ -252,7 +256,6 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         200,
         1,
       );
-      await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
