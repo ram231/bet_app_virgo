@@ -23,6 +23,13 @@ class GrandTotalAdminLoaded extends GrandTotalState {
   final DateTime fromDate;
   final DateTime toDate;
   final Object? error;
+
+  int get betGrandTotal => items.fold(
+      0, (previousValue, element) => previousValue + element.betAmount);
+  int get hitGrandTotal =>
+      items.fold(0, (previousValue, element) => previousValue + element.hits);
+  int get tapalGrandTotal =>
+      items.fold(0, (prev, curr) => prev + (curr.betAmount - curr.hits));
   GrandTotalAdminLoaded copyWith({
     List<AdminGrandTotal>? items,
     DateTime? fromDate,

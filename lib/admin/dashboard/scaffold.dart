@@ -25,8 +25,8 @@ class BetDashboardScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return _BetDashboardWillPopScope(
-      child: GrandTotalProvider(
+    return GrandTotalProvider(
+      child: _BetDashboardWillPopScope(
         child: Scaffold(
           drawer: Drawer(
             child: ListView(
@@ -80,14 +80,13 @@ class BetDashboardScaffold extends StatelessWidget {
             ),
           ),
           appBar: AppBar(
-              elevation: 0,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("THIS MONTH"),
-                  Text("P 25,000", style: textTheme.caption),
-                ],
-              )),
+            elevation: 0,
+            title: Text("THIS MONTH"),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(24),
+              child: _AdminGrandTotalAppBar(),
+            ),
+          ),
           body: BetDashboardBody(),
         ),
       ),
@@ -95,12 +94,85 @@ class BetDashboardScaffold extends StatelessWidget {
   }
 }
 
-class _BetDashboardWillPopScope extends StatelessWidget {
+class _AdminGrandTotalAppBar extends StatelessWidget {
+  const _AdminGrandTotalAppBar({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final state = context.watch<GrandTotalCubit>().state;
+    if (state is GrandTotalAdminLoaded) {
+      final isPositive = state.tapalGrandTotal > 0 ? Colors.green : Colors.red;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "BETS",
+                    style: textTheme.bodyText1?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text("P ${state.betGrandTotal}", style: textTheme.caption)
+                ],
+              ),
+              Column(
+                children: [
+                  Text("HITS",
+                      style: textTheme.bodyText1?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      )),
+                  Text("P ${state.hitGrandTotal}")
+                ],
+              ),
+              Column(
+                children: [
+                  Text("TAPAL/KABIG",
+                      style: textTheme.bodyText1?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      )),
+                  Text("P ${state.tapalGrandTotal}",
+                      style: TextStyle(
+                        color: isPositive,
+                      ))
+                ],
+              ),
+            ],
+          )
+        ],
+      );
+    }
+    return Center(child: Text("Loading"));
+  }
+}
+
+class _BetDashboardWillPopScope extends StatefulWidget {
   const _BetDashboardWillPopScope({
     Key? key,
     required this.child,
   }) : super(key: key);
   final Widget child;
+
+  @override
+  State<_BetDashboardWillPopScope> createState() =>
+      _BetDashboardWillPopScopeState();
+}
+
+class _BetDashboardWillPopScopeState extends State<_BetDashboardWillPopScope> {
+  @override
+  void initState() {
+    context.read<GrandTotalCubit>().refetchAdmin();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -129,7 +201,7 @@ class _BetDashboardWillPopScope extends StatelessWidget {
             });
         return false;
       },
-      child: child,
+      child: widget.child,
     );
   }
 }
@@ -142,12 +214,6 @@ class BetDashboardBody extends StatefulWidget {
 }
 
 class _BetDashboardBodyState extends State<BetDashboardBody> {
-  @override
-  void initState() {
-    context.read<GrandTotalCubit>().refetchAdmin();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -276,7 +342,7 @@ class _GrandTotalContainer extends StatelessWidget {
                       children: [
                         Text("TAPAL/KABIG", style: textTheme.button),
                         Text(
-                          "${tapal}",
+                          "P ${tapal}",
                           style: textTheme.subtitle1?.copyWith(
                             color: color,
                           ),

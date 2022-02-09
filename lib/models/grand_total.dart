@@ -56,7 +56,9 @@ class AdminGrandTotal extends Equatable {
           ? int.parse(map['bet_amount'].split(".").first)
           : map['bet_amount']?.toInt() ?? 0,
       readableBetAmount: map['readable_bet_amount'] ?? '',
-      hits: map['hits']?.toInt() ?? 0,
+      hits: map['hits'] is String
+          ? int.parse(map['hits'].split(".").first)
+          : map['hits']?.toInt() ?? 0,
       readableHits: map['readable_hits'] ?? '',
     );
   }
