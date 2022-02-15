@@ -261,7 +261,7 @@ class _BetNumberTextField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: "Bet Number",
             ),
-            maxLength: state.selectedDrawType?.drawType?.digits.toInt() ?? 3,
+            maxLength: 3,
             maxLengthEnforcement: MaxLengthEnforcement.enforced,
             keyboardType:
                 TextInputType.numberWithOptions(decimal: false, signed: false),
@@ -283,15 +283,8 @@ class _BetNumberTextField extends StatelessWidget {
             },
             onChanged: (val) {
               if (val.isNotEmpty) {
-                final extraZero = int.parse(val) < 10;
-                final extra = extraZero ? "0$val" : val;
-
-                final digit =
-                    (state.selectedDrawType?.drawType?.digits ?? 0) < 3
-                        ? "0$extra"
-                        : extra;
                 context.read<NewBetBloc>().add(InsertNewBetEvent(
-                      betNumber: digit,
+                      betNumber: val,
                     ));
               }
               context.read<DrawTypeCubit>().changeDrawTypeByLength(val);
