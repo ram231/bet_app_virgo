@@ -45,14 +45,8 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   final STLHttpClient _httpClient;
 
   Future<NewBetLoaded> _onValidateEvent(AppendBetDTO dto) async {
-    final lessThan10 = int.parse(dto.betNumber);
-    final extra = lessThan10 < 10 ? "0$lessThan10" : dto.betNumber;
-
-    final digit =
-        (state.drawTypeBet?.drawType?.digits ?? 0) < 3 ? "0$extra" : extra;
     final data = dto.copyWith(
       winAmount: dto.betAmount * dto.winAmount,
-      betNumber: digit,
     );
     final rawState = state.copyWith(items: [...state.items, data]);
     try {
