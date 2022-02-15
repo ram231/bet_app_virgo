@@ -45,12 +45,16 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   final STLHttpClient _httpClient;
 
   Future<NewBetLoaded> _onValidateEvent(AppendBetDTO dto) async {
-    final rawState = state.copyWith(items: [
-      ...state.items,
-      dto.copyWith(
-        winAmount: dto.betAmount * dto.winAmount,
-      )
-    ]);
+    final lessThan10 = int.parse(dto.betNumber);
+    final extra = lessThan10 < 10 ? "0$lessThan10" : dto.betNumber;
+
+    final digit =
+        (state.drawTypeBet?.drawType?.digits ?? 0) < 3 ? "0$extra" : extra;
+    final data = dto.copyWith(
+      winAmount: dto.betAmount * dto.winAmount,
+      betNumber: digit,
+    );
+    final rawState = state.copyWith(items: [...state.items, data]);
     try {
       final result = await _httpClient.post(
         '$adminEndpoint/bets/append/${dto.betNumber}',
@@ -62,7 +66,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
         }
         if (result is Map<String, dynamic>) {
           return state.copyWith(
-            items: [...state.items, dto],
+            items: [...state.items, data],
           );
         }
       }
@@ -93,6 +97,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
       emit(state.copyWith(error: "Bet Number already exists"));
       return;
     }
+
     final result = await _onValidateEvent(event.dto);
     emit(result);
   }
