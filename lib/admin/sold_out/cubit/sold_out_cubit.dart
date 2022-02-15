@@ -17,15 +17,14 @@ class SoldOutCubit extends Cubit<SoldOutState> {
       };
   void submit({
     required String number,
-    required String type,
     String amount = '',
   }) async {
     emit(state.copyWith(isLoading: true));
     try {
-      final result = await _http.post('$adminEndpoint/${type}',
+      final result = await _http.post('$adminEndpoint/${state.type}',
           queryParams: _userParam,
           body: {
-            if (type == 'low-wins') ...{
+            if (state.type == 'low-wins') ...{
               'winning_amount': int.parse(amount),
               'low_win_number': int.parse(number),
             } else
@@ -43,14 +42,12 @@ class SoldOutCubit extends Cubit<SoldOutState> {
   }
 
   void delete({
-    bool soldOut = false,
     required int id,
   }) async {
     emit(state.copyWith(isLoading: true));
     try {
-      String endPoint = soldOut ? 'sold-outs' : 'low-wins';
       final result = await _http.delete(
-        '$adminEndpoint/$endPoint/$id',
+        '$adminEndpoint/${state.type}/$id',
         queryParams: _userParam,
       );
       final newItems = state.items.where((e) => e.id != id).toList();
@@ -61,29 +58,26 @@ class SoldOutCubit extends Cubit<SoldOutState> {
     }
   }
 
-  void fetch() async {
+  void fetch({String endPoint = 'sold-outs'}) async {
+    assert(endPoint == 'sold-outs' || endPoint == 'low-wins');
     emit(state.copyWith(isLoading: true));
     try {
-      final soldOuts = await _http.get('$adminEndpoint/sold-outs',
+      final soldOuts = await _http.get('$adminEndpoint/$endPoint',
           onSerialize: (json) => (json['data'] as List)
               .map((e) => BetSoldOut.fromMap(e))
               .toList());
-      final lowWins = await _http.get(
-        '$adminEndpoint/low-wins',
-        onSerialize: (json) =>
-            (json['data'] as List).map((e) => BetSoldOut.fromMap(e)).toList(),
-      );
 
-      final newItems = [
-        ...state.items,
-        ...soldOuts,
-        ...lowWins,
-      ];
-      emit(state.copyWith(items: newItems));
+      emit(state.copyWith(
+        items: soldOuts,
+        type: endPoint,
+      ));
     } catch (e) {
       addError(e);
 
-      emit(state.copyWith(error: throwableDioError(e)));
+      emit(state.copyWith(
+        error: throwableDioError(e),
+        type: endPoint,
+      ));
     }
   }
 }

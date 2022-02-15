@@ -1,5 +1,6 @@
 import 'package:bet_app_virgo/admin/sold_out/cubit/sold_out_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../login/widgets/builder.dart';
@@ -52,6 +53,7 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
   late final TextEditingController _amountController;
   static const _numberOnly =
       TextInputType.numberWithOptions(decimal: false, signed: false);
+  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     _controller = TextEditingController();
@@ -77,92 +79,113 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
   void onChange(String? val) {
     setState(() {
       _selectedType = val ?? "SOLD OUT";
+      final type = _selectedType == 'SOLD OUT' ? 'sold-outs' : 'low-wins';
+      _formKey.currentState?.reset();
+      _controller.clear();
+      _amountController.clear();
+      context.read<SoldOutCubit>().fetch(
+            endPoint: type,
+          );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Flexible(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Radio<String>(
-                groupValue: _selectedType,
-                onChanged: onChange,
-                value: _radioGroup.first,
-              ),
-              Text(_radioGroup.first),
-              Radio<String>(
-                groupValue: _selectedType,
-                onChanged: onChange,
-                value: _radioGroup.last,
-              ),
-              Text(_radioGroup.last),
-            ],
-          ),
-        ),
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              keyboardType: _numberOnly,
-              controller: _controller,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                hintText: "Combination",
-              ),
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Radio<String>(
+                  groupValue: _selectedType,
+                  onChanged: onChange,
+                  value: _radioGroup.first,
+                ),
+                Text(_radioGroup.first),
+                Radio<String>(
+                  groupValue: _selectedType,
+                  onChanged: onChange,
+                  value: _radioGroup.last,
+                ),
+                Text(_radioGroup.last),
+              ],
             ),
           ),
-        ),
-        if (_selectedType == "LOW WIN")
           Flexible(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
                 keyboardType: _numberOnly,
-                controller: _amountController,
+                controller: _controller,
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
-                  hintText: "Low Win Amount",
+                  hintText: "Combination",
                 ),
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                maxLength: _selectedType == 'SOLD OUT' ? 2 : 3,
+                onChanged: (val) {
+                  if (val.isEmpty) {
+                    return;
+                  }
+                },
+                validator: (val) {
+                  if (val != null && val.isNotEmpty) {
+                    return null;
+                  }
+                  return "Required";
+                },
               ),
             ),
           ),
-        Flexible(
-            child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_selectedType == "SOLD OUT") {
-                    context.read<SoldOutCubit>().submit(
-                          number: _controller.text,
-                          type: "sold-outs",
-                        );
-                  } else {
-                    context.read<SoldOutCubit>().submit(
-                          number: _controller.text,
-                          amount: _amountController.text,
-                          type: "low-wins",
-                        );
-                  }
-                },
-                child: Text("ADD"),
+          if (_selectedType == "LOW WIN")
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  keyboardType: _numberOnly,
+                  controller: _amountController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: "Low Win Amount",
+                  ),
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: () {}, child: Text("REFRESH LIST")),
-            )
-          ],
-        )),
-        const SoldOutListView(),
-      ],
+          Flexible(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_selectedType == "SOLD OUT") {
+                      context.read<SoldOutCubit>().submit(
+                            number: _controller.text,
+                          );
+                    } else {
+                      context.read<SoldOutCubit>().submit(
+                            number: _controller.text,
+                            amount: _amountController.text,
+                          );
+                    }
+                  },
+                  child: Text("ADD"),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                    onPressed: () {}, child: Text("REFRESH LIST")),
+              )
+            ],
+          )),
+          const SoldOutListView(),
+        ],
+      ),
     );
   }
 }
@@ -173,51 +196,52 @@ class SoldOutListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<SoldOutCubit>().state;
-    if (state.hasError) {
-      return Text(
-        "${state.error}",
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      );
+    if (state.isLoading) {
+      return Center(child: CircularProgressIndicator.adaptive());
     }
     return Expanded(
       flex: 4,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: DataTable(
-            columns: [
-              DataColumn(label: Text("Number")),
-              DataColumn(label: Text("Win Amount")),
-              DataColumn(label: Text("Action")),
-            ],
-            rows: state.items
-                .map((e) => DataRow(cells: [
-                      DataCell(Text("${e.soldOutNumber}")),
-                      DataCell(Text("${e.winAmount}")),
-                      DataCell(ElevatedButton(
-                        onPressed: () {
-                          context.read<SoldOutCubit>().delete(
-                                soldOut: e.winAmount == "0",
-                                id: e.id,
-                              );
-                        },
-                        child: Text("DELETE"),
-                      )),
-                    ]))
-                .toList(),
-            // rows: [
-
-            //   DataRow(cells: [
-            //     DataCell(Text("11S2")),
-            //     DataCell(Text("00")),
-
-            //   ])
-            // ],
+      child: Column(
+        children: [
+          if (state.hasError)
+            Text(
+              "${state.error}",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              maxLines: 5,
+              overflow: TextOverflow.ellipsis,
+            ),
+          Flexible(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: DataTable(
+                  columns: [
+                    DataColumn(label: Text("Number")),
+                    if (state.type == 'low-wins')
+                      DataColumn(label: Text("Win Amount")),
+                    DataColumn(label: Text("Action")),
+                  ],
+                  rows: state.items
+                      .map((e) => DataRow(cells: [
+                            DataCell(Text("${e.soldOutNumber}")),
+                            if (state.type == 'low-wins')
+                              DataCell(Text("${e.winAmount}")),
+                            DataCell(ElevatedButton(
+                              onPressed: () {
+                                context.read<SoldOutCubit>().delete(
+                                      id: e.id,
+                                    );
+                              },
+                              child: Text("DELETE"),
+                            )),
+                          ]))
+                      .toList(),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
