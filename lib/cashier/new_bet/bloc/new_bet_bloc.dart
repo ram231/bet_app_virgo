@@ -61,12 +61,8 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
           return rawState;
         }
         if (result is Map<String, dynamic>) {
-          final rawAmount = result['winning_amount'] ?? 0.0;
-          final winAmount = rawAmount is String
-              ? double.parse(rawAmount)
-              : rawAmount as double;
           return state.copyWith(
-            items: [...state.items, dto.copyWith(winAmount: winAmount)],
+            items: [...state.items, dto],
           );
         }
       }
