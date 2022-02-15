@@ -17,7 +17,7 @@ class AddNewBetEvent extends NewBetEvent {
 }
 
 class InsertNewBetEvent extends NewBetEvent {
-  final int? betNumber;
+  final String? betNumber;
   final double? betAmount;
   final DrawBet? drawTypeBet;
   final int? branchId;
@@ -33,7 +33,7 @@ class InsertNewBetEvent extends NewBetEvent {
   });
 
   InsertNewBetEvent copyWith({
-    int? betNumber,
+    String? betNumber,
     double? betAmount,
     DrawBet? drawTypeBet,
     int? branchId,

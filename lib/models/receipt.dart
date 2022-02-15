@@ -118,7 +118,7 @@ class BetReceiptObject extends Equatable {
   final int drawId;
   final int branchId;
   final int receiptId;
-  final int betNumber;
+  final String betNumber;
   final String betAmount;
   final String winningAmount;
   final String prize;
@@ -146,7 +146,7 @@ class BetReceiptObject extends Equatable {
     int? drawId,
     int? branchId,
     int? receiptId,
-    int? betNumber,
+    String? betNumber,
     String? betAmount,
     String? winningAmount,
     String? prize,
@@ -194,7 +194,7 @@ class BetReceiptObject extends Equatable {
       drawId: map['draw_id']?.toInt() ?? 0,
       branchId: map['branch_id']?.toInt() ?? 0,
       receiptId: map['receipt_id']?.toInt() ?? 0,
-      betNumber: map['bet_number']?.toInt() ?? 0,
+      betNumber: map['bet_number'] ?? "",
       betAmount: map['bet_amount'] ?? '',
       winningAmount: map['winning_amount'] ?? '',
       prize: map['prize'] ?? '',

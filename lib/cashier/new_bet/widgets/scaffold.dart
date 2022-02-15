@@ -110,7 +110,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
   @override
   void initState() {
     _betNumberController = TextEditingController();
-    _betAmountController = TextEditingController(text: "0");
+    _betAmountController = TextEditingController();
     _betNumberFocusNode = FocusNode();
     context.read<DrawTypeCubit>().fetchDrawTypes();
     super.initState();
@@ -164,8 +164,11 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                 ],
                 validator: (val) {
                   if (val != null && val.isNotEmpty) {
-                    final num = int.parse(val);
-                    if (num % 5 != 0) {
+                    final digit = int.parse(val);
+                    if (digit <= 0) {
+                      return "Bet amount cannot be negative or 0";
+                    }
+                    if (digit % 5 != 0) {
                       return "Invalid bet amount";
                     }
                     return null;
@@ -210,7 +213,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                                     AddNewBetEvent(
                                       dto: AppendBetDTO(
                                         betAmount: _state.betAmount ?? 0,
-                                        betNumber: _state.betNumber ?? 0,
+                                        betNumber: _state.betNumber ?? '',
                                         drawTypeBet: _state.drawTypeBet,
                                         winAmount: winAmount,
                                         cashier: userState.user,
@@ -258,7 +261,7 @@ class _BetNumberTextField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: "Bet Number",
             ),
-            maxLength: 3,
+            maxLength: state.selectedDrawType?.drawType?.digits.toInt() ?? 3,
             maxLengthEnforcement: MaxLengthEnforcement.enforced,
             keyboardType:
                 TextInputType.numberWithOptions(decimal: false, signed: false),
@@ -280,9 +283,15 @@ class _BetNumberTextField extends StatelessWidget {
             },
             onChanged: (val) {
               if (val.isNotEmpty) {
-                final betNumber = int.parse(val);
+                final extraZero = int.parse(val) < 10;
+                final extra = extraZero ? "0$val" : val;
+
+                final digit =
+                    (state.selectedDrawType?.drawType?.digits ?? 0) < 3
+                        ? "0$extra"
+                        : extra;
                 context.read<NewBetBloc>().add(InsertNewBetEvent(
-                      betNumber: betNumber,
+                      betNumber: digit,
                     ));
               }
               context.read<DrawTypeCubit>().changeDrawTypeByLength(val);
@@ -378,12 +387,9 @@ class _BetTable extends StatelessWidget {
           child: DataTable(
             rows: state.items.map(
               (draw) {
-                final betNumber = draw.betNumber < 10
-                    ? "0${draw.betNumber}"
-                    : "${draw.betNumber}";
                 return DataRow(
                   cells: [
-                    DataCell(Text(betNumber)),
+                    DataCell(Text("${draw.betNumber}")),
                     DataCell(Text("${draw.betAmount}")),
                     DataCell(Text("${draw.winAmount}")),
                     DataCell(Text("${draw.drawTypeBet?.drawType?.name}")),

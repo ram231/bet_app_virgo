@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 import '../../../models/draw.dart';
 
 class AppendBetDTO extends Equatable {
-  final int betNumber;
+  final String betNumber;
   final double betAmount;
   final DrawBet? drawTypeBet;
   final double winAmount;
@@ -20,7 +20,7 @@ class AppendBetDTO extends Equatable {
   });
 
   AppendBetDTO copyWith({
-    int? betNumber,
+    String? betNumber,
     double? betAmount,
     DrawBet? drawTypeBet,
     double? winAmount,
@@ -46,7 +46,7 @@ class AppendBetDTO extends Equatable {
 
   factory AppendBetDTO.fromMap(Map<String, dynamic> map) {
     return AppendBetDTO(
-      betNumber: map['betNumber'] ?? 0,
+      betNumber: map['betNumber'],
       betAmount: map['betAmount'] ?? 0.0,
       drawTypeBet: DrawBet.fromMap(map['drawTypeBet']),
       winAmount: map['winAmount'] ?? 0.0,

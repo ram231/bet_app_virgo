@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 class NewBetDTO extends Equatable {
-  final int? betNumber;
+  final String? betNumber;
   final double betAmount;
   final int gambleId;
   final int cashierId;
@@ -17,7 +17,7 @@ class NewBetDTO extends Equatable {
   });
 
   NewBetDTO copyWith({
-    int? betNumber,
+    String? betNumber,
     double? betAmount,
     int? gambleId,
     int? cashierId,
@@ -44,7 +44,7 @@ class NewBetDTO extends Equatable {
 
   factory NewBetDTO.fromMap(Map<String, dynamic> map) {
     return NewBetDTO(
-      betNumber: map['betNumber'],
+      betNumber: map['bet_Number'],
       betAmount: map['bet_amount'] ?? 0.0,
       gambleId: map['gamble_id'] ?? 0,
       cashierId: map['cashier_id'] ?? 0,

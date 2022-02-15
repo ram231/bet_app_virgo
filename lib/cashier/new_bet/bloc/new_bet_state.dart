@@ -9,7 +9,7 @@ enum PrintStatus {
 class NewBetLoaded extends Equatable {
   final List<AppendBetDTO> items;
   final List<BetResult> result;
-  final int? betNumber;
+  final String? betNumber;
   final double? betAmount;
   final DrawBet? drawTypeBet;
   final double? winAmount;
@@ -37,7 +37,7 @@ class NewBetLoaded extends Equatable {
 
   NewBetLoaded copyWith({
     List<AppendBetDTO>? items,
-    int? betNumber,
+    String? betNumber,
     double? betAmount,
     DrawBet? drawTypeBet,
     int? branchId,

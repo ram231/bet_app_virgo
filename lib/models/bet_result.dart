@@ -12,7 +12,7 @@ class BetResult extends Equatable {
   final UserAccount? cashier;
   final num? betAmount;
   final String? readableBetAmount;
-  final int? betNumber;
+  final String? betNumber;
   final int? prize;
   final bool isCancel;
   final bool isWinner;
@@ -121,7 +121,7 @@ class BetResult extends Equatable {
     UserAccount? cashier,
     num? betAmount,
     String? readableBetAmount,
-    int? betNumber,
+    String? betNumber,
     int? prize,
     bool? isCancel,
     bool? isWinner,
