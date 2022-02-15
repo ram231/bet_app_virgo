@@ -109,9 +109,11 @@ String throwableDioError(Object error) {
   if (error is DioError) {
     final responseMessage = error.response?.data;
     if (responseMessage is Map) {
-      final message = responseMessage['message'] ?? 'Error';
-      final errors = responseMessage['errors'];
-      return "$message: $errors";
+      final errors = (responseMessage['errors'] as Map).values.map((e) {
+        final messages = e;
+        return messages.join("\n");
+      }).join("");
+      return "$errors";
     }
     final statusMessage = error.response?.statusMessage ?? error.message;
     return statusMessage;
