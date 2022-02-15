@@ -110,7 +110,7 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
   @override
   void initState() {
     _betNumberController = TextEditingController();
-    _betAmountController = TextEditingController();
+    _betAmountController = TextEditingController(text: "0");
     _betNumberFocusNode = FocusNode();
     context.read<DrawTypeCubit>().fetchDrawTypes();
     super.initState();
@@ -152,10 +152,11 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   hintText: "Bet Amount",
+                  prefixText: "₱",
                 ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(
-                    RegExp(r"^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$"),
+                    RegExp(r"^[0-9]*$"),
                   ),
                   FilteringTextInputFormatter.deny(
                     RegExp(r"[+-]"),
@@ -163,13 +164,20 @@ class _CashierNewBetBodyState extends State<_CashierNewBetBody> {
                 ],
                 validator: (val) {
                   if (val != null && val.isNotEmpty) {
+                    final num = int.parse(val);
+                    if (num % 5 != 0) {
+                      return "Invalid bet amount";
+                    }
                     return null;
                   }
                   return "Required";
                 },
-                keyboardType: TextInputType.numberWithOptions(
-                    decimal: false, signed: false),
+                keyboardType: TextInputType.numberWithOptions(),
                 onChanged: (val) {
+                  final isValid = formKey.currentState?.validate() ?? false;
+                  if (!isValid) {
+                    return;
+                  }
                   if (val.isNotEmpty) {
                     context.read<NewBetBloc>().add(InsertNewBetEvent(
                           betAmount: double.parse(val),
@@ -250,6 +258,8 @@ class _BetNumberTextField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: "Bet Number",
             ),
+            maxLength: 3,
+            maxLengthEnforcement: MaxLengthEnforcement.enforced,
             keyboardType:
                 TextInputType.numberWithOptions(decimal: false, signed: false),
             inputFormatters: [
