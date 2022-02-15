@@ -27,9 +27,11 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
     try {
       final _http = STLHttpClient();
       final response = await _http.post(
-        "$adminEndpoint/receipts/claim-prizes/$receiptNo",
-        onSerialize: (json) => BetReceipt.fromMap(json),
-      );
+          "$adminEndpoint/receipts/claim-prizes/$receiptNo",
+          onSerialize: (json) => BetReceipt.fromMap(json),
+          body: {
+            'user_id': cashierId,
+          });
       onFinished?.call(response);
     } catch (e) {
       err = throwableDioError(e);
@@ -342,7 +344,6 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Prize:${widget.receipt.readablePrizesClaimed}"),
             if (err.isNotEmpty)
               Text(
                 "$err",
@@ -351,10 +352,22 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
                   fontWeight: FontWeight.bold,
                 ),
               )
+            else
+              Text("Prize:${widget.receipt.readablePrizesClaimed}"),
           ],
         ),
         actions: [
-          if ((widget.receipt.prizesClaimed ?? 0) > 0)
+          if (err.isNotEmpty)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                  ),
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text("CLOSE")),
+            )
+          else if ((widget.receipt.prizesClaimed ?? 0) > 0)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
