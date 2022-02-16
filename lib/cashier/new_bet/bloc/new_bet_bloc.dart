@@ -176,12 +176,12 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
     List<BetResult> result,
   ) async {
     try {
+      final _body = {
+        "user_id": cashier.id,
+        "bet_ids": result.map((e) => e.id).toList(),
+      };
       final receipt = await _httpClient.post('$adminEndpoint/receipts',
-          body: {
-            "user_id": cashier.id,
-            "bet_ids": result.map((e) => e.id).toList(),
-          },
-          onSerialize: (json) => BetReceipt.fromMap(json));
+          body: _body, onSerialize: (json) => BetReceipt.fromMap(json));
 
       final bytes = await rootBundle.load("images/print_logo.jpg");
       final dir = (await getApplicationDocumentsDirectory()).path;

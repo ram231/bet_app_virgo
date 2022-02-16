@@ -61,7 +61,9 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
                 if (result.status != 'V') {
                   throw "${result.readableStatus}";
                 }
-
+                if (result.isClaimed) {
+                  throw "Prize already claimed";
+                }
                 Navigator.pop(context, result);
               } catch (e) {
                 debugPrint('$e');
