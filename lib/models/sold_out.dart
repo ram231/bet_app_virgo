@@ -37,12 +37,10 @@ class BetSoldOut extends Equatable {
 
   factory BetSoldOut.fromMap(Map<String, dynamic> map) {
     final lowWin = map['low_win_number'] ?? map['sold_out_number'];
-    final checker =
-        lowWin is String ? int.parse(lowWin.split(".").first) : lowWin;
     final winChecker = map['winning_amount'].toString();
     return BetSoldOut(
       id: map['id']?.toInt() ?? 0,
-      soldOutNumber: checker,
+      soldOutNumber: lowWin,
       winAmount: winChecker,
       readableWinAmount: map['readable_winning_amount'] ?? '',
     );
