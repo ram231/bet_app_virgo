@@ -64,5 +64,6 @@ class LoginBloc extends HydratedBloc<LoginEvent, LoginState> {
         'isLoggedIn': false,
       };
     }
+    return null;
   }
 }

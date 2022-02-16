@@ -24,6 +24,5 @@ class BetHistoryBuilder extends StatelessWidget {
     }
 
     return builder(historyState);
-    ;
   }
 }

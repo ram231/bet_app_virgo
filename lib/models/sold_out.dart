@@ -4,9 +4,9 @@ import 'package:equatable/equatable.dart';
 
 class BetSoldOut extends Equatable {
   final int id;
-  final String soldOutNumber;
-  final String winAmount;
-  final String readableWinAmount;
+  final String? soldOutNumber;
+  final String? winAmount;
+  final String? readableWinAmount;
   BetSoldOut({
     required this.id,
     required this.soldOutNumber,
@@ -53,7 +53,7 @@ class BetSoldOut extends Equatable {
       BetSoldOut.fromMap(json.decode(source));
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         soldOutNumber,
         winAmount,

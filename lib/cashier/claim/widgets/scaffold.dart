@@ -353,7 +353,7 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
                 ),
               )
             else
-              Text("Prize:${widget.receipt.readablePrizesClaimed}"),
+              Text("Prize:${widget.receipt.readablePrize}"),
           ],
         ),
         actions: [
@@ -367,7 +367,7 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
                   onPressed: () => Navigator.pop(context, false),
                   child: Text("CLOSE")),
             )
-          else if ((widget.receipt.prizesClaimed ?? 0) > 0)
+          else if ((widget.receipt.prize ?? 0) > 0)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

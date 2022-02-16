@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bet_app_virgo/models/user_account.dart';
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:equatable/equatable.dart';
 
 class BetReceipt extends Equatable {
@@ -12,8 +12,12 @@ class BetReceipt extends Equatable {
   final List<BetReceiptObject> bets;
   final String? createdAt;
   final String? createdAtText;
+  @Deprecated("changed to prize")
   final int? prizesClaimed;
+  final int? prize;
+  final bool isClaimed;
   final String? readablePrizesClaimed;
+  final String? readablePrize;
   const BetReceipt({
     this.id,
     this.user,
@@ -25,11 +29,14 @@ class BetReceipt extends Equatable {
     this.createdAtText,
     this.prizesClaimed,
     this.readablePrizesClaimed,
+    this.prize,
+    this.readablePrize,
+    this.isClaimed = false,
   });
 
   BetReceipt copyWith({
     int? id,
-    UserAccount? cashier,
+    UserAccount? user,
     String? receiptNo,
     String? status,
     String? readableStatus,
@@ -37,20 +44,25 @@ class BetReceipt extends Equatable {
     String? createdAt,
     String? createdAtText,
     int? prizesClaimed,
+    int? prize,
+    bool? isClaimed,
     String? readablePrizesClaimed,
+    String? readablePrize,
   }) {
     return BetReceipt(
       id: id ?? this.id,
-      user: cashier ?? this.user,
+      user: user ?? this.user,
       receiptNo: receiptNo ?? this.receiptNo,
       status: status ?? this.status,
       readableStatus: readableStatus ?? this.readableStatus,
       bets: bets ?? this.bets,
       createdAt: createdAt ?? this.createdAt,
       createdAtText: createdAtText ?? this.createdAtText,
-      prizesClaimed: prizesClaimed ?? this.prizesClaimed,
+      prize: prize ?? this.prize,
+      isClaimed: isClaimed ?? this.isClaimed,
       readablePrizesClaimed:
           readablePrizesClaimed ?? this.readablePrizesClaimed,
+      readablePrize: readablePrize ?? this.readablePrize,
     );
   }
 
@@ -65,11 +77,14 @@ class BetReceipt extends Equatable {
       'created_at': createdAt,
       'created_at_text': createdAtText,
       'readable_prizes_claimed': readablePrizesClaimed,
-      'prizes_claimed': prizesClaimed,
+      'prize': prize,
     };
   }
 
   factory BetReceipt.fromMap(Map<String, dynamic> map) {
+    final _prize = map['prize'] is String
+        ? int.parse(map['prize'].split(".").first)
+        : map['prize'];
     return BetReceipt(
       id: map['id']?.toInt(),
       user: map['user'] != null ? UserAccount.fromMap(map['user']) : null,
@@ -82,10 +97,10 @@ class BetReceipt extends Equatable {
           map['bets']?.map((x) => BetReceiptObject.fromMap(x)) ?? const []),
       createdAt: map['created_at'],
       createdAtText: map['created_at_text'],
-      readablePrizesClaimed: map['readable_prizes_claimed'],
-      prizesClaimed: map['prizes_claimed'] is String?
-          ? double.parse(map['prizes_claimed']).toInt()
-          : map['prizes_claimed'],
+      prize: _prize,
+      isClaimed:
+          map['is_claimed'] is int ? map['is_claimed'] == 1 : map['is_claimed'],
+      readablePrize: map['readable_prize']?.toString(),
     );
   }
 
@@ -107,8 +122,10 @@ class BetReceipt extends Equatable {
       bets,
       createdAt,
       createdAtText,
-      prizesClaimed,
       readablePrizesClaimed,
+      readablePrize,
+      prize,
+      isClaimed
     ];
   }
 }
