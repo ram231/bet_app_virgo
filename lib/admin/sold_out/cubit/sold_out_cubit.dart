@@ -25,10 +25,10 @@ class SoldOutCubit extends Cubit<SoldOutState> {
           queryParams: _userParam,
           body: {
             if (state.type == 'low-wins') ...{
-              'winning_amount': int.parse(amount),
-              'low_win_number': int.parse(number),
+              'winning_amount': amount,
+              'low_win_number': number,
             } else
-              'sold_out_number': int.parse(number),
+              'sold_out_number': number,
           },
           onSerialize: (json) => BetSoldOut.fromMap(json));
       final newItems = state.items..add(result);

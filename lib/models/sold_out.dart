@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 
 class BetSoldOut extends Equatable {
   final int id;
-  final int soldOutNumber;
+  final String soldOutNumber;
   final String winAmount;
   final String readableWinAmount;
   BetSoldOut({
@@ -16,7 +16,7 @@ class BetSoldOut extends Equatable {
 
   BetSoldOut copyWith({
     int? id,
-    int? soldOutNumber,
+    String? soldOutNumber,
     String? winAmount,
     String? readableWinAmount,
   }) {
@@ -39,13 +39,11 @@ class BetSoldOut extends Equatable {
     final lowWin = map['low_win_number'] ?? map['sold_out_number'];
     final checker =
         lowWin is String ? int.parse(lowWin.split(".").first) : lowWin;
-    final winChecker = map['winning_amount'] is String
-        ? map['winning_amount']
-        : "${map['winning_amount']}";
+    final winChecker = map['winning_amount'].toString();
     return BetSoldOut(
       id: map['id']?.toInt() ?? 0,
-      soldOutNumber: (checker)?.toInt() ?? 0,
-      winAmount: winChecker ?? '0',
+      soldOutNumber: checker,
+      winAmount: winChecker,
       readableWinAmount: map['readable_winning_amount'] ?? '',
     );
   }
