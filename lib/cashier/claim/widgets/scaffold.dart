@@ -51,16 +51,14 @@ mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
                 final _http = STLHttpClient();
 
                 final result = await _http.get(
-                  '$adminEndpoint/receipts/no/$receiptNo',
+                  '$adminEndpoint/receipts/before-claim-prizes/$receiptNo',
                   onSerialize: (json) => BetReceipt.fromMap(json),
                   queryParams: {
-                    'filter[show_all_or_not]': "${user.id},${user.type}",
+                    // 'filter[show_all_or_not]': "${user.id},${user.type}",
+                    'filter[user_id]': user.id,
                   },
                 );
 
-                if (result.status != 'V') {
-                  throw "${result.readableStatus}";
-                }
                 if (result.isClaimed) {
                   throw "Prize already claimed";
                 }
@@ -327,20 +325,6 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
   @override
   Widget build(BuildContext context) {
     return LoginSuccessBuilder(builder: (user) {
-      if (user.id != widget.receipt.user?.id) {
-        return AlertDialog(
-          title: Text("NOT ALLOWED"),
-          content: Text("User not allowed to verify transaction"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: Text("CLOSE"),
-            ),
-          ],
-        );
-      }
       return AlertDialog(
         title: Text("Claim Prize"),
         content: Column(
@@ -378,11 +362,17 @@ class _ClaimPrizeButtonState extends State<_ClaimPrizeButton>
                         borderRadius: BorderRadius.circular(40))),
                 onPressed: isLoading
                     ? null
-                    : () => onClaim(
+                    : () async {
+                        onClaim(
                           "${user.id}",
                           widget.receipt.receiptNo ?? '',
-                          onFinished: (prize) => Navigator.pop(context),
-                        ),
+                          onFinished: (prize) async {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Success")));
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
                 child: isLoading
                     ? CircularProgressIndicator.adaptive()
                     : Text("CLAIM"),
@@ -469,9 +459,6 @@ class _ClaimInputBodyState extends State<ClaimInputBody> with ClaimPOSTMixin {
     if (isValid) {
       final result = await fetchReceipt(_controller.text);
       if (result != null) {
-        if (result.status != 'V') {
-          throw "${result.readableStatus}";
-        }
         final showWinner = await showDialog<bool>(
             context: context,
             builder: (context) {

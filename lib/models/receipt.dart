@@ -98,8 +98,9 @@ class BetReceipt extends Equatable {
       createdAt: map['created_at'],
       createdAtText: map['created_at_text'],
       prize: _prize,
-      isClaimed:
-          map['is_claimed'] is int ? map['is_claimed'] == 1 : map['is_claimed'],
+      isClaimed: map['is_claimed'] is int
+          ? map['is_claimed'] == 1
+          : map['is_claimed'] ?? false,
       readablePrize: map['readable_prize']?.toString(),
     );
   }
