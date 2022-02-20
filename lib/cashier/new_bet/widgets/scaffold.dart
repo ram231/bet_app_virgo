@@ -9,7 +9,7 @@ import '../../../login/widgets/builder.dart';
 import '../../../models/draw.dart';
 import '../../../utils/nil.dart';
 import '../../../utils/timer.dart';
-import '../../printer/widgets/widgets.dart';
+import '../../cashier.dart';
 import '../bloc/new_bet_bloc.dart';
 import '../cubit/draw_type_cubit.dart';
 import '../dto/append_bet_dto.dart';
@@ -319,7 +319,7 @@ class __DateCreatedLabelState extends State<_DateCreatedLabel> {
           Text("$today", style: labelStyle),
           TimerBuilder.periodic(Duration(seconds: 1), builder: (context) {
             final now = DateTime.now();
-            final time = DateFormat.Hms().format(now);
+            final time = DateFormat.jms().format(now);
             return Text("${time}", style: labelStyle);
           }),
         ],
@@ -355,9 +355,11 @@ class _GroundZeroLabel extends StatelessWidget {
               ":",
               style: labelStyle,
             ),
-            Text(
-              "${loginState.user.company}",
-              style: labelStyle,
+            UserBranchName(
+              builder: (name) => Text(
+                name,
+                style: labelStyle,
+              ),
             ),
           ],
         ),

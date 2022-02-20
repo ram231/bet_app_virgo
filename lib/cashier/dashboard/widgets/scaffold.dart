@@ -460,9 +460,11 @@ class UserBranchName extends StatelessWidget {
     Key? key,
     this.onLoading,
     this.onError,
+    this.builder,
   }) : super(key: key);
   final Widget? onLoading;
   final Widget Function(String error)? onError;
+  final Widget Function(String branchName)? builder;
   Future<BetBranch> _fetchBranchById(UserAccount user) async {
     try {
       final _http = STLHttpClient();
@@ -498,14 +500,15 @@ class UserBranchName extends StatelessWidget {
             }
             final branch = snapshot.data;
             if (branch != null) {
-              return Center(
-                child: Text(
-                  "Today - ${branch.name}",
-                  style: textTheme.headline6?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
+              return builder?.call(branch.name) ??
+                  Center(
+                    child: Text(
+                      "Today - ${branch.name}",
+                      style: textTheme.headline6?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
             }
             return notNil;
           });

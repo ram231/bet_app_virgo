@@ -45,7 +45,6 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   final STLHttpClient _httpClient;
 
   Future<NewBetLoaded> _onValidateEvent(AppendBetDTO dto) async {
-    ;
     final rawState = state.copyWith(items: [...state.items, dto]);
     try {
       final result = await _httpClient.post(
@@ -76,6 +75,7 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
                   winAmount: dto.betAmount * dto.winAmount,
                 )
             ],
+            error: lowWin ? "Bet number ${dto.betNumber} has low win." : "",
           );
         }
       }
