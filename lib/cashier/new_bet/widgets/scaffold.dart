@@ -382,7 +382,9 @@ class _BetTable extends StatelessWidget {
               (draw) {
                 return DataRow(
                   cells: [
-                    DataCell(Text("${draw.betNumber}")),
+                    DataCell(
+                      AppendBetNumberCell(draw: draw),
+                    ),
                     DataCell(Text("${draw.betAmount}")),
                     DataCell(Text("${draw.winAmount}")),
                     DataCell(Text("${draw.drawTypeBet?.drawType?.name}")),
@@ -408,6 +410,34 @@ class _BetTable extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class AppendBetNumberCell extends StatelessWidget {
+  const AppendBetNumberCell({
+    Key? key,
+    required this.draw,
+  }) : super(key: key);
+  final AppendBetDTO draw;
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: "${draw.betNumber}",
+          ),
+          if (draw.isLowWin)
+            TextSpan(
+              text: "(Low Win)",
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+        ],
+      ),
+    );
   }
 }
 

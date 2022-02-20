@@ -45,10 +45,8 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
   final STLHttpClient _httpClient;
 
   Future<NewBetLoaded> _onValidateEvent(AppendBetDTO dto) async {
-    final data = dto.copyWith(
-      winAmount: dto.betAmount * dto.winAmount,
-    );
-    final rawState = state.copyWith(items: [...state.items, data]);
+    ;
+    final rawState = state.copyWith(items: [...state.items, dto]);
     try {
       final result = await _httpClient.post(
         '$adminEndpoint/bets/append/${dto.betNumber}',
@@ -59,8 +57,25 @@ class NewBetBloc extends Bloc<NewBetEvent, NewBetLoaded> {
           return rawState;
         }
         if (result is Map<String, dynamic>) {
+          final bool lowWin = result['is_low_win'] ?? false;
+          final lowWinAmount = result['winning_amount'] != null
+              ? result['winning_amount'] is String
+                  ? double.parse(result['winning_amount'])
+                  : result['winning_amount'] as num
+              : null;
           return state.copyWith(
-            items: [...state.items, data],
+            items: [
+              ...state.items,
+              if (lowWin && lowWinAmount != null)
+                dto.copyWith(
+                  winAmount: dto.betAmount * lowWinAmount.toDouble(),
+                  isLowWin: lowWin,
+                )
+              else
+                dto.copyWith(
+                  winAmount: dto.betAmount * dto.winAmount,
+                )
+            ],
           );
         }
       }

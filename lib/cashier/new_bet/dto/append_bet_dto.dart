@@ -11,12 +11,15 @@ class AppendBetDTO extends Equatable {
   final DrawBet? drawTypeBet;
   final double winAmount;
   final UserAccount? cashier;
+  final bool isLowWin;
+
   AppendBetDTO({
     required this.betNumber,
     required this.betAmount,
     required this.drawTypeBet,
     required this.winAmount,
     this.cashier,
+    this.isLowWin = false,
   });
 
   AppendBetDTO copyWith({
@@ -25,6 +28,7 @@ class AppendBetDTO extends Equatable {
     DrawBet? drawTypeBet,
     double? winAmount,
     UserAccount? cashier,
+    bool? isLowWin,
   }) {
     return AppendBetDTO(
       betNumber: betNumber ?? this.betNumber,
@@ -32,6 +36,7 @@ class AppendBetDTO extends Equatable {
       drawTypeBet: drawTypeBet ?? this.drawTypeBet,
       winAmount: winAmount ?? this.winAmount,
       cashier: cashier ?? this.cashier,
+      isLowWin: isLowWin ?? this.isLowWin,
     );
   }
 
@@ -59,9 +64,6 @@ class AppendBetDTO extends Equatable {
       AppendBetDTO.fromMap(json.decode(source));
 
   @override
-  bool get stringify => true;
-
-  @override
   List<Object?> get props {
     return [
       betNumber,
@@ -69,6 +71,7 @@ class AppendBetDTO extends Equatable {
       drawTypeBet,
       winAmount,
       cashier,
+      isLowWin,
     ];
   }
 }
