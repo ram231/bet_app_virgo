@@ -82,7 +82,7 @@ class BetResult extends Equatable {
       isWinner:
           map['is_winner'] is bool ? map['is_winner'] : map['is_cancel'] == 1,
       readablePrize: map['readable_prize'],
-      winningAmount: map['winning_amount'],
+      winningAmount: map['winning_amount'].toString(),
       readableWinningAmount: map['readable_winning_amount'],
     );
   }
