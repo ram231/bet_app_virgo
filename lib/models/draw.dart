@@ -11,7 +11,7 @@ class DrawBet extends Equatable {
   final String? drawEnd;
   final String winningAmount;
   final String readableWinningAmount;
-  final int? winningCombination;
+  final String? winningCombination;
   final String status;
   final int prize;
   final String? timeStart;
@@ -39,7 +39,7 @@ class DrawBet extends Equatable {
     String? drawEnd,
     String? winningAmount,
     String? readableWinningAmount,
-    int? winningNumber,
+    String? winningCombination,
     String? status,
   }) {
     return DrawBet(
@@ -51,7 +51,7 @@ class DrawBet extends Equatable {
       winningAmount: winningAmount ?? this.winningAmount,
       readableWinningAmount:
           readableWinningAmount ?? this.readableWinningAmount,
-      winningCombination: winningNumber ?? this.winningCombination,
+      winningCombination: winningCombination ?? this.winningCombination,
       status: status ?? this.status,
     );
   }
