@@ -17,7 +17,8 @@ class SoldOutCubit extends Cubit<SoldOutState> {
       };
   void submit({
     required String number,
-    String amount = '',
+    String twoDigitAmount = '',
+    String threeDigitAmount = '',
   }) async {
     emit(state.copyWith(isLoading: true));
     try {
@@ -25,7 +26,8 @@ class SoldOutCubit extends Cubit<SoldOutState> {
           queryParams: _userParam,
           body: {
             if (state.type == 'low-wins') ...{
-              'winning_amount': amount,
+              'two_digits_winning_amount': twoDigitAmount,
+              'three_digits_winning_amount': threeDigitAmount,
               'low_win_number': number,
             } else
               'sold_out_number': number,

@@ -5,13 +5,17 @@ import 'package:equatable/equatable.dart';
 class BetSoldOut extends Equatable {
   final int id;
   final String? soldOutNumber;
-  final String? winAmount;
+  final String? twoDigitWinningAmount;
+  final String? threeDigitWinningAmount;
   final String? readableWinAmount;
+  final String? readableThreeDigitWinningAmount;
   BetSoldOut({
     required this.id,
     required this.soldOutNumber,
-    this.winAmount = '',
+    this.twoDigitWinningAmount = '',
     this.readableWinAmount = '',
+    this.threeDigitWinningAmount = '',
+    this.readableThreeDigitWinningAmount,
   });
 
   BetSoldOut copyWith({
@@ -23,7 +27,7 @@ class BetSoldOut extends Equatable {
     return BetSoldOut(
       id: id ?? this.id,
       soldOutNumber: soldOutNumber ?? this.soldOutNumber,
-      winAmount: winAmount ?? this.winAmount,
+      twoDigitWinningAmount: winAmount ?? this.twoDigitWinningAmount,
       readableWinAmount: readableWinAmount ?? this.readableWinAmount,
     );
   }
@@ -37,13 +41,15 @@ class BetSoldOut extends Equatable {
 
   factory BetSoldOut.fromMap(Map<String, dynamic> map) {
     final lowWin = map['low_win_number'] ?? map['sold_out_number'];
-    final winChecker = map['winning_amount'].toString();
+    final winChecker = map['two_digits_winning_amount'].toString();
     return BetSoldOut(
-      id: map['id']?.toInt() ?? 0,
-      soldOutNumber: lowWin,
-      winAmount: winChecker,
-      readableWinAmount: map['readable_winning_amount'] ?? '',
-    );
+        id: map['id']?.toInt() ?? 0,
+        soldOutNumber: lowWin,
+        twoDigitWinningAmount: winChecker,
+        readableWinAmount: map['readable_two_digits_winning_amount'] ?? '',
+        threeDigitWinningAmount: map['three_digits_winning_amount'],
+        readableThreeDigitWinningAmount:
+            map['readable_three_digits_winning_amount']);
   }
   String toJson() => json.encode(toMap());
 
@@ -54,7 +60,9 @@ class BetSoldOut extends Equatable {
   List<Object?> get props => [
         id,
         soldOutNumber,
-        winAmount,
+        twoDigitWinningAmount,
         readableWinAmount,
+        threeDigitWinningAmount,
+        readableThreeDigitWinningAmount
       ];
 }

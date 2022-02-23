@@ -50,14 +50,16 @@ class _SoldOutBody extends StatefulWidget {
 
 class _SoldOutBodyState extends State<_SoldOutBody> {
   late final TextEditingController _controller;
-  late final TextEditingController _amountController;
+  late final TextEditingController _twoDigitController;
+  late final TextEditingController _threeDigitController;
   static const _numberOnly =
       TextInputType.numberWithOptions(decimal: false, signed: false);
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     _controller = TextEditingController();
-    _amountController = TextEditingController();
+    _twoDigitController = TextEditingController();
+    _threeDigitController = TextEditingController();
     if (mounted) {
       context.read<SoldOutCubit>().fetch();
     }
@@ -67,7 +69,8 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
   @override
   void dispose() {
     _controller.dispose();
-    _amountController.dispose();
+    _twoDigitController.dispose();
+    _threeDigitController.dispose();
     super.dispose();
   }
 
@@ -82,7 +85,7 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
       final type = _selectedType == 'SOLD OUT' ? 'sold-outs' : 'low-wins';
       _formKey.currentState?.reset();
       _controller.clear();
-      _amountController.clear();
+      _twoDigitController.clear();
       context.read<SoldOutCubit>().fetch(
             endPoint: type,
           );
@@ -125,7 +128,7 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
                   hintText: "Combination",
                 ),
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                maxLength: _selectedType == 'SOLD OUT' ? 2 : 3,
+                maxLength: 2,
                 onChanged: (val) {
                   if (val.isEmpty) {
                     return;
@@ -142,16 +145,35 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
           ),
           if (_selectedType == "LOW WIN")
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  keyboardType: _numberOnly,
-                  controller: _amountController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: "Low Win Amount",
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        keyboardType: _numberOnly,
+                        controller: _twoDigitController,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: "2 Digit amount",
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        keyboardType: _numberOnly,
+                        controller: _threeDigitController,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: "3 Digit amount",
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           Flexible(
@@ -169,7 +191,8 @@ class _SoldOutBodyState extends State<_SoldOutBody> {
                     } else {
                       context.read<SoldOutCubit>().submit(
                             number: _controller.text,
-                            amount: _amountController.text,
+                            twoDigitAmount: _twoDigitController.text,
+                            threeDigitAmount: _threeDigitController.text,
                           );
                     }
                   },
@@ -218,15 +241,20 @@ class SoldOutListView extends StatelessWidget {
                 child: DataTable(
                   columns: [
                     DataColumn(label: Text("Number")),
-                    if (state.type == 'low-wins')
-                      DataColumn(label: Text("Win Amount")),
+                    if (state.type == 'low-wins') ...[
+                      DataColumn(label: Text("2 Digit Win Amount")),
+                      DataColumn(label: Text("3 Digit Win Amount")),
+                    ],
                     DataColumn(label: Text("Action")),
                   ],
                   rows: state.items
                       .map((e) => DataRow(cells: [
                             DataCell(Text("${e.soldOutNumber}")),
-                            if (state.type == 'low-wins')
-                              DataCell(Text("${e.winAmount}")),
+                            if (state.type == 'low-wins') ...[
+                              DataCell(Text("${e.readableWinAmount}")),
+                              DataCell(
+                                  Text("${e.readableThreeDigitWinningAmount}"))
+                            ],
                             DataCell(ElevatedButton(
                               onPressed: () {
                                 context.read<SoldOutCubit>().delete(
