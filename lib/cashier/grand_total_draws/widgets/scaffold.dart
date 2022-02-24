@@ -40,6 +40,7 @@ class _GrandTotalDrawBodyState extends State<GrandTotalDrawBody> {
   Widget build(BuildContext context) {
     return GrandTotalDrawBuilder(
       onLoading: Center(child: CircularProgressIndicator.adaptive()),
+      onError: (err) => Text("${err}"),
       builder: (state) {
         return ListView.builder(
           itemCount: state.length,
@@ -107,8 +108,7 @@ class _GrandTotalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<DrawTypeData>().state;
     final textTheme = Theme.of(context).textTheme;
-    final tapal = int.parse(state.totalBetAmount!.split(".").first) -
-        (int.parse(state.prize!.split(".").first));
+    final tapal = state.tapalKabig ?? 0;
     final isPositive = tapal > 0;
     final color = isPositive ? Colors.green[600] : Colors.red[600];
 
@@ -119,7 +119,7 @@ class _GrandTotalCard extends StatelessWidget {
           children: [
             Text("BET", style: textTheme.button),
             Text(
-              "${state.totalBetAmount}",
+              "${state.readableTotalBetAmount}",
               style: textTheme.subtitle1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -129,7 +129,7 @@ class _GrandTotalCard extends StatelessWidget {
           children: [
             Text("HITS", style: textTheme.button),
             Text(
-              "${state.prize}",
+              "${state.readablePrize}",
               style: textTheme.subtitle1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -139,7 +139,7 @@ class _GrandTotalCard extends StatelessWidget {
           children: [
             Text("TAPAL/KABIG", style: textTheme.button),
             Text(
-              "${tapal.toStringAsFixed(2)}",
+              "${state.readableTapalKabig}",
               style: textTheme.subtitle1?.copyWith(
                 color: color,
               ),

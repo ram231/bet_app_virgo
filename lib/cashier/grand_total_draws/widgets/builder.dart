@@ -40,7 +40,7 @@ class GrandTotalDrawBuilder extends StatelessWidget {
       return onLoading ?? notNil;
     }
     if (state.hasErrors) {
-      return notNil;
+      return onError?.call(state.error) ?? notNil;
     }
     return builder(state.draws);
   }

@@ -7,12 +7,14 @@ class WinningHitsResult extends Equatable {
   final int? id;
   final DrawBet? draw;
   final int? totalWinners;
-  final String? totalBetAmount;
+  final int? totalBetAmount;
   final String? readableTotalBetAmount;
-  final String? winningAmount;
+  final int? winningAmount;
   final String? readableWinningAmount;
-  final String? prize;
+  final int? prize;
   final String? readablePrize;
+  final int? tapalKabig;
+  final String? readableTapalKabig;
   final String? createdAt;
   final String? updatedAt;
   final String? readableCreatedAt;
@@ -31,18 +33,22 @@ class WinningHitsResult extends Equatable {
     this.updatedAt,
     this.readableCreatedAt,
     this.readableUpdatedAt,
+    this.tapalKabig,
+    this.readableTapalKabig,
   });
 
   WinningHitsResult copyWith({
     int? id,
     DrawBet? draw,
     int? totalWinners,
-    String? totalBetAmount,
+    int? totalBetAmount,
     String? readableTotalBetAmount,
-    String? winningAmount,
+    int? winningAmount,
     String? readableWinningAmount,
-    String? prize,
+    int? prize,
     String? readablePrize,
+    int? tapalKabig,
+    String? readableTapalKabig,
     String? createdAt,
     String? updatedAt,
     String? readableCreatedAt,
@@ -60,6 +66,8 @@ class WinningHitsResult extends Equatable {
           readableWinningAmount ?? this.readableWinningAmount,
       prize: prize ?? this.prize,
       readablePrize: readablePrize ?? this.readablePrize,
+      tapalKabig: tapalKabig ?? this.tapalKabig,
+      readableTapalKabig: readableTapalKabig ?? this.readableTapalKabig,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       readableCreatedAt: readableCreatedAt ?? this.readableCreatedAt,
@@ -100,6 +108,8 @@ class WinningHitsResult extends Equatable {
       updatedAt: map['updated_at'],
       readableCreatedAt: map['readable_created_at'],
       readableUpdatedAt: map['readable_updated_at'],
+      tapalKabig: map['tapal_kabig'],
+      readableTapalKabig: map['readable_tapal_kabig'],
     );
   }
 
