@@ -26,15 +26,24 @@ class HitsReportBloc extends Bloc<HitsReportEvent, HitsReportState> {
 
   void _onFetch(FetchHitReportsEvent event, Emitter emit) async {
     emit(HitsReportLoading());
-
-    final result = await _httpClient
-        .get<List>("$adminEndpoint/winning-hits", queryParams: {
-      'filter[from_this_day]': YEAR_MONTH_DAY.format(event.dateTime),
-      ...cashierIdParam,
-    }, onSerialize: (json) {
-      return json['data'];
-    });
-    final draws = result.map((e) => WinningHitsResult.fromMap(e)).toList();
-    emit(HitsReportLoaded(draws: draws, drawDate: event.dateTime));
+    try {
+      final result = await _httpClient
+          .get<List>("$adminEndpoint/winning-hits", queryParams: {
+        'filter[from_this_day]': YEAR_MONTH_DAY.format(event.dateTime),
+        ...cashierIdParam,
+      }, onSerialize: (json) {
+        return json['data'];
+      });
+      final draws = result.map((e) => WinningHitsResult.fromMap(e)).toList();
+      emit(HitsReportLoaded(draws: draws, drawDate: event.dateTime));
+    } catch (e) {
+      emit(
+        HitsReportLoaded(
+          drawDate: event.dateTime,
+          draws: [],
+          error: throwableDioError(e),
+        ),
+      );
+    }
   }
 }

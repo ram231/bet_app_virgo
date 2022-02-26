@@ -27,7 +27,10 @@ class STLHttpClient {
   }) async {
     final response = await _httpClient.get(
       "$_url/$path",
-      queryParameters: queryParams,
+      queryParameters: {
+        ...queryParams!,
+        "rows_per_page": 1000000,
+      },
       options: _options,
     );
     final statusCode = response.statusCode ?? 400;

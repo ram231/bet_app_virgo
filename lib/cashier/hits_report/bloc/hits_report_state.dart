@@ -15,9 +15,15 @@ class HitsReportLoaded extends HitsReportState {
   const HitsReportLoaded({
     this.draws = const [],
     required this.drawDate,
+    this.error = "",
   });
+  final String error;
   @override
-  List<Object> get props => [draws, drawDate];
+  List<Object> get props => [
+        draws,
+        drawDate,
+        error,
+      ];
 }
 
 class HitsReportLoading extends HitsReportState {}
