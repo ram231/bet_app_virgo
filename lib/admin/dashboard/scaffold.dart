@@ -5,6 +5,7 @@ import 'package:bet_app_virgo/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../cashier/grand_total_draws/cubit/grand_total_draws_cubit.dart';
 import '../../cashier/grand_total_draws/widgets/scaffold.dart';
@@ -29,70 +30,94 @@ class BetDashboardScaffold extends StatelessWidget {
       child: _BetDashboardWillPopScope(
         child: Scaffold(
           drawer: Drawer(
-            child: ListView(
-              children: [
-                UserAccountsDrawerHeader(
-                  accountName: Text("BET APPLICATION"),
-                  accountEmail: Text("DASHBOARD v1.06"),
-                ),
-                ListTile(
-                  title: Text("Top 10 Combinations"),
-                  onTap: () =>
-                      Navigator.pushNamed(context, BetCombinationScaffold.path),
-                ),
-                ListTile(
-                  title: Text("History"),
-                  onTap: () => Navigator.pushNamed(
-                      context, CashierBetHistoryScaffold.path),
-                ),
-                ListTile(
-                  title: Text("Low Win Summary"),
-                  onTap: () =>
-                      Navigator.pushNamed(context, BetCategoryScaffold.path),
-                ),
-                ListTile(
-                  title: Text("Generate Hits"),
-                  onTap: () =>
-                      Navigator.pushNamed(context, BetGenerateHitScaffold.path),
-                ),
-                ListTile(
-                  title: Text("Sold Out / Low Win"),
-                  onTap: () =>
-                      Navigator.pushNamed(context, BetSoldOutScaffold.path),
-                ),
-                ListTile(
-                    title: Text("Draws"),
-                    onTap: () =>
-                        Navigator.pushNamed(context, AdminDrawScaffold.path)),
-                ListTile(
-                  title: Text("Bet Cancellation"),
-                  onTap: null,
-                ),
-                ListTile(
-                  title: Text("LOGOUT"),
-                  onTap: () {
-                    context.read<LoginBloc>().add(LogoutEvent());
-                    Navigator.pushReplacementNamed(
-                        context, BetLoginScaffold.path);
-                  },
-                ),
-              ],
-            ),
+            child: _AdminDrawerList(),
           ),
           appBar: AppBar(
             elevation: 0,
-            title: Text("THIS MONTH"),
+            title: _TextDate(),
             bottom: PreferredSize(
               preferredSize: Size.fromHeight(24),
               child: _AdminGrandTotalAppBar(),
             ),
             actions: [
+              _DatePicker(),
               _RefreshButton(),
             ],
           ),
           body: BetDashboardBody(),
         ),
       ),
+    );
+  }
+}
+
+class _TextDate extends StatelessWidget {
+  const _TextDate({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<GrandTotalCubit>().state;
+    if (state is GrandTotalAdminLoaded) {
+      final format = DateFormat.yMMMMd().format(state.fromDate);
+      return Text(format);
+    }
+    return Text("THIS MONTH");
+  }
+}
+
+class _AdminDrawerList extends StatelessWidget {
+  const _AdminDrawerList({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        UserAccountsDrawerHeader(
+          accountName: Text("BET APPLICATION"),
+          accountEmail: Text("DASHBOARD v1.06"),
+        ),
+        ListTile(
+          title: Text("Top 10 Combinations"),
+          onTap: () =>
+              Navigator.pushNamed(context, BetCombinationScaffold.path),
+        ),
+        ListTile(
+          title: Text("History"),
+          onTap: () =>
+              Navigator.pushNamed(context, CashierBetHistoryScaffold.path),
+        ),
+        ListTile(
+          title: Text("Low Win Summary"),
+          onTap: () => Navigator.pushNamed(context, BetCategoryScaffold.path),
+        ),
+        ListTile(
+          title: Text("Generate Hits"),
+          onTap: () =>
+              Navigator.pushNamed(context, BetGenerateHitScaffold.path),
+        ),
+        ListTile(
+          title: Text("Sold Out / Low Win"),
+          onTap: () => Navigator.pushNamed(context, BetSoldOutScaffold.path),
+        ),
+        ListTile(
+            title: Text("Draws"),
+            onTap: () => Navigator.pushNamed(context, AdminDrawScaffold.path)),
+        ListTile(
+          title: Text("Bet Cancellation"),
+          onTap: null,
+        ),
+        ListTile(
+          title: Text("LOGOUT"),
+          onTap: () {
+            context.read<LoginBloc>().add(LogoutEvent());
+            Navigator.pushReplacementNamed(context, BetLoginScaffold.path);
+          },
+        ),
+      ],
     );
   }
 }
@@ -110,6 +135,35 @@ class _RefreshButton extends StatelessWidget {
       },
       icon: Icon(Icons.refresh),
     );
+  }
+}
+
+class _DatePicker extends StatelessWidget {
+  const _DatePicker({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<GrandTotalCubit>().state;
+    if (state is GrandTotalAdminLoaded) {
+      return IconButton(
+        onPressed: () async {
+          final result = await showDatePicker(
+            initialDate: state.fromDate,
+            context: context,
+            firstDate: new DateTime(2022),
+            lastDate: DateTime.now(),
+          );
+          if (result != null) {
+            context.read<GrandTotalCubit>().fetchAdmin(
+                  fromDate: result,
+                  toDate: result,
+                );
+          }
+        },
+        icon: Icon(Icons.date_range),
+      );
+    }
+    return notNil;
   }
 }
 
