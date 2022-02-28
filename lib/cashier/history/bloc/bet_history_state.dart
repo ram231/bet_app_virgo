@@ -5,34 +5,47 @@ class BetHistoryState extends Equatable {
   final DateTime date;
   final bool isLoading;
   final String error;
+  final List<BetReceipt> searchResult;
   const BetHistoryState({
     this.bets = const [],
+    required this.date,
     this.isLoading = false,
     this.error = '',
-    required this.date,
+    this.searchResult = const [],
   });
 
   bool get hasError => error.isNotEmpty;
+  List<BetReceipt> get receipts {
+    if (searchResult.isEmpty) {
+      return bets;
+    }
+    return searchResult;
+  }
 
   @override
-  List<Object> get props => [
-        bets,
-        error,
-        isLoading,
-        date,
-      ];
+  List<Object> get props {
+    return [
+      bets,
+      date,
+      isLoading,
+      error,
+      searchResult,
+    ];
+  }
 
   BetHistoryState copyWith({
     List<BetReceipt>? bets,
     DateTime? date,
-    bool isLoading = false,
-    String error = '',
+    bool? isLoading,
+    String error = "",
+    List<BetReceipt> searchResult = const [],
   }) {
     return BetHistoryState(
       bets: bets ?? this.bets,
       date: date ?? this.date,
-      isLoading: isLoading,
+      isLoading: isLoading ?? this.isLoading,
       error: error,
+      searchResult: searchResult,
     );
   }
 }

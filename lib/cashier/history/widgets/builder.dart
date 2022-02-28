@@ -8,18 +8,20 @@ class BetHistoryBuilder extends StatelessWidget {
     required this.builder,
     this.onError,
     this.onLoading,
+    this.showError = false,
     Key? key,
   }) : super(key: key);
   final Widget Function(BetHistoryState state) builder;
   final Widget? onLoading;
   final Widget Function(String error)? onError;
+  final bool showError;
   @override
   Widget build(BuildContext context) {
     final historyState = context.watch<BetHistoryBloc>().state;
     if (historyState.isLoading) {
       return onLoading ?? notNil;
     }
-    if (historyState.hasError) {
+    if (historyState.hasError && showError) {
       return onError?.call(historyState.error) ?? notNil;
     }
 

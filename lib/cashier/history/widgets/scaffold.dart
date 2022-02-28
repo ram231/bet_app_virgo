@@ -1,3 +1,6 @@
+import 'package:bet_app_virgo/cashier/history/widgets/print_button.dart';
+import 'package:bet_app_virgo/cashier/printer/widgets/builder.dart';
+import 'package:bet_app_virgo/utils/nil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +9,6 @@ import '../../../login/bloc/login_bloc.dart';
 import '../../../login/widgets/builder.dart';
 import '../../../models/models.dart';
 import '../../../utils/date_format.dart';
-import '../../../utils/nil.dart';
 import '../bloc/bet_history_bloc.dart';
 import 'bet_items.dart';
 import 'builder.dart';
@@ -33,26 +35,114 @@ class CashierBetHistoryScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return BetHistoryProvider(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text("History"),
           elevation: 0,
+          actions: const [
+            BetHistoryPrintButton(),
+          ],
         ),
         body: Column(
           children: [
             Flexible(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: const [
-                  _BetHistoryDrawDateText(),
-                  Spacer(),
-                  _BetHistoryChangeDateButton(),
-                ],
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: const [
+                    _BetHistoryDrawDateText(),
+                    Spacer(),
+                    _BetHistoryChangeDateButton(),
+                  ],
+                ),
               ),
-            )),
-            Flexible(child: _BetHistoryBody()),
+            ),
+            Flexible(child: _SearchReceiptTextField()),
+            _ErrorMessage(),
+            Expanded(
+              flex: 8,
+              child: _BetHistoryBody(),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ErrorMessage extends StatelessWidget {
+  const _ErrorMessage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final historyState = context.watch<BetHistoryBloc>().state;
+    if (historyState.hasError) {
+      return Center(
+        child: Text(
+          "${historyState.error}",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }
+    return notNil;
+  }
+}
+
+class _SearchReceiptTextField extends StatefulWidget {
+  const _SearchReceiptTextField({Key? key}) : super(key: key);
+
+  @override
+  State<_SearchReceiptTextField> createState() =>
+      _SearchReceiptTextFieldState();
+}
+
+class _SearchReceiptTextFieldState extends State<_SearchReceiptTextField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    _controller = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: _controller,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: "Search Receipt",
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              context.read<BetHistoryBloc>().searchReceipt("");
+              _controller.clear();
+            },
+          ),
+        ),
+        onChanged: (val) {
+          if (val.isEmpty) {
+            context.read<BetHistoryBloc>().searchReceipt(val);
+          }
+        },
+        onSubmitted: (val) {
+          context.read<BetHistoryBloc>().searchReceipt(val);
+        },
       ),
     );
   }
@@ -95,49 +185,37 @@ class BetHistoryTable extends StatelessWidget {
     if (historyState.isLoading) {
       return Center(child: CircularProgressIndicator.adaptive());
     }
-    if (historyState.hasError) {
-      return Center(
-          child: Text("${historyState.error}",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis));
-    }
-    final receipts = historyState.bets;
-    if (receipts.isNotEmpty) {
-      return DataTable(
-        showBottomBorder: true,
-        showCheckboxColumn: true,
-        rows: receipts.map((receipt) {
-          return DataRow(
-            color: receipt.status == 'I'
-                ? MaterialStateProperty.all(Colors.red[200])
-                : null,
-            cells: <Widget>[
-              Text("${receipt.receiptNo}"),
-              Text("${receipt.createdAt}"),
-              _CancelReceiptButton(receipt: receipt),
-            ]
-                .map(
-                  (data) => DataCell(
-                    data,
-                    onTap: () => onPress(context, receipt),
-                  ),
-                )
-                .toList(),
-          );
-        }).toList(),
-        columns: [
-          DataColumn(label: Text("Receipt No.")),
-          DataColumn(label: Text("Bet Date")),
-          DataColumn(label: Text("Actions")),
-        ],
-      );
-    }
-    return notNil;
+    final receipts = historyState.searchResult.isNotEmpty
+        ? historyState.searchResult
+        : historyState.bets;
+    return DataTable(
+      showBottomBorder: true,
+      showCheckboxColumn: true,
+      rows: receipts.map((receipt) {
+        return DataRow(
+          color: receipt.status == 'I'
+              ? MaterialStateProperty.all(Colors.red[200])
+              : null,
+          cells: <Widget>[
+            Text("${receipt.receiptNo}"),
+            Text("${receipt.createdAt}"),
+            _CancelReceiptButton(receipt: receipt),
+          ]
+              .map(
+                (data) => DataCell(
+                  data,
+                  onTap: () => onPress(context, receipt),
+                ),
+              )
+              .toList(),
+        );
+      }).toList(),
+      columns: [
+        DataColumn(label: Text("Receipt No.")),
+        DataColumn(label: Text("Bet Date")),
+        DataColumn(label: Text("Actions")),
+      ],
+    );
   }
 }
 
@@ -209,7 +287,35 @@ class _CancelReceiptButton extends StatelessWidget {
               icon: Icon(Icons.bookmark_remove),
             ),
           ),
+        if (receipt.bets.isNotEmpty) _ReprintReceipt(receipt: receipt),
       ],
+    );
+  }
+}
+
+class _ReprintReceipt extends StatelessWidget {
+  const _ReprintReceipt({
+    Key? key,
+    required this.receipt,
+  }) : super(key: key);
+
+  final BetReceipt receipt;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlueThermalBuilder(
+      builder: (state) {
+        if (state.isConnected) {
+          return ElevatedButton.icon(
+            onPressed: () {
+              context.read<BetHistoryBloc>().rePrintReceipt(receipt);
+            },
+            icon: Icon(Icons.print),
+            label: Text("Print"),
+          );
+        }
+        return notNil;
+      },
     );
   }
 }

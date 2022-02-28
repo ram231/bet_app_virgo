@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:bet_app_virgo/models/models.dart';
 import 'package:equatable/equatable.dart';
 
+List<BetReceipt> computeBetReceipt(List data) {
+  return data.map((e) => BetReceipt.fromMap(e)).toList();
+}
+
 class BetReceipt extends Equatable {
   final int? id;
   final UserAccount? user;

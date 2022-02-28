@@ -1,8 +1,8 @@
-import 'package:bet_app_virgo/login/widgets/builder.dart';
-import 'package:bet_app_virgo/utils/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../login/widgets/builder.dart';
+import '../../../utils/date_format.dart';
 import '../bloc/hits_report_bloc.dart';
 import 'builder.dart';
 
@@ -121,14 +121,18 @@ class _HitsTable extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 rows: state.draws
-                    .map((bet) => DataRow(cells: [
-                          DataCell(Text("${bet.draw?.id}")),
-                          DataCell(
-                              Text("${bet.draw?.winningCombination ?? ''}")),
-                          DataCell(Text("${bet.totalBetAmount}")),
-                          DataCell(Text("${bet.id}")),
-                          DataCell(Text("${bet.readablePrize}")),
-                        ]))
+                    .map((bet) => DataRow(
+                            color: (bet.totalWinners ?? 0) > 0
+                                ? MaterialStateProperty.all(Colors.red[200])
+                                : null,
+                            cells: [
+                              DataCell(Text("${bet.draw?.id}")),
+                              DataCell(Text(
+                                  "${bet.draw?.winningCombination ?? ''}")),
+                              DataCell(Text("${bet.totalBetAmount}")),
+                              DataCell(Text("${bet.id}")),
+                              DataCell(Text("${bet.readablePrize}")),
+                            ]))
                     .toList(),
                 columns: [
                   DataColumn(label: Text("Draw")),
