@@ -12,6 +12,7 @@ import '../../cashier/grand_total_draws/widgets/scaffold.dart';
 import '../../login/bloc/login_bloc.dart';
 import '../../login/widgets/builder.dart';
 import '../../login/widgets/scaffold.dart';
+import '../../utils/date_picker_toggle.dart';
 import '../../utils/utils.dart';
 import '../combinations/scaffold.dart';
 import '../draws/widgets/scaffold.dart';
@@ -39,14 +40,70 @@ class BetDashboardScaffold extends StatelessWidget {
               preferredSize: Size.fromHeight(24),
               child: _AdminGrandTotalAppBar(),
             ),
-            actions: [
-              _DatePicker(),
+            actions: const [
               _RefreshButton(),
             ],
           ),
           body: BetDashboardBody(),
         ),
       ),
+    );
+  }
+}
+
+class _AdminDatePickerToggle extends StatelessWidget {
+  const _AdminDatePickerToggle({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DatePickerToggleButton(
+      onPressed: (index) async {
+        switch (index) {
+
+          /// TODAY
+          case 0:
+            context.read<GrandTotalCubit>().fetchAdmin();
+            break;
+
+          /// YESTERDAY
+          case 1:
+            final yesterday = DateTime.now().subtract(const Duration(days: 1));
+
+            context.read<GrandTotalCubit>().fetchAdmin(
+                  fromDate: yesterday,
+                  toDate: yesterday,
+                );
+            break;
+
+          /// LAST 7 DAYS
+          case 2:
+            final lastWeek = DateTime.now().subtract(const Duration(days: 7));
+
+            context.read<GrandTotalCubit>().fetchAdmin(
+                  fromDate: lastWeek,
+                  toDate: DateTime.now(),
+                );
+            break;
+          case 3:
+            final result = await showDateRangePicker(
+              context: context,
+              firstDate: DateTime(2022),
+              lastDate: DateTime.now(),
+              initialEntryMode: DatePickerEntryMode.calendarOnly,
+            );
+            if (result != null) {
+              context.read<GrandTotalCubit>().fetchAdmin(
+                    fromDate: result.start,
+                    toDate: result.end,
+                  );
+            } else {
+              return;
+            }
+            break;
+          default:
+            break;
+        }
+      },
     );
   }
 }
@@ -288,8 +345,18 @@ class _BetDashboardBodyState extends State<BetDashboardBody> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Flexible(child: _GrandTotalListview()),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: _AdminDatePickerToggle(),
+          ),
+        ),
+        Flexible(
+          child: _GrandTotalListview(),
+        ),
       ],
     );
   }

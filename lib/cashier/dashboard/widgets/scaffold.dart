@@ -6,6 +6,7 @@ import '../../../login/bloc/login_bloc.dart';
 import '../../../login/widgets/builder.dart';
 import '../../../login/widgets/scaffold.dart';
 import '../../../models/models.dart';
+import '../../../utils/date_picker_toggle.dart';
 import '../../../utils/http_client.dart';
 import '../../../utils/nil.dart';
 import '../../cashier.dart';
@@ -158,7 +159,7 @@ class _CashierBodyState extends State<_CashierBody> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: _CashierSalesDateToggle()),
+                Center(child: _CashierDatePickerToggleButton()),
                 UserBranchName(),
                 SizedBox(height: 24),
                 GrandTotalContainer(),
@@ -172,28 +173,14 @@ class _CashierBodyState extends State<_CashierBody> {
   }
 }
 
-class _CashierSalesDateToggle extends StatefulWidget {
-  const _CashierSalesDateToggle({Key? key}) : super(key: key);
+class _CashierDatePickerToggleButton extends StatelessWidget {
+  const _CashierDatePickerToggleButton({
+    Key? key,
+  }) : super(key: key);
 
-  @override
-  __CashierSalesDateToggleState createState() =>
-      __CashierSalesDateToggleState();
-}
-
-class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
-  List<bool> tabs = [
-    true,
-    false,
-    false,
-    false,
-  ];
   @override
   Widget build(BuildContext context) {
-    return ToggleButtons(
-      selectedBorderColor: Colors.yellow[700],
-      selectedColor: Colors.yellow[700],
-      borderRadius: BorderRadius.circular(4),
-      borderWidth: 1,
+    return DatePickerToggleButton(
       onPressed: (index) async {
         switch (index) {
 
@@ -240,32 +227,7 @@ class __CashierSalesDateToggleState extends State<_CashierSalesDateToggle> {
           default:
             break;
         }
-        tabs = tabs.map((e) => false).toList();
-        setState(() {
-          tabs[index] = true;
-        });
       },
-      isSelected: tabs,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text("Today"),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text("Yesterday"),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text("Last 7 days"),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Icon(
-            Icons.date_range_outlined,
-          ),
-        )
-      ],
     );
   }
 }
