@@ -21,14 +21,14 @@ class STLHttpClient {
 
   Future<Response> get<Response>(
     String path, {
-    Map<string, dynamic>? queryParams,
+    Map<string, dynamic> queryParams = const {},
     dynamic Function(Object error)? onError,
     Response Function(Map<String, dynamic> json)? onSerialize,
   }) async {
     final response = await _httpClient.get(
       "$_url/$path",
       queryParameters: {
-        ...queryParams!,
+        ...queryParams,
         "rows_per_page": 1000000,
       },
       options: _options,
