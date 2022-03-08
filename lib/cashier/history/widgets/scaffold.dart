@@ -199,7 +199,14 @@ class BetHistoryTable extends StatelessWidget {
           cells: <Widget>[
             Text("${receipt.receiptNo}"),
             Text("${receipt.createdAt}"),
-            _CancelReceiptButton(receipt: receipt),
+            IgnorePointer(
+              ignoring: historyState.isPrinting,
+              child: AnimatedOpacity(
+                opacity: historyState.isPrinting ? 0.6 : 1.0,
+                duration: Duration.zero,
+                child: _CancelReceiptButton(receipt: receipt),
+              ),
+            ),
           ]
               .map(
                 (data) => DataCell(

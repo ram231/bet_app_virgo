@@ -47,8 +47,14 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
     emit(state.copyWith(error: "'${receiptNo}' not found"));
   }
 
-  void rePrintReceipt(BetReceipt receipts) async {
+  void rePrintReceipt(BetReceipt receipt) async {
     try {
+      emit(state.copyWith(isPrinting: true));
+      final branchById = await _httpClient.get(
+        "$adminEndpoint/branches/${receipt.user?.branchId}",
+        onSerialize: (json) => BetBranch.fromMap(json),
+      );
+
       final bytes = await rootBundle.load("images/print_logo.jpg");
       final dir = (await getApplicationDocumentsDirectory()).path;
       final buffer = bytes.buffer;
@@ -77,7 +83,7 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
         "Draw",
         1,
       );
-      await Future.wait(receipts.bets.map((e) {
+      await Future.wait(receipt.bets.map((e) {
         return BlueThermalPrinter.instance.print4Column(
           '${e.betNumber}',
           "${e.betAmount}",
@@ -97,9 +103,48 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
         1,
         1,
       );
+      final total = receipt.bets.fold<double>(
+        0,
+        (previousValue, element) =>
+            previousValue + num.parse(element.betAmount),
+      );
+      await BlueThermalPrinter.instance.printNewLine();
+      await BlueThermalPrinter.instance.printCustom(
+        "Total:$total",
+        1,
+        1,
+      );
+      await BlueThermalPrinter.instance.printCustom(
+        "Receipt: ${receipt.receiptNo ?? 'N/A'}",
+        1,
+        1,
+      );
+      await BlueThermalPrinter.instance.printCustom(
+        "${receipt.user?.fullName ?? user.fullName}",
+        1,
+        1,
+      );
+      await BlueThermalPrinter.instance.printCustom(
+        "STRICTLY!!! No ticket no claim. ",
+        1,
+        1,
+      );
+      await BlueThermalPrinter.instance.printCustom(
+        "${branchById.name}",
+        1,
+        1,
+      );
+      final data = "${receipt.receiptNo}";
+      await await BlueThermalPrinter.instance.printQRcode(
+        data,
+        200,
+        200,
+        1,
+      );
       await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
+      emit(state.copyWith());
     } catch (e) {
       addError(e);
       emit(state.copyWith(error: "$e"));
@@ -158,5 +203,9 @@ class BetHistoryBloc extends Cubit<BetHistoryState> {
       emit(state.copyWith(error: throwableDioError(e)));
       addError(e);
     }
+  }
+
+  void printAll([bool isPrinting = false]) {
+    emit(state.copyWith(isPrinting: isPrinting));
   }
 }

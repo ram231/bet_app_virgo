@@ -6,12 +6,14 @@ class BetHistoryState extends Equatable {
   final bool isLoading;
   final String error;
   final List<BetReceipt> searchResult;
+  final bool isPrinting;
   const BetHistoryState({
     this.bets = const [],
     required this.date,
     this.isLoading = false,
     this.error = '',
     this.searchResult = const [],
+    this.isPrinting = false,
   });
 
   bool get hasError => error.isNotEmpty;
@@ -39,6 +41,7 @@ class BetHistoryState extends Equatable {
     bool? isLoading,
     String error = "",
     List<BetReceipt> searchResult = const [],
+    bool isPrinting = false,
   }) {
     return BetHistoryState(
       bets: bets ?? this.bets,
@@ -46,6 +49,7 @@ class BetHistoryState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       error: error,
       searchResult: searchResult,
+      isPrinting: isPrinting,
     );
   }
 }

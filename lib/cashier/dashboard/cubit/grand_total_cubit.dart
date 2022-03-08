@@ -110,12 +110,15 @@ class GrandTotalCubit extends Cubit<GrandTotalState> {
     );
     try {
       emit(GrandTotalLoading());
-      final List result = await _httpClient
-          .get('$adminEndpoint/bets/grand-total-per-cashier', queryParams: {
-        'from_date': startDate,
-        'to_date': endDate,
-        ...cashierIdParam,
-      });
+      final List result = await _httpClient.get(
+        '$adminEndpoint/bets/grand-total-per-cashier',
+        queryParams: {
+          'from_date': startDate,
+          'to_date': endDate,
+          ...cashierIdParam,
+          'is_winner': true,
+        },
+      );
 
       final list = result.map((json) {
         return AdminGrandTotal.fromMap(json);

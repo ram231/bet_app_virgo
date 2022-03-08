@@ -109,6 +109,9 @@ class STLHttpClient {
 }
 
 String throwableDioError(Object error) {
+  if (error is SocketException) {
+    return error.message;
+  }
   if (error is DioError) {
     final responseMessage = error.response?.data;
     if (responseMessage is Map) {

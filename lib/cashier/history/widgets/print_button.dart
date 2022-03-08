@@ -28,12 +28,15 @@ class BetHistoryPrintButton extends StatelessWidget {
     }
     final bets = historyState.bets;
     final isEmpty = bets.isEmpty;
+    final isPrinting = historyState.isPrinting;
     return BlueThermalBuilder(
       builder: (state) {
         if (state.isConnected) {
           return IconButton(
             icon: Icon(Icons.print),
-            onPressed: isEmpty ? null : () => printReceipts(bets, context),
+            onPressed: isEmpty || isPrinting
+                ? null
+                : () => printReceipts(bets, context),
           );
         }
         return TextButton.icon(
@@ -55,6 +58,7 @@ class BetHistoryPrintButton extends StatelessWidget {
     BuildContext context,
   ) async {
     try {
+      context.read<BetHistoryBloc>().printAll(true);
       final bytes = await rootBundle.load("images/print_logo.jpg");
       final dir = (await getApplicationDocumentsDirectory()).path;
       final buffer = bytes.buffer;
@@ -110,6 +114,7 @@ class BetHistoryPrintButton extends StatelessWidget {
       await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
       await BlueThermalPrinter.instance.printNewLine();
+      context.read<BetHistoryBloc>().printAll(false);
     } catch (e) {
       context.read<BetHistoryBloc>().onErr(e);
     }
