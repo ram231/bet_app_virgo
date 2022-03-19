@@ -29,6 +29,7 @@ class GrandTotalItemCubit extends Cubit<GrandTotalItemState> {
         queryParams: {
           'filter[draw_id]': id,
           ...cashierIdParam,
+          'filter[is_winner]': 1,
         },
         onSerialize: (json) =>
             (json['data'] as List).map((e) => BetResult.fromMap(e)).toList(),
