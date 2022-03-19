@@ -98,17 +98,25 @@ class WinningHitsResult extends Equatable {
       id: map['id'],
       draw: DrawBet.fromMap(map['draw']),
       totalWinners: map['total_winners'],
-      totalBetAmount: map['total_bet_amount'],
+      totalBetAmount: map['total_bet_amount'] is String
+          ? num.parse(map['total_bet_amount']).toInt()
+          : map['total_bet_amount'],
       readableTotalBetAmount: map['readable_total_bet_amount'],
-      winningAmount: map['winning_amount'],
+      winningAmount: map['winning_amount'] is String
+          ? num.parse(map['winning_amount']).toInt()
+          : map['winning_amount'],
       readableWinningAmount: map['readable_winning_amount'],
-      prize: map['prize'],
+      prize: map['prize'] is String
+          ? num.parse(map['prize']).toInt()
+          : map['prize'],
       readablePrize: map['readable_prize'],
       createdAt: map['created_at'],
       updatedAt: map['updated_at'],
       readableCreatedAt: map['readable_created_at'],
       readableUpdatedAt: map['readable_updated_at'],
-      tapalKabig: map['tapal_kabig'],
+      tapalKabig: map['tapal_kabig'] is String
+          ? num.parse(map['tapal_kabig']).toInt()
+          : map['tapal_kabig'],
       readableTapalKabig: map['readable_tapal_kabig'],
     );
   }
