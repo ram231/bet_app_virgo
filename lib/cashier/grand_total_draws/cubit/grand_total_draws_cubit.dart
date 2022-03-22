@@ -18,7 +18,7 @@ class GrandTotalDrawsCubit extends Cubit<GrandTotalDrawsState> {
   final UserAccount user;
 
   Map<String, String> get cashierIdParam => {
-        'filter[show_all_or_not]': "${user.id},${user.type}",
+        'filter[show_all_or_not]': "${user.id},C",
       };
 
   void fetch({DateTime? fromDate, DateTime? toDate}) async {

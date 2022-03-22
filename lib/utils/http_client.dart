@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 const defaultUrl = 'http://10.0.2.2:8000';
 const api = const String.fromEnvironment('API',
@@ -33,6 +34,8 @@ class STLHttpClient {
       },
       options: _options,
     );
+    final rawUri = Uri.decodeFull("${response.realUri}");
+    debugPrint("GET::${rawUri}");
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
       throw onError?.call(response.data) ??
@@ -56,6 +59,8 @@ class STLHttpClient {
       queryParameters: queryParams,
       options: _options,
     );
+    final rawUri = Uri.decodeFull("${response.realUri}");
+    debugPrint("POST::${rawUri}");
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
       throw HttpException(onError?.call(response.data) ??
@@ -79,6 +84,9 @@ class STLHttpClient {
       queryParameters: queryParams,
       options: _options,
     );
+
+    final rawUri = Uri.decodeFull("${response.realUri}");
+    debugPrint("DELETE::${rawUri}");
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
       throw HttpException(onError?.call(response.data) ??
@@ -97,6 +105,8 @@ class STLHttpClient {
   }) async {
     final response = await _httpClient.put("$_url/$path",
         data: body, queryParameters: queryParams);
+    final rawUri = Uri.decodeFull("${response.realUri}");
+    debugPrint("PUT::${rawUri}");
     final statusCode = response.statusCode ?? 400;
     if (statusCode >= 400) {
       throw onError?.call(response.data) ??
