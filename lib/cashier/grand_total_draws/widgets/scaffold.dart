@@ -1,4 +1,4 @@
-import 'package:bet_app_virgo/login/widgets/builder.dart';
+import 'package:bet_app_virgo/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,6 +38,8 @@ class _GrandTotalDrawBodyState extends State<GrandTotalDrawBody> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context
+        .select<GrandTotalDrawsCubit, UserAccount>((cubit) => cubit.user);
     return GrandTotalDrawBuilder(
       onLoading: Center(child: CircularProgressIndicator.adaptive()),
       onError: (err) => Text("${err}"),
@@ -54,15 +56,12 @@ class _GrandTotalDrawBodyState extends State<GrandTotalDrawBody> {
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                      builder: (context) =>
-                          LoginSuccessBuilder(builder: (user) {
-                        return BlocProvider(
-                          create: (context) => GrandTotalItemCubit(
-                            user: user,
-                          )..fetchByDrawId(item.draw!.id),
-                          child: GrandTotalDrawItemScaffold(),
-                        );
-                      }),
+                      builder: (context) => BlocProvider(
+                        create: (context) => GrandTotalItemCubit(
+                          user: user,
+                        )..fetchByDrawId(item.draw!.id),
+                        child: GrandTotalDrawItemScaffold(),
+                      ),
                     ),
                   );
                 },

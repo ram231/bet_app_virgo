@@ -15,7 +15,7 @@ class GrandTotalItemCubit extends Cubit<GrandTotalItemState> {
   final UserAccount user;
 
   Map<String, String> get cashierIdParam => {
-        'filter[show_all_or_not]': "${user.id},C",
+        'filter[show_all_or_not]': "${user.id},${user.type}",
       };
 
   void fetchByDrawId(int id) async {
