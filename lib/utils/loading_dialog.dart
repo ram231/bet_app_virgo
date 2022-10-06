@@ -14,7 +14,7 @@ class LoadingDialog extends StatefulWidget {
 class _HeroLoadingDialogState extends State<LoadingDialog> {
   @override
   void initState() {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
         widget.onLoading?.call();
       }

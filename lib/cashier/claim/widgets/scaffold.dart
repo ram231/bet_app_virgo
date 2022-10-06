@@ -8,6 +8,7 @@ import '../../../models/models.dart';
 import '../../../utils/utils.dart';
 
 enum ClaimType { input, qrcode, none }
+
 mixin ClaimPOSTMixin<T extends StatefulWidget> on State<T> {
   bool isLoading = false;
   String err = '';
@@ -163,7 +164,7 @@ class _ClaimQRBodyState extends State<ClaimQRBody>
   String err = '';
   @override
   void initState() {
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 

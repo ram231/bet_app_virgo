@@ -106,7 +106,7 @@ class _BetLoginBodyState extends State<BetLoginBody> {
                 height: 32,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.yellow[700],
+                    backgroundColor: Colors.yellow[700],
                   ),
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {

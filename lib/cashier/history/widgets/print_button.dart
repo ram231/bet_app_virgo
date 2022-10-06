@@ -41,7 +41,7 @@ class BetHistoryPrintButton extends StatelessWidget {
         }
         return TextButton.icon(
           style: TextButton.styleFrom(
-            primary: Colors.black,
+            foregroundColor: Colors.black,
           ),
           onPressed: () {
             Navigator.pushNamed(context, CashierPrinterScaffold.path);

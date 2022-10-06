@@ -244,9 +244,9 @@ class _CancelReceiptButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
                 elevation: 0,
-                primary: Colors.red,
-                onPrimary: Colors.white,
+                backgroundColor: Colors.red,
               ),
               onPressed: () async {
                 final result = await showDialog<bool>(

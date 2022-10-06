@@ -19,7 +19,7 @@ class _SplashScreenScaffoldState extends State<SplashScreenScaffold>
     with AfterInitStateMixin {
   @override
   void didInitState() {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final loginState = context.read<LoginBloc>().state;
       if (loginState is LoginSuccess) {
         if (loginState.user.type == 'A') {
