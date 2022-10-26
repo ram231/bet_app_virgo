@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 const defaultUrl = 'http://10.0.2.2:8000';
 const api = const String.fromEnvironment('API',
-    defaultValue: 'https://api.smalltownlottery.online');
+    defaultValue: 'https://forge.laravel.com/servers/597561/sites/1769393');
 final _url = '$api';
 const adminEndpoint = 'api/lotto';
 typedef string = String;
